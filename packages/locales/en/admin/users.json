@@ -15,7 +15,8 @@
       "dateJoined": "Date Joined",
       "createdAt": "Created At",
       "actions": "Actions"
-    },    "loading": "Loading users...",
+    },
+    "loading": "Loading users...",
     "noData": "No users found",
     "noUsers": "No users found",
     "noUsersDescription": "There are currently no users in the system. Users will appear here once they register.",

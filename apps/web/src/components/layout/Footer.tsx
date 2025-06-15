@@ -35,7 +35,8 @@ export function Footer() {
               <span className="text-2xl font-bold text-primary-600">
                 FlipStaq
               </span>
-            </Link>            <p className="max-w-md text-sm text-secondary-600 dark:text-secondary-400">
+            </Link>{' '}
+            <p className="max-w-md text-sm text-secondary-600 dark:text-secondary-400">
               {t('common:welcome')}
             </p>
           </div>

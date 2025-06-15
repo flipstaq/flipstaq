@@ -34,7 +34,9 @@ export const UserTable: React.FC<UserTableProps> = ({
               />
             </svg>
           </div>
-          <div className="ml-3 rtl:ml-0 rtl:mr-3">            <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+          <div className="ml-3 rtl:ml-0 rtl:mr-3">
+            {' '}
+            <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
               {t('admin-users:table.error')}
             </h3>
             <div className="mt-1 text-sm text-red-700 dark:text-red-300">
@@ -80,7 +82,8 @@ export const UserTable: React.FC<UserTableProps> = ({
               d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
             />
           </svg>
-        </div>        <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+        </div>{' '}
+        <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
           {t('admin-users:table.noUsers')}
         </h3>
         <p className="text-gray-500 dark:text-gray-400">
@@ -95,7 +98,9 @@ export const UserTable: React.FC<UserTableProps> = ({
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
+            <tr>
+              {' '}
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
                 {t('admin-users:table.headers.user')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
@@ -166,7 +171,9 @@ export const UserTable: React.FC<UserTableProps> = ({
                         ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                         : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                     }`}
-                  >                    {user.isActive
+                  >
+                    {' '}
+                    {user.isActive
                       ? t('admin-users:status.active')
                       : t('admin-users:status.inactive')}
                   </span>
@@ -176,14 +183,17 @@ export const UserTable: React.FC<UserTableProps> = ({
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                   {new Date(user.createdAt).toLocaleDateString()}
-                </td>                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                  <div className="flex space-x-2 rtl:space-x-reverse">                    <button 
+                </td>{' '}
+                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                  <div className="flex space-x-2 rtl:space-x-reverse">
+                    {' '}
+                    <button
                       onClick={() => onUserAction?.('view', user)}
                       className="rounded px-2 py-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     >
                       {t('admin-users:actions.view')}
                     </button>
-                    <button 
+                    <button
                       onClick={() => onUserAction?.('edit', user)}
                       className="rounded px-2 py-1 text-sm text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
                     >

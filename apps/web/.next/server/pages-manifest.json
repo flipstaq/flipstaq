@@ -1,14 +1,7 @@
 {
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
-  "/auth/signin": "pages/auth/signin.html",
-  "/api/locales/[...path]": "pages/api/locales/[...path].js",
-  "/auth/login": "pages/auth/login.html",
-  "/auth/signup": "pages/auth/signup.html",
-  "/debug": "pages/debug.html",
-  "/admin": "pages/admin.html",
-  "/": "pages/index.html",
-  "/products": "pages/products.html",
   "/_document": "pages/_document.js",
-  "/404": "pages/404.html"
+  "/auth/signin": "pages/auth/signin.js",
+  "/admin": "pages/admin.js"
 }

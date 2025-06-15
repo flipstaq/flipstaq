@@ -36,10 +36,13 @@ export function Header() {
           </div>
           {/* Right side controls */}
           <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            {/* Theme Toggle */}            <button
+            {/* Theme Toggle */}{' '}
+            <button
               onClick={toggleTheme}
               className="rounded-lg bg-secondary-100 p-2 text-secondary-700 transition-colors duration-200 hover:bg-secondary-200 dark:bg-secondary-800 dark:text-secondary-300 dark:hover:bg-secondary-700"
-              aria-label={theme === 'light' ? t('common:darkMode') : t('common:lightMode')}
+              aria-label={
+                theme === 'light' ? t('common:darkMode') : t('common:lightMode')
+              }
             >
               {theme === 'light' ? (
                 <Moon className="h-5 w-5" />
@@ -76,7 +79,8 @@ export function Header() {
                     <span>{t('common:logout')}</span>
                   </button>
                 </div>
-              ) : (                <>
+              ) : (
+                <>
                   <Link href="/auth/signup" className="btn-primary">
                     {t('common:signUp')}
                   </Link>
@@ -121,12 +125,16 @@ export function Header() {
                         setIsMobileMenuOpen(false);
                       }}
                       className="btn-secondary block w-full text-center"
-                    >                      <LogOut className="mr-1 inline h-4 w-4" />
+                    >
+                      {' '}
+                      <LogOut className="mr-1 inline h-4 w-4" />
                       {t('common:logout')}
                     </button>
                   </div>
                 ) : (
-                  <>                    <Link
+                  <>
+                    {' '}
+                    <Link
                       href="/auth/signup"
                       className="btn-primary block text-center"
                       onClick={() => setIsMobileMenuOpen(false)}
