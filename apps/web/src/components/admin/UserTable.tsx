@@ -95,24 +95,23 @@ export const UserTable: React.FC<UserTableProps> = ({
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
-                {t('admin.users.table.headers.user')}
+            <tr>              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
+                {t('admin-users:table.headers.user')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
-                {t('admin.users.table.headers.role')}
+                {t('admin-users:table.headers.role')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
-                {t('admin.users.table.headers.status')}
+                {t('admin-users:table.headers.status')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
-                {t('admin.users.table.headers.country')}
+                {t('admin-users:table.headers.country')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
-                {t('admin.users.table.headers.createdAt')}
+                {t('admin-users:table.headers.createdAt')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 rtl:text-right">
-                {t('admin.users.table.headers.actions')}
+                {t('admin-users:table.headers.actions')}
               </th>
             </tr>
           </thead>
@@ -167,10 +166,9 @@ export const UserTable: React.FC<UserTableProps> = ({
                         ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                         : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                     }`}
-                  >
-                    {user.isActive
-                      ? t('admin.users.status.active')
-                      : t('admin.users.status.inactive')}
+                  >                    {user.isActive
+                      ? t('admin-users:status.active')
+                      : t('admin-users:status.inactive')}
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
@@ -179,25 +177,24 @@ export const UserTable: React.FC<UserTableProps> = ({
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </td>                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                  <div className="flex space-x-2 rtl:space-x-reverse">
-                    <button 
+                  <div className="flex space-x-2 rtl:space-x-reverse">                    <button 
                       onClick={() => onUserAction?.('view', user)}
                       className="rounded px-2 py-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     >
-                      {t('admin.users.actions.view')}
+                      {t('admin-users:actions.view')}
                     </button>
                     <button 
                       onClick={() => onUserAction?.('edit', user)}
                       className="rounded px-2 py-1 text-sm text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
                     >
-                      {t('admin.users.actions.edit')}
+                      {t('admin-users:actions.edit')}
                     </button>
                     <button
                       onClick={() => onUserAction?.('delete', user)}
                       className="rounded px-2 py-1 text-sm text-red-600 hover:text-red-800 disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
                       disabled={user.role === 'OWNER'}
                     >
-                      {t('admin.users.actions.delete')}
+                      {t('admin-users:actions.delete')}
                     </button>
                   </div>
                 </td>
