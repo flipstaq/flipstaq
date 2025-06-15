@@ -28,7 +28,7 @@ export function useFormValidation(rules: ValidationRules) {
       rule.required &&
       (!value || (typeof value === 'string' && value.trim() === ''))
     ) {
-      return rule.message || t('validation.required', 'auth');
+      return rule.message || t('auth:validation.required');
     }
 
     if (

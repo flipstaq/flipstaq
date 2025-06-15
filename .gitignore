@@ -16,6 +16,7 @@ out/
 apps/web/.next/
 apps/admin/.next/
 apps/*/.next/
+/apps/web/.next/
 
 # NestJS specific
 apps/*/dist/

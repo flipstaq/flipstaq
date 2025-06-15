@@ -6,22 +6,21 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 
 export function Footer() {
   const { t } = useLanguage();
-
   const footerLinks = [
     {
-      title: t('company', 'common'),
+      title: t('common:company'),
       links: [
-        { name: t('about'), href: '/about' },
-        { name: t('careers'), href: '/careers' },
-        { name: t('contact'), href: '/contact' },
+        { name: t('common:about'), href: '/about' },
+        { name: t('common:careers'), href: '/careers' },
+        { name: t('common:contact'), href: '/contact' },
       ],
     },
     {
-      title: t('support', 'common'),
+      title: t('common:support'),
       links: [
-        { name: t('help'), href: '/help' },
-        { name: t('privacy'), href: '/privacy' },
-        { name: t('terms'), href: '/terms' },
+        { name: t('common:help'), href: '/help' },
+        { name: t('common:privacy'), href: '/privacy' },
+        { name: t('common:terms'), href: '/terms' },
       ],
     },
   ];
@@ -36,9 +35,8 @@ export function Footer() {
               <span className="text-2xl font-bold text-primary-600">
                 FlipStaq
               </span>
-            </Link>
-            <p className="max-w-md text-sm text-secondary-600 dark:text-secondary-400">
-              {t('welcome')}
+            </Link>            <p className="max-w-md text-sm text-secondary-600 dark:text-secondary-400">
+              {t('common:welcome')}
             </p>
           </div>
 

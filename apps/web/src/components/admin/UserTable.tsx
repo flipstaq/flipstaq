@@ -35,7 +35,7 @@ export const UserTable: React.FC<UserTableProps> = ({
             </svg>
           </div>
           <div className="ml-3 rtl:ml-0 rtl:mr-3">            <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-              {t('table.error', 'admin-users')}
+              {t('admin-users:table.error')}
             </h3>
             <div className="mt-1 text-sm text-red-700 dark:text-red-300">
               {error}
@@ -81,10 +81,10 @@ export const UserTable: React.FC<UserTableProps> = ({
             />
           </svg>
         </div>        <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-          {t('table.noUsers', 'admin-users')}
+          {t('admin-users:table.noUsers')}
         </h3>
         <p className="text-gray-500 dark:text-gray-400">
-          {t('table.noUsersDescription', 'admin-users')}
+          {t('admin-users:table.noUsersDescription')}
         </p>
       </div>
     );
