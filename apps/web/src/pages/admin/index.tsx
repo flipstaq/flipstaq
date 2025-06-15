@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'next-i18next';
+import { useLanguage } from '@/components/providers/LanguageProvider';
 import { AdminRouteGuard } from '@/components/providers/AdminRouteGuard';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { userApi } from '@/lib/api/users';
@@ -54,6 +54,7 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
+  t: (key: string) => string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -66,6 +67,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   onCancel,
   isLoading = false,
+  t,
 }) => {
   if (!isOpen) return null;
 
@@ -117,13 +119,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </div>
           </div>
           <div className="bg-gray-50 px-4 py-3 dark:bg-gray-700 sm:flex sm:flex-row-reverse sm:px-6">
+            {' '}
             <button
               type="button"
               disabled={isLoading}
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 sm:ml-3 sm:w-auto sm:text-sm"
               onClick={onConfirm}
             >
-              {isLoading ? 'Processing...' : confirmText}
+              {isLoading ? t('admin-common:common.processing') : confirmText}
             </button>
             <button
               type="button"
@@ -151,6 +154,7 @@ interface UserDetailModalProps {
   currentUser: UserInfo | null;
   canManageUser: (targetUser: User) => boolean;
   canChangeRoleTo: (targetUser: User, targetRole: UserRole) => boolean;
+  isRTL: boolean;
 }
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({
@@ -163,8 +167,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   currentUser,
   canManageUser,
   canChangeRoleTo,
+  isRTL,
 }) => {
-  const { t } = useTranslation('admin');
+  const { t } = useLanguage();
 
   if (!isOpen || !user) return null;
 
@@ -217,8 +222,8 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     {user.firstName.charAt(0)}
                     {user.lastName.charAt(0)}
                   </span>
-                </div>
-                <div className="ml-4">
+                </div>{' '}
+                <div className={isRTL ? 'mr-4' : 'ml-4'}>
                   <h3
                     className={`text-lg font-medium leading-6 ${
                       isDeleted
@@ -226,10 +231,12 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         : 'text-gray-900 dark:text-white'
                     }`}
                   >
-                    {user.firstName} {user.lastName}
+                    {user.firstName} {user.lastName}{' '}
                     {isDeleted && (
-                      <span className="ml-2 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300">
-                        Deleted
+                      <span
+                        className={`inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300 ${isRTL ? 'mr-2' : 'ml-2'}`}
+                      >
+                        {t('admin-users:status.deleted')}
                       </span>
                     )}
                   </h3>
@@ -271,29 +278,33 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Personal Information */}
                 <div>
+                  {' '}
                   <h4 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">
-                    Personal Information
+                    {t('admin-users:modal.personalInfo')}
                   </h4>
                   <div className="space-y-3">
                     <div>
+                      {' '}
                       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Full Name
+                        {t('admin-users:modal.fullName')}
                       </label>
                       <p className="mt-1 text-sm text-gray-900 dark:text-white">
                         {user.firstName} {user.lastName}
                       </p>
                     </div>
                     <div>
+                      {' '}
                       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Email
+                        {t('admin-users:modal.email')}
                       </label>
                       <p className="mt-1 text-sm text-gray-900 dark:text-white">
                         {user.email}
                       </p>
                     </div>
                     <div>
+                      {' '}
                       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Username
+                        {t('admin-users:modal.username')}
                       </label>
                       <p className="mt-1 text-sm text-gray-900 dark:text-white">
                         @{user.username}
@@ -301,8 +312,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     </div>
                     {user.dateOfBirth && (
                       <div>
+                        {' '}
                         <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                          Date of Birth
+                          {t('admin-users:modal.dateOfBirth')}
                         </label>
                         <p className="mt-1 text-sm text-gray-900 dark:text-white">
                           {formatDate(user.dateOfBirth)}
@@ -310,8 +322,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       </div>
                     )}
                     <div>
+                      {' '}
                       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Country
+                        {t('admin-users:modal.country')}
                       </label>
                       <p className="mt-1 text-sm text-gray-900 dark:text-white">
                         {user.country}
@@ -322,13 +335,15 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* Account Information */}
                 <div>
+                  {' '}
                   <h4 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">
-                    Account Information
+                    {t('admin-users:modal.accountInfo')}
                   </h4>
                   <div className="space-y-3">
                     <div>
+                      {' '}
                       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Role
+                        {t('admin-users:modal.role')}
                       </label>
                       <div className="mt-1 flex items-center">
                         <span
@@ -342,13 +357,14 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                                   : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                           }`}
                         >
-                          {user.role.replace('_', ' ')}
+                          {t(`admin-users:roles.${user.role}`)}
                         </span>
                       </div>
                     </div>
                     <div>
+                      {' '}
                       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Status
+                        {t('admin-users:modal.status')}
                       </label>
                       <div className="mt-1">
                         <span
@@ -358,21 +374,25 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                               : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                           }`}
                         >
-                          {isDeleted ? 'Deleted' : 'Active'}
+                          {isDeleted
+                            ? t('admin-users:status.deleted')
+                            : t('admin-users:status.active')}
                         </span>
                       </div>
                     </div>
                     <div>
+                      {' '}
                       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Date Joined
+                        {t('admin-users:modal.dateJoined')}
                       </label>
                       <p className="mt-1 text-sm text-gray-900 dark:text-white">
                         {formatDate(user.createdAt)}
                       </p>
                     </div>
                     <div>
+                      {' '}
                       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Last Updated
+                        {t('admin-users:modal.lastUpdated')}
                       </label>
                       <p className="mt-1 text-sm text-gray-900 dark:text-white">
                         {formatDate(user.updatedAt)}
@@ -382,7 +402,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       <>
                         <div>
                           <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                            {t('users.modals.userDetail.deletedAt')}
+                            {t('admin-users:modals.userDetail.deletedAt')}
                           </label>
                           <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                             {formatDate(user.deletedAt)}
@@ -393,12 +413,13 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                             currentUser?.role === 'HIGHER_STAFF') && (
                             <div>
                               <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                                {t('users.modals.userDetail.deletedBy')}
-                              </label>
+                                {' '}
+                                {t('admin-users:modals.userDetail.deletedBy')}
+                              </label>{' '}
                               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {user.deletedBy.firstName}{' '}
                                 {user.deletedBy.lastName} (
-                                {user.deletedBy.role.replace('_', ' ')})
+                                {t(`admin-users:roles.${user.deletedBy.role}`)})
                               </p>
                             </div>
                           )}
@@ -406,17 +427,18 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     )}
                   </div>
                 </div>
-              </div>
-
+              </div>{' '}
               {/* Role Management - Only for active users */}
               {!isDeleted && canManageUser(user) && user.role !== 'OWNER' && (
                 <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-700">
                   <h4 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">
-                    Role Management
+                    {t('admin-users:modal.roleManagement')}
                   </h4>
-                  <div className="flex items-center space-x-3">
+                  <div
+                    className={`flex items-center ${isRTL ? 'space-x-3 space-x-reverse' : 'space-x-3'}`}
+                  >
                     <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                      Change Role:
+                      {t('admin-users:modal.changeRole')}:
                     </label>
                     <select
                       value={user.role}
@@ -425,10 +447,16 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       }
                       className="rounded border border-gray-300 bg-white px-3 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     >
-                      <option value="USER">User</option>
-                      <option value="STAFF">Staff</option>
+                      <option value="USER">
+                        {t('admin-users:roles.USER')}
+                      </option>
+                      <option value="STAFF">
+                        {t('admin-users:roles.STAFF')}
+                      </option>
                       {canChangeRoleTo(user, 'HIGHER_STAFF') && (
-                        <option value="HIGHER_STAFF">Higher Staff</option>
+                        <option value="HIGHER_STAFF">
+                          {t('admin-users:roles.HIGHER_STAFF')}
+                        </option>
                       )}
                     </select>
                   </div>
@@ -439,7 +467,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
           {/* Footer Actions */}
           <div className="bg-gray-50 px-4 py-3 dark:bg-gray-700 sm:flex sm:flex-row-reverse sm:px-6">
-            <div className="flex space-x-3">
+            <div
+              className={`flex ${isRTL ? 'space-x-3 space-x-reverse' : 'space-x-3'}`}
+            >
               {/* Restore Button - Only for deleted users */}
               {isDeleted && canManageUser(user) && (
                 <button
@@ -450,7 +480,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   }}
                   className="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                 >
-                  Restore User
+                  {t('admin-users:actions.restoreUser')}
                 </button>
               )}
 
@@ -466,7 +496,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     }}
                     className="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                   >
-                    Delete User
+                    {t('admin-users:actions.delete')}
                   </button>
                 )}
 
@@ -476,7 +506,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 onClick={onClose}
                 className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
-                Close
+                {t('admin-users:actions.close')}
               </button>
             </div>
           </div>
@@ -488,7 +518,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
 export default function AdminPanel() {
   const { user } = useAuth();
-  const { t } = useTranslation('admin');
+  const { t, language, isRTL, setLanguage } = useLanguage();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -502,6 +532,11 @@ export default function AdminPanel() {
     users: 0,
     active: 0,
   });
+
+  // Helper function to format numbers based on language
+  const formatNumber = (num: number): string => {
+    return num.toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US');
+  };
 
   // Toast notifications
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -606,7 +641,9 @@ export default function AdminPanel() {
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch users');
+      setError(
+        err instanceof Error ? err.message : t('admin-common:common.fetchError')
+      );
       console.error('Error fetching users:', err);
     } finally {
       setLoading(false);
@@ -646,12 +683,11 @@ export default function AdminPanel() {
     }
     return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
   };
-
   const getStatusText = (isActive: boolean, isDeleted: boolean = false) => {
     if (isDeleted || !isActive) {
-      return 'Deleted';
+      return t('admin-users:status.deleted');
     }
-    return 'Active';
+    return t('admin-users:status.active');
   };
 
   // Helper functions for modals
@@ -679,7 +715,7 @@ export default function AdminPanel() {
       // Fallback to the basic user data from the list
       setSelectedUser(targetUser);
       setShowDetailModal(true);
-      addToast('error', 'Failed to load full user details');
+      addToast('error', t('admin-users:notifications.loadUserDetailsError'));
     }
   };
 
@@ -705,17 +741,22 @@ export default function AdminPanel() {
 
       // Refresh the user list to get the latest data
       await fetchUsers();
-
+      const roleDisplayName = t(`admin-users:roles.${newRole}`);
       addToast(
         'success',
-        `User role updated successfully to ${newRole.replace('_', ' ')}`
+        t('admin-users:notifications.roleUpdateSuccess').replace(
+          '{{newRole}}',
+          roleDisplayName
+        )
       );
       setShowRoleModal(false);
       setSelectedUser(null);
     } catch (error) {
       console.error('Error updating user role:', error);
       const errorMessage =
-        error instanceof Error ? error.message : 'Failed to update user role';
+        error instanceof Error
+          ? error.message
+          : t('admin-users:notifications.roleUpdateError');
       setError(errorMessage);
       addToast('error', errorMessage);
     } finally {
@@ -739,17 +780,20 @@ export default function AdminPanel() {
 
       // Refresh the user list to get the latest data
       await fetchUsers();
-
       addToast(
         'success',
-        `User ${selectedUser.firstName} ${selectedUser.lastName} has been deleted successfully`
+        t('admin-users:notifications.deleteSuccess')
+          .replace('{{firstName}}', selectedUser.firstName)
+          .replace('{{lastName}}', selectedUser.lastName)
       );
       setShowDeleteModal(false);
       setSelectedUser(null);
     } catch (error) {
       console.error('Error deleting user:', error);
       const errorMessage =
-        error instanceof Error ? error.message : 'Failed to delete user';
+        error instanceof Error
+          ? error.message
+          : t('admin-users:notifications.deleteError');
       setError(errorMessage);
       addToast('error', errorMessage);
     } finally {
@@ -766,17 +810,20 @@ export default function AdminPanel() {
 
       // Refresh the user list to get the latest data
       await fetchUsers();
-
       addToast(
         'success',
-        `User ${selectedUser.firstName} ${selectedUser.lastName} has been restored successfully`
+        t('admin-users:notifications.restoreSuccess')
+          .replace('{{firstName}}', selectedUser.firstName)
+          .replace('{{lastName}}', selectedUser.lastName)
       );
       setShowRestoreModal(false);
       setSelectedUser(null);
     } catch (error) {
       console.error('Error restoring user:', error);
       const errorMessage =
-        error instanceof Error ? error.message : 'Failed to restore user';
+        error instanceof Error
+          ? error.message
+          : t('admin-users:notifications.restoreError');
       setError(errorMessage);
       addToast('error', errorMessage);
     } finally {
@@ -785,7 +832,10 @@ export default function AdminPanel() {
   };
   return (
     <AdminRouteGuard>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div
+        className="min-h-screen bg-gray-50 dark:bg-gray-900"
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
         {/* Toast Notifications */}
         <ToastContainer toasts={toasts} removeToast={removeToast} />
         {/* Header */}
@@ -793,16 +843,31 @@ export default function AdminPanel() {
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               <div className="flex items-center">
+                {' '}
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-                  FlipStaq Admin Panel
+                  {t('admin-common:header.title')}
                 </h1>
-              </div>
-              <div className="flex items-center space-x-4">
+              </div>{' '}
+              <div
+                className={`flex items-center ${isRTL ? 'space-x-4 space-x-reverse' : 'space-x-4'}`}
+              >
+                {/* Language Switcher */}
+                <div className="flex items-center">
+                  <button
+                    onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  >
+                    {language === 'en' ? '🇸🇦 AR' : '🇺🇸 EN'}
+                  </button>
+                </div>{' '}
                 <span className="hidden text-sm text-gray-600 dark:text-gray-400 sm:block">
-                  Welcome, {user?.firstName} {user?.lastName}
-                </span>
+                  {t('admin-common:header.welcome', {
+                    firstName: user?.firstName,
+                    lastName: user?.lastName,
+                  })}
+                </span>{' '}
                 <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-300">
-                  {user?.role}
+                  {t(`admin-users:roles.${user?.role}`)}
                 </span>
               </div>
             </div>
@@ -824,14 +889,16 @@ export default function AdminPanel() {
                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                       </svg>
                     </div>
-                  </div>
-                  <div className="ml-3 w-0 flex-1 sm:ml-5">
+                  </div>{' '}
+                  <div
+                    className={`w-0 flex-1 ${isRTL ? 'mr-3 sm:mr-5' : 'ml-3 sm:ml-5'}`}
+                  >
                     <dl>
                       <dt className="truncate text-xs font-medium text-gray-500 dark:text-gray-400 sm:text-sm">
-                        Total Users
+                        {t('admin-common:stats.totalUsers')}
                       </dt>
                       <dd className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-                        {stats.total}
+                        {formatNumber(stats.total)}
                       </dd>
                     </dl>
                   </div>
@@ -856,14 +923,16 @@ export default function AdminPanel() {
                         />
                       </svg>
                     </div>
-                  </div>
-                  <div className="ml-3 w-0 flex-1 sm:ml-5">
+                  </div>{' '}
+                  <div
+                    className={`w-0 flex-1 ${isRTL ? 'mr-3 sm:mr-5' : 'ml-3 sm:ml-5'}`}
+                  >
                     <dl>
                       <dt className="truncate text-xs font-medium text-gray-500 dark:text-gray-400 sm:text-sm">
-                        Owners
+                        {t('admin-common:stats.owners')}
                       </dt>
                       <dd className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-                        {stats.owners}
+                        {formatNumber(stats.owners)}
                       </dd>
                     </dl>
                   </div>
@@ -888,14 +957,16 @@ export default function AdminPanel() {
                         />
                       </svg>
                     </div>
-                  </div>
-                  <div className="ml-3 w-0 flex-1 sm:ml-5">
+                  </div>{' '}
+                  <div
+                    className={`w-0 flex-1 ${isRTL ? 'mr-3 sm:mr-5' : 'ml-3 sm:ml-5'}`}
+                  >
                     <dl>
                       <dt className="truncate text-xs font-medium text-gray-500 dark:text-gray-400 sm:text-sm">
-                        Staff
+                        {t('admin-common:stats.staff')}
                       </dt>
                       <dd className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-                        {stats.staff}
+                        {formatNumber(stats.staff)}
                       </dd>
                     </dl>
                   </div>
@@ -920,14 +991,16 @@ export default function AdminPanel() {
                         />
                       </svg>
                     </div>
-                  </div>
-                  <div className="ml-3 w-0 flex-1 sm:ml-5">
+                  </div>{' '}
+                  <div
+                    className={`w-0 flex-1 ${isRTL ? 'mr-3 sm:mr-5' : 'ml-3 sm:ml-5'}`}
+                  >
                     <dl>
                       <dt className="truncate text-xs font-medium text-gray-500 dark:text-gray-400 sm:text-sm">
-                        Regular Users
+                        {t('admin-common:stats.users')}
                       </dt>
                       <dd className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-                        {stats.users}
+                        {formatNumber(stats.users)}
                       </dd>
                     </dl>
                   </div>
@@ -952,14 +1025,16 @@ export default function AdminPanel() {
                         />
                       </svg>
                     </div>
-                  </div>
-                  <div className="ml-3 w-0 flex-1 sm:ml-5">
+                  </div>{' '}
+                  <div
+                    className={`w-0 flex-1 ${isRTL ? 'mr-3 sm:mr-5' : 'ml-3 sm:ml-5'}`}
+                  >
                     <dl>
                       <dt className="truncate text-xs font-medium text-gray-500 dark:text-gray-400 sm:text-sm">
-                        Active Users
+                        {t('admin-common:stats.active')}
                       </dt>
                       <dd className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-                        {stats.active}
+                        {formatNumber(stats.active)}
                       </dd>
                     </dl>
                   </div>
@@ -975,9 +1050,11 @@ export default function AdminPanel() {
                 <div className="flex-1">
                   <label htmlFor="search" className="sr-only">
                     Search users
-                  </label>
+                  </label>{' '}
                   <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <div
+                      className={`pointer-events-none absolute inset-y-0 flex items-center ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'}`}
+                    >
                       <svg
                         className="h-5 w-5 text-gray-400"
                         fill="currentColor"
@@ -993,8 +1070,8 @@ export default function AdminPanel() {
                     <input
                       id="search"
                       type="text"
-                      placeholder="Search by name, email, or username..."
-                      className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-3 leading-5 text-gray-900 placeholder-gray-500 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                      placeholder={t('admin-users:filters.search.placeholder')}
+                      className={`block w-full rounded-lg border border-gray-300 bg-white py-3 leading-5 text-gray-900 placeholder-gray-500 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 ${isRTL ? 'pl-3 pr-10' : 'pl-10 pr-3'}`}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -1003,8 +1080,9 @@ export default function AdminPanel() {
                 {/* View Mode Toggle - Only for OWNER and HIGHER_STAFF */}
                 {(user?.role === 'OWNER' || user?.role === 'HIGHER_STAFF') && (
                   <div className="sm:w-48 lg:w-56">
+                    {' '}
                     <label htmlFor="viewMode" className="sr-only">
-                      View mode
+                      {t('admin-users:filters.view.label')}
                     </label>
                     <select
                       id="viewMode"
@@ -1014,14 +1092,20 @@ export default function AdminPanel() {
                         setViewMode(e.target.value as 'active' | 'deleted')
                       }
                     >
-                      <option value="active">Active Users</option>
-                      <option value="deleted">Deleted Users</option>
+                      <option value="active">
+                        {' '}
+                        {t('admin-users:filters.view.active')}
+                      </option>
+                      <option value="deleted">
+                        {t('admin-users:filters.view.deleted')}
+                      </option>
                     </select>
                   </div>
                 )}
                 <div className="sm:w-48 lg:w-56">
+                  {' '}
                   <label htmlFor="role" className="sr-only">
-                    Filter by role
+                    {t('admin-users:filters.role.label')}
                   </label>
                   <select
                     id="role"
@@ -1029,11 +1113,22 @@ export default function AdminPanel() {
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value)}
                   >
-                    <option value="ALL">All Roles</option>
-                    <option value="OWNER">Owners</option>
-                    <option value="HIGHER_STAFF">Higher Staff</option>
-                    <option value="STAFF">Staff</option>
-                    <option value="USER">Users</option>
+                    <option value="ALL">
+                      {' '}
+                      {t('admin-users:filters.role.all')}
+                    </option>
+                    <option value="OWNER">
+                      {t('admin-users:filters.role.owner')}
+                    </option>
+                    <option value="HIGHER_STAFF">
+                      {t('admin-users:filters.role.higherStaff')}
+                    </option>
+                    <option value="STAFF">
+                      {t('admin-users:filters.role.staff')}
+                    </option>
+                    <option value="USER">
+                      {t('admin-users:filters.role.user')}
+                    </option>
                   </select>
                 </div>
                 <button
@@ -1041,7 +1136,7 @@ export default function AdminPanel() {
                   className="inline-flex items-center rounded-lg border border-transparent bg-blue-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <svg
-                    className="mr-2 h-4 w-4"
+                    className={isRTL ? 'ml-2 h-4 w-4' : 'mr-2 h-4 w-4'}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1049,9 +1144,9 @@ export default function AdminPanel() {
                       fillRule="evenodd"
                       d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
                       clipRule="evenodd"
-                    />
+                    />{' '}
                   </svg>
-                  Refresh
+                  {t('admin-common:common.retry')}
                 </button>
               </div>
             </div>
@@ -1060,20 +1155,21 @@ export default function AdminPanel() {
           {/* Users Table */}
           <div className="overflow-hidden rounded-lg bg-white shadow-lg dark:bg-gray-800">
             <div className="border-b border-gray-200 px-4 py-4 dark:border-gray-700 sm:px-6">
+              {' '}
               <h3 className="text-lg font-bold leading-6 text-gray-900 dark:text-white sm:text-xl">
-                Registered Users ({filteredUsers.length})
+                {t('admin-users:table.title')} ({filteredUsers.length})
               </h3>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Manage and view all registered users in the system
+                {t('admin-users:table.description')}
               </p>
             </div>
 
             {loading ? (
               <div className="flex items-center justify-center py-16">
                 <div className="flex flex-col items-center">
-                  <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>
+                  <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>{' '}
                   <span className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-                    Loading users...
+                    {t('admin-users:table.loading')}
                   </span>
                 </div>
               </div>
@@ -1095,8 +1191,9 @@ export default function AdminPanel() {
                   onClick={fetchUsers}
                   className="inline-flex items-center rounded-lg border border-transparent bg-blue-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
                 >
+                  {' '}
                   <svg
-                    className="mr-2 h-4 w-4"
+                    className={isRTL ? 'ml-2 h-4 w-4' : 'mr-2 h-4 w-4'}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1104,9 +1201,9 @@ export default function AdminPanel() {
                       fillRule="evenodd"
                       d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
                       clipRule="evenodd"
-                    />
+                    />{' '}
                   </svg>
-                  Try Again
+                  {t('admin-common:common.retry')}
                 </button>
               </div>
             ) : filteredUsers.length === 0 ? (
@@ -1117,14 +1214,14 @@ export default function AdminPanel() {
                   viewBox="0 0 20 20"
                 >
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                </svg>
+                </svg>{' '}
                 <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
-                  No users found
+                  {t('admin-users:table.noUsers')}
                 </h3>
                 <p className="text-lg text-gray-600 dark:text-gray-400">
                   {searchTerm || selectedRole !== 'ALL'
-                    ? 'Try adjusting your filters'
-                    : 'No users have been registered yet'}
+                    ? t('admin-users:table.noData')
+                    : t('admin-users:table.noData')}
                 </p>
               </div>
             ) : (
@@ -1132,23 +1229,36 @@ export default function AdminPanel() {
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                        User
+                      {' '}
+                      <th
+                        className={`px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                      >
+                        {t('admin-users:table.headers.user')}
                       </th>
-                      <th className="hidden px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 sm:table-cell">
-                        Role
+                      <th
+                        className={`hidden px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 sm:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                      >
+                        {t('admin-users:table.headers.role')}
                       </th>
-                      <th className="hidden px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 md:table-cell">
-                        Status
+                      <th
+                        className={`hidden px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 md:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                      >
+                        {t('admin-users:table.headers.status')}
                       </th>
-                      <th className="hidden px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 lg:table-cell">
-                        Country
+                      <th
+                        className={`hidden px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 lg:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                      >
+                        {t('admin-users:table.headers.country')}
                       </th>
-                      <th className="hidden px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 lg:table-cell">
-                        Joined
+                      <th
+                        className={`hidden px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 lg:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                      >
+                        {t('admin-users:table.headers.dateJoined')}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                        Actions
+                      <th
+                        className={`px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                      >
+                        {t('admin-users:table.headers.actions')}
                       </th>
                     </tr>
                   </thead>
@@ -1166,7 +1276,10 @@ export default function AdminPanel() {
                               : ''
                           }`}
                         >
-                          <td className="whitespace-nowrap px-6 py-4">
+                          {' '}
+                          <td
+                            className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             <div className="flex items-center">
                               <div className="h-10 w-10 flex-shrink-0 sm:h-12 sm:w-12">
                                 <div
@@ -1182,7 +1295,7 @@ export default function AdminPanel() {
                                   </span>
                                 </div>
                               </div>
-                              <div className="ml-4">
+                              <div className={isRTL ? 'mr-4' : 'ml-4'}>
                                 <div
                                   className={`text-sm font-semibold ${
                                     isDeleted
@@ -1190,10 +1303,12 @@ export default function AdminPanel() {
                                       : 'text-gray-900 dark:text-white'
                                   }`}
                                 >
-                                  {tableUser.firstName} {tableUser.lastName}
+                                  {tableUser.firstName} {tableUser.lastName}{' '}
                                   {isDeleted && (
-                                    <span className="ml-2 inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300">
-                                      Deleted
+                                    <span
+                                      className={`inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300 ${isRTL ? 'mr-2' : 'ml-2'}`}
+                                    >
+                                      {t('admin-users:status.deleted')}
                                     </span>
                                   )}
                                 </div>
@@ -1217,10 +1332,11 @@ export default function AdminPanel() {
                                 </div>
                                 {/* Mobile-only role and status */}
                                 <div className="mt-2 flex flex-wrap gap-2 sm:hidden">
+                                  {' '}
                                   <span
                                     className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${getRoleBadgeColor(tableUser.role)}`}
                                   >
-                                    {tableUser.role.replace('_', ' ')}
+                                    {t(`admin-users:roles.${tableUser.role}`)}
                                   </span>
                                   <span
                                     className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(tableUser.isActive, isDeleted)}`}
@@ -1234,14 +1350,19 @@ export default function AdminPanel() {
                               </div>
                             </div>
                           </td>
-                          <td className="hidden whitespace-nowrap px-6 py-4 sm:table-cell">
+                          <td
+                            className={`hidden whitespace-nowrap px-6 py-4 sm:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
+                            {' '}
                             <span
                               className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${getRoleBadgeColor(tableUser.role)}`}
                             >
-                              {tableUser.role.replace('_', ' ')}
+                              {t(`admin-users:roles.${tableUser.role}`)}
                             </span>
                           </td>
-                          <td className="hidden whitespace-nowrap px-6 py-4 md:table-cell">
+                          <td
+                            className={`hidden whitespace-nowrap px-6 py-4 md:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             <span
                               className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${getStatusBadgeColor(tableUser.isActive, isDeleted)}`}
                             >
@@ -1249,7 +1370,7 @@ export default function AdminPanel() {
                             </span>
                           </td>
                           <td
-                            className={`hidden whitespace-nowrap px-6 py-4 text-sm font-medium lg:table-cell ${
+                            className={`hidden whitespace-nowrap px-6 py-4 text-sm font-medium lg:table-cell ${isRTL ? 'text-right' : 'text-left'} ${
                               isDeleted
                                 ? 'text-gray-500 dark:text-gray-400'
                                 : 'text-gray-900 dark:text-white'
@@ -1258,14 +1379,14 @@ export default function AdminPanel() {
                             {tableUser.country}
                           </td>
                           <td
-                            className={`hidden whitespace-nowrap px-6 py-4 text-sm lg:table-cell ${
+                            className={`hidden whitespace-nowrap px-6 py-4 text-sm lg:table-cell ${isRTL ? 'text-right' : 'text-left'} ${
                               isDeleted
                                 ? 'text-gray-400 dark:text-gray-500'
                                 : 'text-gray-500 dark:text-gray-400'
                             }`}
                           >
                             {new Date(tableUser.createdAt).toLocaleDateString(
-                              'en-US',
+                              language === 'ar' ? 'ar-SA' : 'en-US',
                               {
                                 year: 'numeric',
                                 month: 'short',
@@ -1273,15 +1394,19 @@ export default function AdminPanel() {
                               }
                             )}
                           </td>{' '}
-                          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-2">
+                          <td
+                            className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
+                            <div
+                              className={`flex flex-col gap-2 sm:flex-row sm:items-center ${isRTL ? 'sm:space-x-2 sm:space-x-reverse' : 'sm:space-x-2'}`}
+                            >
                               {/* View Details Button - Always available */}
                               <button
                                 onClick={() => openDetailModal(tableUser)}
                                 className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                                title="View Details"
+                                title={t('admin-users:actions.view')}
                               >
-                                View
+                                {t('admin-users:actions.viewDetails')}
                               </button>
 
                               {/* Role Change Dropdown - Only for active users */}
@@ -1307,14 +1432,19 @@ export default function AdminPanel() {
                                     className="rounded border border-gray-300 bg-white px-2 py-1 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     disabled={isDeleted}
                                   >
-                                    <option value="USER">User</option>
-                                    <option value="STAFF">Staff</option>
+                                    {' '}
+                                    <option value="USER">
+                                      {t('admin-users:roles.USER')}
+                                    </option>
+                                    <option value="STAFF">
+                                      {t('admin-users:roles.STAFF')}
+                                    </option>
                                     {canChangeRoleTo(
                                       tableUser,
                                       'HIGHER_STAFF'
                                     ) && (
                                       <option value="HIGHER_STAFF">
-                                        Higher Staff
+                                        {t('admin-users:roles.HIGHER_STAFF')}
                                       </option>
                                     )}
                                   </select>
@@ -1327,9 +1457,9 @@ export default function AdminPanel() {
                                   <button
                                     onClick={() => openDeleteModal(tableUser)}
                                     className="rounded bg-red-600 px-2 py-1 text-xs text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                                    title="Delete User"
+                                    title={t('admin-users:actions.delete')}
                                   >
-                                    Delete
+                                    {t('admin-users:actions.delete')}
                                   </button>
                                 )}
                               {/* Restore Button - Only for deleted users */}
@@ -1338,9 +1468,9 @@ export default function AdminPanel() {
                                   <button
                                     onClick={() => openRestoreModal(tableUser)}
                                     className="rounded bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
-                                    title="Restore User"
+                                    title={t('admin-users:actions.restoreUser')}
                                   >
-                                    Restore
+                                    {t('admin-users:actions.restore')}
                                   </button>
                                 )}
                             </div>
@@ -1354,7 +1484,7 @@ export default function AdminPanel() {
             )}
           </div>
         </div>{' '}
-        {/* User Detail Modal */}
+        {/* User Detail Modal */}{' '}
         <UserDetailModal
           isOpen={showDetailModal}
           user={selectedUser}
@@ -1378,65 +1508,81 @@ export default function AdminPanel() {
           currentUser={user}
           canManageUser={canManageUser}
           canChangeRoleTo={canChangeRoleTo}
+          isRTL={isRTL}
         />
-      </div>
-
+      </div>{' '}
       {/* Role Change Confirmation Modal */}
       <ConfirmationModal
         isOpen={showRoleModal}
-        title="Update User Role"
+        title={t('admin-users:modals.roleUpdate.title')}
         message={
           selectedUser
-            ? `Are you sure you want to change ${selectedUser.firstName} ${selectedUser.lastName}'s role from ${selectedUser.role.replace('_', ' ')} to ${newRole.replace('_', ' ')}?`
+            ? t('admin-users:modals.roleUpdate.message')
+                .replace(
+                  '{{userName}}',
+                  `${selectedUser.firstName} ${selectedUser.lastName}`
+                )
+                .replace(
+                  '{{currentRole}}',
+                  t(`admin-users:roles.${selectedUser.role}`)
+                )
+                .replace('{{newRole}}', t(`admin-users:roles.${newRole}`))
             : ''
         }
-        confirmText="Update Role"
-        cancelText="Cancel"
+        confirmText={t('admin-users:actions.confirm')}
+        cancelText={t('admin-users:actions.cancel')}
         onConfirm={handleRoleChange}
         onCancel={() => {
           setShowRoleModal(false);
           setSelectedUser(null);
         }}
         isLoading={actionLoading}
-      />
-
+        t={t}
+      />{' '}
       {/* Delete User Confirmation Modal */}
       <ConfirmationModal
         isOpen={showDeleteModal}
-        title="Delete User"
+        title={t('admin-users:modals.delete.title')}
         message={
           selectedUser
-            ? `Are you sure you want to delete ${selectedUser.firstName} ${selectedUser.lastName}?`
+            ? t('admin-users:modals.delete.message').replace(
+                '{{userName}}',
+                `${selectedUser.firstName} ${selectedUser.lastName}`
+              )
             : ''
         }
-        warning="This will permanently disable the user account and they will no longer be able to access the platform."
-        confirmText="Delete User"
-        cancelText="Cancel"
+        warning={t('admin-users:modals.delete.warning')}
+        confirmText={t('admin-users:actions.delete')}
+        cancelText={t('admin-users:actions.cancel')}
         onConfirm={handleDeleteUser}
         onCancel={() => {
           setShowDeleteModal(false);
           setSelectedUser(null);
         }}
         isLoading={actionLoading}
-      />
-
+        t={t}
+      />{' '}
       {/* Restore User Confirmation Modal */}
       <ConfirmationModal
         isOpen={showRestoreModal}
-        title="Restore User"
+        title={t('admin-users:modals.restore.title')}
         message={
           selectedUser
-            ? `Are you sure you want to restore ${selectedUser.firstName} ${selectedUser.lastName}'s account?`
+            ? t('admin-users:modals.restore.message').replace(
+                '{{userName}}',
+                `${selectedUser.firstName} ${selectedUser.lastName}`
+              )
             : ''
         }
-        confirmText="Restore User"
-        cancelText="Cancel"
+        confirmText={t('admin-users:actions.restoreUser')}
+        cancelText={t('admin-users:actions.cancel')}
         onConfirm={handleRestoreUser}
         onCancel={() => {
           setShowRestoreModal(false);
           setSelectedUser(null);
         }}
         isLoading={actionLoading}
+        t={t}
       />
     </AdminRouteGuard>
   );

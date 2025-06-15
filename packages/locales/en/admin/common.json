@@ -1,4 +1,19 @@
 {
+  "header": {
+    "title": "Flipstaq Admin Panel",
+    "welcome": "Welcome, {{firstName}} {{lastName}}",
+    "languageSwitcher": {
+      "english": "🇺🇸 EN",
+      "arabic": "🇸🇦 AR"
+    }
+  },
+  "stats": {
+    "totalUsers": "Total Users",
+    "owners": "Owners",
+    "staff": "Staff",
+    "users": "Users",
+    "active": "Active Users"
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "users": "Users",
@@ -19,7 +34,10 @@
     "search": "Search",
     "filter": "Filter",
     "reset": "Reset",
-    "apply": "Apply"
+    "apply": "Apply",
+    "processing": "Processing...",
+    "close": "Close",
+    "fetchError": "Failed to fetch data"
   },
   "permissions": {
     "accessDenied": "Access Denied",

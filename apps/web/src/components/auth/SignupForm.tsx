@@ -66,20 +66,19 @@ export function SignupForm() {
   useEffect(() => {
     clearError();
   }, [clearError]);
-
   const countries = [
-    { code: 'US', name: t('countries.US', 'auth') },
-    { code: 'CA', name: t('countries.CA', 'auth') },
-    { code: 'GB', name: t('countries.GB', 'auth') },
-    { code: 'SA', name: t('countries.SA', 'auth') },
-    { code: 'AE', name: t('countries.AE', 'auth') },
-    { code: 'EG', name: t('countries.EG', 'auth') },
-    { code: 'JO', name: t('countries.JO', 'auth') },
-    { code: 'LB', name: t('countries.LB', 'auth') },
-    { code: 'KW', name: t('countries.KW', 'auth') },
-    { code: 'QA', name: t('countries.QA', 'auth') },
-    { code: 'BH', name: t('countries.BH', 'auth') },
-    { code: 'OM', name: t('countries.OM', 'auth') },
+    { code: 'US', name: t('auth:countries.US') },
+    { code: 'CA', name: t('auth:countries.CA') },
+    { code: 'GB', name: t('auth:countries.GB') },
+    { code: 'SA', name: t('auth:countries.SA') },
+    { code: 'AE', name: t('auth:countries.AE') },
+    { code: 'EG', name: t('auth:countries.EG') },
+    { code: 'JO', name: t('auth:countries.JO') },
+    { code: 'LB', name: t('auth:countries.LB') },
+    { code: 'KW', name: t('auth:countries.KW') },
+    { code: 'QA', name: t('auth:countries.QA') },
+    { code: 'BH', name: t('auth:countries.BH') },
+    { code: 'OM', name: t('auth:countries.OM') },
   ];
   const onSubmit = async (data: SignupFormData) => {
     try {
@@ -93,27 +92,28 @@ export function SignupForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary-50 px-4 py-12 dark:bg-secondary-900 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
+        {' '}
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-secondary-900 dark:text-secondary-100">
-            {t('createAccount', 'auth')}
+            {t('auth:createAccount')}
           </h2>
           <p className="mt-2 text-center text-sm text-secondary-600 dark:text-secondary-400">
-            {t('alreadyHaveAccount', 'auth')}{' '}
+            {t('auth:alreadyHaveAccount')}{' '}
             <Link
               href="/auth/signin"
               className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
             >
-              {t('signInHere', 'auth')}
+              {t('auth:signInHere')}
             </Link>
           </p>
         </div>
-
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
+            {' '}
             {/* First Name */}
             <div>
               <label htmlFor="firstName" className="label-field">
-                {t('firstName', 'auth')}
+                {t('auth:firstName')}
               </label>
               <input
                 {...register('firstName')}
@@ -125,14 +125,14 @@ export function SignupForm() {
               />
               {errors.firstName && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(errors.firstName.message || '', 'auth')}
+                  {t(`auth:${errors.firstName.message || ''}`)}
                 </p>
               )}
             </div>
             {/* Last Name */}
             <div>
               <label htmlFor="lastName" className="label-field">
-                {t('lastName', 'auth')}
+                {t('auth:lastName')}
               </label>
               <input
                 {...register('lastName')}
@@ -144,14 +144,14 @@ export function SignupForm() {
               />
               {errors.lastName && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(errors.lastName.message || '', 'auth')}
+                  {t(`auth:${errors.lastName.message || ''}`)}
                 </p>
               )}
             </div>
             {/* Email */}
             <div>
               <label htmlFor="email" className="label-field">
-                {t('email', 'auth')}
+                {t('auth:email')}
               </label>
               <input
                 {...register('email')}
@@ -163,14 +163,14 @@ export function SignupForm() {
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(errors.email.message || '', 'auth')}
+                  {t(`auth:${errors.email.message || ''}`)}
                 </p>
               )}
             </div>
             {/* Username */}
             <div>
               <label htmlFor="username" className="label-field">
-                {t('username', 'auth')}
+                {t('auth:username')}
               </label>
               <input
                 {...register('username')}
@@ -182,14 +182,14 @@ export function SignupForm() {
               />
               {errors.username && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(errors.username.message || '', 'auth')}
+                  {t(`auth:${errors.username.message || ''}`)}
                 </p>
               )}
             </div>
             {/* Password */}
             <div>
               <label htmlFor="password" className="label-field">
-                {t('password', 'auth')}
+                {t('auth:password')}
               </label>
               <input
                 {...register('password')}
@@ -201,14 +201,14 @@ export function SignupForm() {
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(errors.password.message || '', 'auth')}
+                  {t(`auth:${errors.password.message || ''}`)}
                 </p>
               )}
             </div>{' '}
             {/* Date of Birth */}
             <div>
               <label htmlFor="dateOfBirth" className="label-field">
-                {t('dateOfBirth', 'auth')}
+                {t('auth:dateOfBirth')}
               </label>
               <input
                 {...register('dateOfBirth')}
@@ -220,14 +220,14 @@ export function SignupForm() {
               />
               {errors.dateOfBirth && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(errors.dateOfBirth.message || '', 'auth')}
+                  {t(`auth:${errors.dateOfBirth.message || ''}`)}
                 </p>
               )}
             </div>
             {/* Country */}
             <div>
               <label htmlFor="country" className="label-field">
-                {t('country', 'auth')}
+                {t('auth:country')}
               </label>
               <select
                 {...register('country')}
@@ -235,7 +235,7 @@ export function SignupForm() {
                 className="input-field"
                 dir={isRTL ? 'rtl' : 'ltr'}
               >
-                <option value="">{t('countries.select', 'auth')}</option>
+                <option value="">{t('auth:countries.select')}</option>
                 {countries.map((country) => (
                   <option key={country.code} value={country.code}>
                     {country.name}
@@ -244,7 +244,7 @@ export function SignupForm() {
               </select>
               {errors.country && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(errors.country.message || '', 'auth')}
+                  {t(`auth:${errors.country.message || ''}`)}
                 </p>
               )}
             </div>{' '}
@@ -263,6 +263,7 @@ export function SignupForm() {
               disabled={isSubmitting || loading}
               className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
             >
+              {' '}
               {isSubmitting || loading ? (
                 <span className="flex items-center justify-center">
                   <svg
@@ -285,10 +286,10 @@ export function SignupForm() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  {t('creating', 'auth')}
+                  {t('auth:creating')}
                 </span>
               ) : (
-                t('createAccount', 'auth')
+                t('auth:createAccount')
               )}
             </button>
           </div>

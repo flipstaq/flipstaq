@@ -2,6 +2,8 @@
   "title": "User Management",
   "description": "Manage user accounts and permissions",
   "table": {
+    "title": "Registered Users",
+    "description": "Manage and view all registered users in the system",
     "headers": {
       "user": "User",
       "fullName": "Full Name",
@@ -50,13 +52,16 @@
       "label": "Date Joined",
       "from": "From",
       "to": "To"
-    }
+    },
+    "clear": "Clear Filters",
+    "includeDeleted": "Include deleted users"
   },
   "actions": {
     "view": "View Details",
     "edit": "Edit User",
     "delete": "Delete User",
     "restore": "Restore User",
+    "restoreUser": "Restore User",
     "changeRole": "Change Role",
     "updating": "Updating...",
     "deleting": "Deleting...",
@@ -68,6 +73,7 @@
     "viewUser": "View User"
   },
   "status": {
+    "active": "Active",
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
     "BANNED": "Banned",
@@ -157,17 +163,33 @@
       "close": "Close"
     }
   },
+  "modal": {
+    "personalInfo": "Personal Information",
+    "fullName": "Full Name",
+    "email": "Email",
+    "username": "Username",
+    "dateOfBirth": "Date of Birth",
+    "country": "Country",
+    "accountInfo": "Account Information",
+    "role": "Role",
+    "status": "Status",
+    "dateJoined": "Date Joined",
+    "lastUpdated": "Last Updated",
+    "roleManagement": "Role Management",
+    "changeRole": "Change Role"
+  },
   "permissions": {
     "cannotModifyOwner": "Owner roles cannot be modified",
     "insufficientPermissions": "You don't have sufficient permissions for this action",
     "forbidden": "You don't have permission to perform this action"
   },
   "notifications": {
-    "roleUpdateSuccess": "User role updated successfully",
+    "roleUpdateSuccess": "User role updated successfully to {{newRole}}",
     "roleUpdateError": "Failed to update user role",
-    "deleteSuccess": "User deleted successfully",
+    "deleteSuccess": "User {{firstName}} {{lastName}} has been deleted successfully",
     "deleteError": "Failed to delete user",
-    "restoreSuccess": "User restored successfully",
-    "restoreError": "Failed to restore user"
+    "restoreSuccess": "User {{firstName}} {{lastName}} has been restored successfully",
+    "restoreError": "Failed to restore user",
+    "loadUserDetailsError": "Failed to load full user details"
   }
 }

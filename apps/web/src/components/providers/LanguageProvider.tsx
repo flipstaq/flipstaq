@@ -13,7 +13,11 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (language: Language) => void;
   translations: Translations;
-  t: (key: string, namespace?: string) => string;
+  t: (
+    key: string,
+    variables?: Record<string, any>,
+    namespace?: string
+  ) => string;
   isRTL: boolean;
 }
 
@@ -43,40 +47,41 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [language, mounted]);
   const loadTranslations = async (lang: Language) => {
     try {
-      // Load common and auth translations
-      const commonResponse = await fetch(`/locales/${lang}/common.json`);
-      const authResponse = await fetch(`/locales/${lang}/auth.json`);
+      let translationData: Translations = {};
 
-      // Load admin translations
-      const adminCommonResponse = await fetch(
-        `/locales/${lang}/admin/common.json`
-      );
-      const adminUsersResponse = await fetch(
-        `/locales/${lang}/admin/users.json`
-      );
+      if (lang === 'en') {
+        // Import all English translations
+        const [common, auth, adminCommon, adminUsers] = await Promise.all([
+          import('../../../../../packages/locales/en/common.json'),
+          import('../../../../../packages/locales/en/auth.json'),
+          import('../../../../../packages/locales/en/admin/common.json'),
+          import('../../../../../packages/locales/en/admin/users.json'),
+        ]);
 
-      if (commonResponse.ok && authResponse.ok) {
-        const common = await commonResponse.json();
-        const auth = await authResponse.json();
-
-        const translationData: Translations = {
-          common,
-          auth,
+        translationData = {
+          common: common.default,
+          auth: auth.default,
+          'admin-common': adminCommon.default,
+          'admin-users': adminUsers.default,
         };
+      } else if (lang === 'ar') {
+        // Import all Arabic translations
+        const [common, auth, adminCommon, adminUsers] = await Promise.all([
+          import('../../../../../packages/locales/ar/common.json'),
+          import('../../../../../packages/locales/ar/auth.json'),
+          import('../../../../../packages/locales/ar/admin/common.json'),
+          import('../../../../../packages/locales/ar/admin/users.json'),
+        ]);
 
-        // Add admin translations if available
-        if (adminCommonResponse.ok) {
-          const adminCommon = await adminCommonResponse.json();
-          translationData['admin-common'] = adminCommon;
-        }
-
-        if (adminUsersResponse.ok) {
-          const adminUsers = await adminUsersResponse.json();
-          translationData['admin-users'] = adminUsers;
-        }
-
-        setTranslations(translationData);
+        translationData = {
+          common: common.default,
+          auth: auth.default,
+          'admin-common': adminCommon.default,
+          'admin-users': adminUsers.default,
+        };
       }
+
+      setTranslations(translationData);
     } catch (error) {
       console.error('Failed to load translations:', error);
       // Fallback to English if loading fails
@@ -89,10 +94,23 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const setLanguage = (newLanguage: Language) => {
     setLanguageState(newLanguage);
   };
+  const t = (
+    key: string,
+    variables?: Record<string, any>,
+    namespace?: string
+  ): string => {
+    // Handle colon-separated format like "admin/users:actions.viewDetails"
+    let actualNamespace = namespace || 'common';
+    let actualKey = key;
 
-  const t = (key: string, namespace: string = 'common'): string => {
-    const keys = key.split('.');
-    let value = translations[namespace];
+    if (key.includes(':')) {
+      const [ns, k] = key.split(':');
+      actualNamespace = ns.replace('/', '-'); // Convert admin/users to admin-users
+      actualKey = k;
+    }
+
+    const keys = actualKey.split('.');
+    let value = translations[actualNamespace];
 
     for (const k of keys) {
       if (value && typeof value === 'object') {
@@ -102,7 +120,17 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    return typeof value === 'string' ? value : key;
+    let result = typeof value === 'string' ? value : key;
+
+    // Handle variable interpolation
+    if (variables && typeof result === 'string') {
+      Object.keys(variables).forEach((varKey) => {
+        const varValue = variables[varKey] ?? '';
+        result = result.replace(new RegExp(`{{${varKey}}}`, 'g'), varValue);
+      });
+    }
+
+    return result;
   };
   // Prevent hydration mismatch by providing a default context during SSR
   if (!mounted) {

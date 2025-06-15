@@ -55,16 +55,17 @@ export function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-secondary-50 px-4 py-12 dark:bg-secondary-900 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div>
+          {' '}
           <h2 className="mt-6 text-center text-3xl font-bold text-secondary-900 dark:text-secondary-100">
-            {t('signInToAccount', 'auth')}
+            {t('auth:signInToAccount')}
           </h2>
           <p className="mt-2 text-center text-sm text-secondary-600 dark:text-secondary-400">
-            {t('dontHaveAccount', 'auth')}{' '}
+            {t('auth:dontHaveAccount')}{' '}
             <Link
               href="/auth/signup"
               className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
             >
-              {t('signUpHere', 'auth')}
+              {t('auth:signUpHere')}
             </Link>
           </p>
         </div>
@@ -73,8 +74,9 @@ export function LoginForm() {
           <div className="space-y-4">
             {/* Username/Email */}
             <div>
+              {' '}
               <label htmlFor="identifier" className="label-field">
-                {t('usernameOrEmail', 'auth')}
+                {t('auth:usernameOrEmail')}
               </label>
               <input
                 {...register('identifier')}
@@ -83,18 +85,21 @@ export function LoginForm() {
                 autoComplete="username"
                 className="input-field"
                 dir="ltr"
-                placeholder={t('usernameOrEmailPlaceholder', 'auth')}
+                placeholder={t('auth:usernameOrEmailPlaceholder')}
               />
               {errors.identifier && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(errors.identifier.message || '', 'auth')}
+                  {t(
+                    `auth:${errors.identifier.message}` ||
+                      'auth:validation.required'
+                  )}
                 </p>
               )}
             </div>
-            {/* Password */}
+            {/* Password */}{' '}
             <div>
               <label htmlFor="password" className="label-field">
-                {t('password', 'auth')}
+                {t('auth:password')}
               </label>
               <input
                 {...register('password')}
@@ -103,11 +108,14 @@ export function LoginForm() {
                 autoComplete="current-password"
                 className="input-field"
                 dir="ltr"
-                placeholder={t('passwordPlaceholder', 'auth')}
+                placeholder={t('auth:passwordPlaceholder')}
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(errors.password.message || '', 'auth')}
+                  {t(
+                    `auth:${errors.password.message}` ||
+                      'auth:validation.required'
+                  )}
                 </p>
               )}
             </div>{' '}
@@ -134,20 +142,20 @@ export function LoginForm() {
                   <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
                     {router.query.message === 'account_deleted' ||
                     (error && error.includes('deleted'))
-                      ? t('accountAccessDenied', 'auth')
+                      ? t('auth:accountAccessDenied')
                       : 'Login Error'}
                   </h3>{' '}
                   <div className="mt-2 text-sm text-red-700 dark:text-red-300">
                     <p>
                       {router.query.message === 'account_deleted' ||
                       (error && error.includes('deleted'))
-                        ? t('accountDeleted', 'auth')
+                        ? t('auth:accountDeleted')
                         : error}
                     </p>
                     {(router.query.message === 'account_deleted' ||
                       (error && error.includes('deleted'))) && (
                       <p className="mt-1 text-xs">
-                        {t('accountDeletedSupport', 'auth')}
+                        {t('auth:accountDeletedSupport')}
                       </p>
                     )}
                   </div>
@@ -182,11 +190,11 @@ export function LoginForm() {
                       fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
-                  </svg>
-                  {t('signingIn', 'auth')}
+                  </svg>{' '}
+                  {t('auth:signingIn')}
                 </span>
               ) : (
-                t('signIn', 'auth')
+                t('auth:signIn')
               )}
             </button>
           </div>
@@ -197,7 +205,7 @@ export function LoginForm() {
                 href="#"
                 className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
               >
-                {t('forgotPassword', 'auth')}
+                {t('auth:forgotPassword')}
               </a>
             </div>
           </div>

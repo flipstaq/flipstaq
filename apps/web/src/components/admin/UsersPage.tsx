@@ -71,21 +71,21 @@ export default function AdminUsersPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Page Header */}        <div>
+        {' '}
+        {/* Page Header */}{' '}
+        <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {t('title', 'admin-users')}
+            {t('admin-users:title')}
           </h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {t('description', 'admin-users')}
+            {t('admin-users:description')}
           </p>
         </div>
-
         {/* Filters */}
         <UserFilters
           onFiltersChange={handleFiltersChange}
           currentFilters={currentFilters}
         />
-
         {/* Users Table */}
         <UserTable
           users={users}
@@ -93,7 +93,6 @@ export default function AdminUsersPage() {
           error={error}
           onUserAction={handleUserAction}
         />
-
         {/* Pagination */}
         {pagination && (
           <Pagination
@@ -106,17 +105,19 @@ export default function AdminUsersPage() {
             itemsPerPage={pagination.limit}
           />
         )}
-
         {/* Delete Confirmation Modal */}
         {deleteConfirm && (
           <div className="fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600 bg-opacity-50">
             <div className="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg dark:bg-gray-800">
-              <div className="mt-3 text-center">                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  {t('confirmDelete.title', 'admin-users')}
+              {' '}
+              <div className="mt-3 text-center">
+                {' '}
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  {t('admin-users:confirmDelete.title')}
                 </h3>
                 <div className="mt-2 px-7 py-3">
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {t('confirmDelete.message', 'admin-users')}
+                    {t('admin-users:confirmDelete.message')}
                   </p>
                   <p className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
                     {deleteConfirm.firstName} {deleteConfirm.lastName} (
@@ -128,13 +129,15 @@ export default function AdminUsersPage() {
                     <button
                       onClick={() => setDeleteConfirm(null)}
                       className="flex-1 rounded-md bg-gray-300 px-4 py-2 text-base font-medium text-gray-800 shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
-                    >                      {t('confirmDelete.cancel', 'admin-users')}
+                    >
+                      {' '}
+                      {t('admin-users:confirmDelete.cancel')}
                     </button>
                     <button
                       onClick={handleDeleteConfirm}
                       className="flex-1 rounded-md bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                     >
-                      {t('confirmDelete.confirm', 'admin-users')}
+                      {t('admin-users:confirmDelete.confirm')}
                     </button>
                   </div>
                 </div>
