@@ -1,0 +1,29 @@
+{
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمين",
+    "products": "المنتجات",
+    "orders": "الطلبات",
+    "analytics": "التحليلات",
+    "settings": "الإعدادات"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "retry": "حاول مرة أخرى",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "search": "بحث",
+    "filter": "تصفية",
+    "reset": "إعادة تعيين",
+    "apply": "تطبيق"
+  },
+  "permissions": {
+    "accessDenied": "تم رفض الوصول",
+    "insufficientPermissions": "ليس لديك إذن للوصول إلى هذه الصفحة",
+    "loginRequired": "يرجى تسجيل الدخول للمتابعة"
+  }
+}

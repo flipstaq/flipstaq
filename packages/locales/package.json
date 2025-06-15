@@ -1,0 +1,10 @@
+{
+  "name": "@flipstaq/locales",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "build": "echo 'Locales build complete'",
+    "dev": "echo 'Locales dev mode'"
+  }
+}

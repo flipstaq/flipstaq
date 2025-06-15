@@ -1,0 +1,30 @@
+{
+  "welcome": "Welcome to FlipStaq",
+  "signUp": "Sign Up",
+  "signIn": "Sign In",
+  "home": "Home",
+  "products": "Products",
+  "profile": "Profile",
+  "logout": "Logout",
+  "darkMode": "Dark Mode",
+  "lightMode": "Light Mode",
+  "language": "Language",
+  "english": "English",
+  "arabic": "العربية",
+  "company": "Company",
+  "support": "Support",
+  "about": "About Us",
+  "careers": "Careers",
+  "contact": "Contact",
+  "help": "Help Center",
+  "privacy": "Privacy Policy",
+  "terms": "Terms of Service",
+  "auth": {
+    "loginRequired": "Login Required",
+    "redirectingToLogin": "Redirecting to login page..."
+  },
+  "admin": {
+    "accessDenied": "Access Denied",
+    "insufficientPermissions": "You don't have sufficient permissions to access this page."
+  }
+}

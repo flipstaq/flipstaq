@@ -1,0 +1,29 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "products": "Products",
+    "orders": "Orders",
+    "analytics": "Analytics",
+    "settings": "Settings"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "apply": "Apply"
+  },
+  "permissions": {
+    "accessDenied": "Access Denied",
+    "insufficientPermissions": "You don't have permission to access this page",
+    "loginRequired": "Please log in to continue"
+  }
+}

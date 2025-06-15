@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: flipstaq_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: p@+1MSfvr
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - flipstaq_network
+
+  # Redis for caching (optional for future use)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - flipstaq_network
+
+  # API Gateway - Central entry point for all external requests
+  api-gateway:
+    build:
+      context: ./apps/api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3100:3100"
+    environment:
+      - NODE_ENV=development
+      - PORT=3100
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - USER_SERVICE_URL=http://user-service:3002
+      - PRODUCT_SERVICE_URL=http://product-service:3003
+      - ORDER_SERVICE_URL=http://order-service:3004
+      - PAYMENT_SERVICE_URL=http://payment-service:3005
+      - REVIEW_SERVICE_URL=http://review-service:3006
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3007
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - flipstaq_network
+
+  # Auth Microservice - Internal only (accessed via gateway)
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=postgresql://postgres:p@+1MSfvr@postgres:5432/flipstaq_dev
+      - JWT_SECRET=your-super-secret-jwt-key
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+    depends_on:
+      - postgres
+    networks:
+      - flipstaq_network
+
+volumes:
+  postgres_data:
+
+networks:
+  flipstaq_network:
+    driver: bridge

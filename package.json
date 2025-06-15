@@ -1,0 +1,29 @@
+{
+  "name": "@flipstaq/root",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently --names \"WEB,AUTH,USER,GATEWAY\" --prefix-colors \"blue,green,yellow,magenta\" \"npm run dev --workspace=@flipstaq/web\" \"npm run start:dev --workspace=@flipstaq/auth-service\" \"npm run start:dev --workspace=@flipstaq/user-service\" \"npm run start:dev --workspace=@flipstaq/api-gateway\"",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean",
+    "db:generate": "turbo run db:generate",
+    "db:push": "turbo run db:push",
+    "db:studio": "turbo run db:studio"
+  },
+  "devDependencies": {
+    "turbo": "^1.13.4",
+    "concurrently": "^8.2.2"
+  },
+  "packageManager": "npm@10.2.4",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

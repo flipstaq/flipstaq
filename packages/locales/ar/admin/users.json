@@ -1,0 +1,181 @@
+{
+  "title": "إدارة المستخدمين",
+  "description": "إدارة حسابات المستخدمين والصلاحيات",
+  "table": {
+    "columns": {
+      "user": "المستخدم",
+      "fullName": "الاسم الكامل",
+      "username": "اسم المستخدم",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "status": "الحالة",
+      "country": "البلد",
+      "dateJoined": "تاريخ الانضمام",
+      "createdAt": "تاريخ الإنشاء",
+      "actions": "الإجراءات"
+    },
+    "headers": {
+      "user": "المستخدم",
+      "fullName": "الاسم الكامل",
+      "username": "اسم المستخدم",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "status": "الحالة",
+      "country": "البلد",
+      "dateJoined": "تاريخ الانضمام",
+      "createdAt": "تاريخ الإنشاء",
+      "actions": "الإجراءات"
+    },
+    "loading": "جاري تحميل المستخدمين...",
+    "noData": "لم يتم العثور على مستخدمين",
+    "noUsers": "لم يتم العثور على مستخدمين",
+    "error": "فشل في تحميل المستخدمين. يرجى المحاولة مرة أخرى."
+  },
+  "filters": {
+    "search": {
+      "placeholder": "البحث بواسطة اسم المستخدم أو البريد الإلكتروني...",
+      "label": "البحث"
+    },
+    "role": {
+      "label": "تصفية حسب الدور",
+      "all": "جميع الأدوار",
+      "owner": "مالك",
+      "higherStaff": "موظف عالي",
+      "staff": "موظف",
+      "user": "مستخدم"
+    },
+    "status": {
+      "label": "تصفية حسب الحالة",
+      "all": "جميع الحالات",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "banned": "محظور",
+      "pendingVerification": "في انتظار التحقق"
+    },
+    "view": {
+      "label": "عرض",
+      "all": "جميع المستخدمين",
+      "active": "المستخدمون النشطون",
+      "deleted": "المستخدمون المحذوفون"
+    },
+    "dateRange": {
+      "label": "تاريخ الانضمام",
+      "from": "من",
+      "to": "إلى"
+    }
+  },
+  "actions": {
+    "view": "عرض التفاصيل",
+    "edit": "تعديل المستخدم",
+    "delete": "حذف المستخدم",
+    "restore": "استعادة المستخدم",
+    "changeRole": "تغيير الدور",
+    "updating": "جاري التحديث...",
+    "deleting": "جاري الحذف...",
+    "restoring": "جاري الاستعادة...",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "viewDetails": "عرض",
+    "viewUser": "عرض المستخدم"
+  },
+  "status": {
+    "ACTIVE": "نشط",
+    "INACTIVE": "غير نشط",
+    "BANNED": "محظور",
+    "PENDING_VERIFICATION": "في انتظار التحقق",
+    "deleted": "محذوف",
+    "deletedAt": "تم الحذف في {{date}}"
+  },
+  "roles": {
+    "OWNER": "مالك",
+    "HIGHER_STAFF": "موظف عالي",
+    "STAFF": "موظف",
+    "USER": "مستخدم"
+  },
+  "pagination": {
+    "showing": "عرض {{start}} إلى {{end}} من {{total}} مستخدم",
+    "previous": "السابق",
+    "next": "التالي",
+    "page": "الصفحة {{page}} من {{total}}"
+  },
+  "confirmDelete": {
+    "title": "حذف المستخدم",
+    "message": "هل أنت متأكد من أنك تريد حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.",
+    "confirm": "حذف",
+    "cancel": "إلغاء"
+  },
+  "fields": {
+    "name": "الاسم",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "email": "البريد الإلكتروني",
+    "username": "اسم المستخدم",
+    "role": "الدور",
+    "country": "البلد",
+    "status": "الحالة",
+    "active": "نشط",
+    "createdAt": "تاريخ الإنشاء"
+  },
+  "modals": {
+    "view": {
+      "title": "عرض تفاصيل المستخدم"
+    },
+    "edit": {
+      "title": "تعديل المستخدم"
+    },
+    "delete": {
+      "title": "حذف المستخدم",
+      "message": "هل أنت متأكد من أنك تريد حذف {{userName}}؟",
+      "warning": "سيؤدي هذا إلى تعطيل حساب المستخدم نهائياً ولن يتمكن من الوصول إلى المنصة.",
+      "warningMessage": "لا يمكن التراجع عن هذا الإجراء."
+    },
+    "roleUpdate": {
+      "title": "تحديث دور المستخدم",
+      "message": "هل أنت متأكد من أنك تريد تغيير دور {{userName}} من {{currentRole}} إلى {{newRole}}؟",
+      "success": "تم تحديث دور المستخدم بنجاح",
+      "error": "فشل في تحديث دور المستخدم"
+    },
+    "restore": {
+      "title": "استعادة المستخدم",
+      "message": "هل أنت متأكد من أنك تريد استعادة {{userName}}؟ سيؤدي هذا إلى إعادة تفعيل حسابه.",
+      "success": "تم استعادة المستخدم بنجاح",
+      "error": "فشل في استعادة المستخدم"
+    },
+    "userDetail": {
+      "title": "تفاصيل المستخدم",
+      "personalInfo": "المعلومات الشخصية",
+      "accountInfo": "معلومات الحساب",
+      "roleManagement": "إدارة الأدوار",
+      "changeRole": "تغيير الدور",
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "username": "اسم المستخدم",
+      "dateOfBirth": "تاريخ الميلاد",
+      "country": "البلد",
+      "role": "الدور",
+      "status": "الحالة",
+      "dateJoined": "تاريخ الانضمام",
+      "lastUpdated": "آخر تحديث",
+      "deletedAt": "تاريخ الحذف",
+      "deletedBy": "تم الحذف بواسطة",
+      "deletionInfo": "تم حذف هذا الحساب بواسطة {{adminName}} في {{date}}",
+      "restoreUser": "استعادة المستخدم",
+      "deleteUser": "حذف المستخدم",
+      "close": "إغلاق"
+    }
+  },
+  "permissions": {
+    "cannotModifyOwner": "لا يمكن تعديل أدوار المالكين",
+    "insufficientPermissions": "ليس لديك صلاحيات كافية لهذا الإجراء",
+    "forbidden": "ليس لديك إذن لتنفيذ هذا الإجراء"
+  },
+  "notifications": {
+    "roleUpdateSuccess": "تم تحديث دور المستخدم بنجاح",
+    "roleUpdateError": "فشل في تحديث دور المستخدم",
+    "deleteSuccess": "تم حذف المستخدم بنجاح",
+    "deleteError": "فشل في حذف المستخدم",
+    "restoreSuccess": "تم استعادة المستخدم بنجاح",
+    "restoreError": "فشل في استعادة المستخدم"
+  }
+}

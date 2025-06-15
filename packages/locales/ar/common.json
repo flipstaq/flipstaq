@@ -1,0 +1,30 @@
+{
+  "welcome": "مرحباً بك في فليب ستاك",
+  "signUp": "إنشاء حساب",
+  "signIn": "تسجيل الدخول",
+  "home": "الرئيسية",
+  "products": "المنتجات",
+  "profile": "الملف الشخصي",
+  "logout": "تسجيل الخروج",
+  "darkMode": "الوضع المظلم",
+  "lightMode": "الوضع المضيء",
+  "language": "اللغة",
+  "english": "English",
+  "arabic": "العربية",
+  "company": "الشركة",
+  "support": "الدعم",
+  "about": "معلومات عنا",
+  "careers": "الوظائف",
+  "contact": "اتصل بنا",
+  "help": "مركز المساعدة",
+  "privacy": "سياسة الخصوصية",
+  "terms": "شروط الخدمة",
+  "auth": {
+    "loginRequired": "تسجيل الدخول مطلوب",
+    "redirectingToLogin": "جاري إعادة توجيهك إلى صفحة تسجيل الدخول..."
+  },
+  "admin": {
+    "accessDenied": "تم رفض الوصول",
+    "insufficientPermissions": "ليس لديك صلاحيات كافية للوصول إلى هذه الصفحة."
+  }
+}
