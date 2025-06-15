@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEmail, MinLength, IsDateString, IsEnum, IsNotEmpty } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { UserRole as PrismaUserRole } from '../../../../packages/db/generated/client';
+import { UserRole as PrismaUserRole } from '@flipstaq/db';
 
 // Export Prisma UserRole for use in other files
-export { UserRole } from '../../../../packages/db/generated/client';
+export { UserRole } from '@flipstaq/db';
 
 export class SignupDto {
   @ApiProperty({

@@ -198,10 +198,60 @@ enum Role {
 
 #### `packages/db/`
 
-- **Prisma Schema**: Centralized database schema definition
-- **Generated Client**: Type-safe database access
-- **Migrations**: Database version control
-- **Environment**: Configured for PostgreSQL
+**Shared Prisma Database Package**
+
+- **Location**: `packages/db/`
+- **Schema**: `packages/db/prisma/schema.prisma`
+- **Generated Client**: `packages/db/generated/client/`
+- **Exports**: `packages/db/index.ts` for convenient imports
+
+**Usage in Microservices:**
+
+```typescript
+// Import from shared db package
+import { PrismaClient, User, UserRole } from '@flipstaq/db';
+
+const prisma = new PrismaClient();
+```
+
+**Key Features:**
+
+- **Single Source of Truth**: All database models centralized
+- **Type Safety**: Shared TypeScript types across all services
+- **Version Control**: Database migrations in one location
+- **Consistency**: Prevents schema drift between services
+- **Client Generation**: Single `npx prisma generate` command
+
+**Database Commands:**
+
+```bash
+# Generate Prisma client (run from packages/db/)
+npm run db:generate
+
+# Apply migrations
+npm run db:migrate
+
+# Open Prisma Studio
+npm run db:studio
+
+# Push schema to database
+npm run db:push
+```
+
+**Service Integration:**
+
+Each microservice references the shared schema in their package.json:
+
+```json
+{
+  "dependencies": {
+    "@flipstaq/db": "workspace:*"
+  },
+  "scripts": {
+    "prisma:generate": "prisma generate --schema=../../packages/db/prisma/schema.prisma"
+  }
+}
+```
 
 #### `packages/locales/`
 

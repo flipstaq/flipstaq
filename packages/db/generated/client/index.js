@@ -176,14 +176,14 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\user\\Desktop\\flipstaq\\packages\\db\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\user\\Desktop\\flipstaq\\packages\\db\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
     "rootEnvPath": null,
     "schemaEnvPath": "../../.env"
   },
-  "relativePath": "../..",
+  "relativePath": "../../prisma",
   "clientVersion": "6.9.0",
   "engineVersion": "81e4af48011447c3cc503a190e86995b66d2a28e",
   "datasourceNames": [
@@ -199,8 +199,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"./generated/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum UserRole {\n  OWNER\n  HIGHER_STAFF\n  STAFF\n  USER\n}\n\nenum UserStatus {\n  ACTIVE\n  INACTIVE\n  BANNED\n  PENDING_VERIFICATION\n}\n\nmodel User {\n  id          String     @id @default(cuid())\n  email       String     @unique\n  username    String     @unique\n  firstName   String\n  lastName    String\n  password    String // Hashed password\n  dateOfBirth DateTime\n  country     String\n  role        UserRole   @default(USER)\n  status      UserStatus @default(ACTIVE)\n  isActive    Boolean    @default(true)\n  deletedAt   DateTime? // Soft delete timestamp\n  deletedById String? // ID of admin who deleted this user\n  createdAt   DateTime   @default(now())\n  updatedAt   DateTime   @updatedAt\n\n  // Relations\n  refreshTokens RefreshToken[]\n\n  // Self-referential relation for deletion tracking\n  deletedBy    User?  @relation(\"UserDeletions\", fields: [deletedById], references: [id])\n  deletedUsers User[] @relation(\"UserDeletions\")\n\n  // Indexes for performance\n  @@map(\"users\")\n}\n\nmodel RefreshToken {\n  id        String   @id @default(cuid())\n  token     String   @unique\n  userId    String\n  expiresAt DateTime\n  createdAt DateTime @default(now())\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"refresh_tokens\")\n}\n",
-  "inlineSchemaHash": "697c4ce8cb5b4ca8800426b0ea1e8f14260f6078208bb0a3008789122c8c7e72",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum UserRole {\n  OWNER\n  HIGHER_STAFF\n  STAFF\n  USER\n}\n\nenum UserStatus {\n  ACTIVE\n  INACTIVE\n  BANNED\n  PENDING_VERIFICATION\n}\n\nmodel User {\n  id          String     @id @default(cuid())\n  email       String     @unique\n  username    String     @unique\n  firstName   String\n  lastName    String\n  password    String // Hashed password\n  dateOfBirth DateTime\n  country     String\n  role        UserRole   @default(USER)\n  status      UserStatus @default(ACTIVE)\n  isActive    Boolean    @default(true)\n  deletedAt   DateTime? // Soft delete timestamp\n  deletedById String? // ID of admin who deleted this user\n  createdAt   DateTime   @default(now())\n  updatedAt   DateTime   @updatedAt\n\n  // Relations\n  refreshTokens RefreshToken[]\n\n  // Self-referential relation for deletion tracking\n  deletedBy    User?  @relation(\"UserDeletions\", fields: [deletedById], references: [id])\n  deletedUsers User[] @relation(\"UserDeletions\")\n\n  // Indexes for performance\n  @@map(\"users\")\n}\n\nmodel RefreshToken {\n  id        String   @id @default(cuid())\n  token     String   @unique\n  userId    String\n  expiresAt DateTime\n  createdAt DateTime @default(now())\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"refresh_tokens\")\n}\n",
+  "inlineSchemaHash": "6e6cc02657388467383d94114f1abd206f0bc0f4765de0ed6b2465a3f3d08ee3",
   "copyEngine": true
 }
 
@@ -209,8 +209,8 @@ const fs = require('fs')
 config.dirname = __dirname
 if (!fs.existsSync(path.join(__dirname, 'schema.prisma'))) {
   const alternativePaths = [
-    "packages/db/generated/client",
-    "db/generated/client",
+    "generated/client",
+    "client",
   ]
   
   const alternativePath = alternativePaths.find((altPath) => {
@@ -240,7 +240,7 @@ Object.assign(exports, Prisma)
 
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
-path.join(process.cwd(), "packages/db/generated/client/query_engine-windows.dll.node")
+path.join(process.cwd(), "generated/client/query_engine-windows.dll.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
-path.join(process.cwd(), "packages/db/generated/client/schema.prisma")
+path.join(process.cwd(), "generated/client/schema.prisma")
