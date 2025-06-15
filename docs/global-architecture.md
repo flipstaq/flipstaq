@@ -203,13 +203,13 @@ enum Role {
 - **Location**: `packages/db/`
 - **Schema**: `packages/db/prisma/schema.prisma`
 - **Generated Client**: `packages/db/generated/client/`
-- **Exports**: `packages/db/index.ts` for convenient imports
+- **Main Entry**: Points directly to generated Prisma client
 
 **Usage in Microservices:**
 
 ```typescript
-// Import from shared db package
-import { PrismaClient, User, UserRole } from '@flipstaq/db';
+// Import directly from shared db package
+import { PrismaClient, User, UserRole, UserStatus } from "@flipstaq/db";
 
 const prisma = new PrismaClient();
 ```
