@@ -75,6 +75,7 @@ model Product {
   currency    String   @default("USD")
   location    String // Country or "Global"
   slug        String // User-chosen URL part
+  imageUrl    String? // Product image URL
   userId      String
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())

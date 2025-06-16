@@ -3,9 +3,40 @@ import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./app.module";
 import { getCurrentApiPath } from "./common/config/api-version.config";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { join } from "path";
+import { existsSync, mkdirSync } from "fs";
+import * as express from "express";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Configure Express to handle larger payloads
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
+  // Configure body parsing limits for file uploads
+  app.use("/api/v1/products", (req: any, res: any, next: any) => {
+    // Increase limit for product creation endpoint with potential file uploads
+    if (req.method === "POST") {
+      req.setTimeout(60000); // 60 seconds timeout
+    }
+    next();
+  }); // Ensure uploads directory exists
+  const uploadsPath = join(__dirname, "..", "src", "uploads", "products");
+  if (!existsSync(uploadsPath)) {
+    mkdirSync(uploadsPath, { recursive: true });
+  }
+
+  // Serve static files for uploads (from src/uploads in development, dist/uploads in production)
+  const staticPath =
+    process.env.NODE_ENV === "production"
+      ? join(__dirname, "uploads")
+      : join(__dirname, "..", "src", "uploads");
+
+  app.useStaticAssets(staticPath, {
+    prefix: "/uploads/",
+  });
 
   // Set global API prefix (api/v1)
   app.setGlobalPrefix(getCurrentApiPath());

@@ -2,5 +2,10 @@
   "search_placeholder": "Search products...",
   "user_count_text": "Over {{count}} users are using Flipstaq",
   "discover_products": "Discover Amazing Products",
-  "global_marketplace": "Your Global Marketplace"
+  "global_marketplace": "Your Global Marketplace",
+  "post_your_product": "Post Your Product",
+  "share_products_with_world": "Share your amazing products with the world",
+  "ready_to_get_started": "Ready to get started?",
+  "create_account_today": "Create your account today.",
+  "join_thousands": "Join thousands of vendors and customers in our global marketplace."
 }

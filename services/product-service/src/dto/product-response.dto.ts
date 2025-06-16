@@ -52,6 +52,13 @@ export class ProductResponseDto {
   slug: string;
 
   @ApiProperty({
+    description: 'Product image URL',
+    example: '/uploads/products/image-123.jpg',
+    nullable: true,
+  })
+  imageUrl: string | null;
+
+  @ApiProperty({
     description: 'Product owner user ID',
     example: 'clx1y2z3a4b5c6d7e8f9g0h2',
   })

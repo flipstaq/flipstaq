@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
 interface Product {
@@ -14,6 +14,7 @@ interface Product {
   location: string;
   slug: string;
   username: string;
+  imageUrl?: string | null;
   createdAt: string;
 }
 
@@ -47,23 +48,42 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
   const handleLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering the modal
   };
-
   return (
     <div
       className="group relative cursor-pointer overflow-hidden rounded-lg border border-secondary-200 bg-white shadow-md transition-shadow duration-200 hover:shadow-lg dark:border-secondary-700 dark:bg-secondary-800"
       onClick={handleClick}
     >
-      {/* Direct Link Button */}
-      <div className="absolute right-3 top-3 z-10 rtl:left-3 rtl:right-auto">
-        {' '}
-        <Link
-          href={`/@${product.username}/${product.slug}`}
-          onClick={handleLinkClick}
-          className="rounded-full bg-white/90 p-2 text-secondary-600 opacity-0 transition-all duration-200 hover:bg-white hover:text-primary-600 group-hover:opacity-100 dark:bg-secondary-800/90 dark:text-secondary-400 dark:hover:bg-secondary-800 dark:hover:text-primary-400"
-          title={t('products.directLink.title')}
-        >
-          <ExternalLink className="h-4 w-4" />
-        </Link>
+      {' '}
+      {/* Product Image Banner */}
+      <div className="relative h-48 w-full overflow-hidden bg-secondary-100 dark:bg-secondary-700">
+        {product.imageUrl ? (
+          <img
+            src={`http://localhost:3100${product.imageUrl}`}
+            alt={t('products.productImage', { title: product.title })}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center">
+              <ImageIcon className="mx-auto h-12 w-12 text-secondary-400 dark:text-secondary-500" />
+              <p className="mt-2 text-xs text-secondary-400 dark:text-secondary-500">
+                {t('products.noImage')}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Direct Link Button */}
+        <div className="absolute right-3 top-3 z-10 rtl:left-3 rtl:right-auto">
+          <Link
+            href={`/@${product.username}/${product.slug}`}
+            onClick={handleLinkClick}
+            className="rounded-full bg-white/90 p-2 text-secondary-600 opacity-0 shadow-md transition-all duration-200 hover:bg-white hover:text-primary-600 group-hover:opacity-100 dark:bg-secondary-800/90 dark:text-secondary-400 dark:hover:bg-secondary-800 dark:hover:text-primary-400"
+            title={t('products.directLink.title')}
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
       <div className="p-6">
         {/* Product Title */}

@@ -2,11 +2,74 @@
 
 This document describes key components used in the FlipStaq frontend.
 
+## Header Component
+
+### Overview
+
+The `Header` component provides navigation, authentication, and user profile management functionality. It includes a dropdown menu system for authenticated users to access various features including product posting.
+
+### Location
+
+`apps/web/src/components/layout/Header.tsx`
+
+### Features
+
+#### User Profile Dropdown Menu
+
+When authenticated users click their name in the header, a dropdown menu appears with the following options:
+
+- **Post Product**: Navigates to the homepage product posting section (`/#post-product`)
+- **My Profile**: Links to user profile page (`/profile`)
+- **Logout**: Securely logs out the user
+
+#### Responsive Design
+
+- **Desktop**: Full dropdown menu with hover effects
+- **Mobile**: Expanded mobile menu with stacked buttons
+- **RTL Support**: Proper positioning for Arabic language (right-to-left)
+
+#### Accessibility Features
+
+- Click-outside detection to close dropdown
+- Keyboard navigation support
+- Proper ARIA labels and semantic HTML
+- Focus management for better UX
+
+## HomePage Component
+
+### Overview
+
+The `HomePage` component serves as the main landing page and includes an integrated product posting feature for authenticated users.
+
+### Location
+
+`apps/web/src/components/pages/HomePage.tsx`
+
+### Features
+
+#### Post Product Section
+
+For authenticated users, the homepage includes a dedicated section for posting products:
+
+- **Conditional Display**: Only visible to logged-in users
+- **Smooth Scrolling**: Header menu links scroll smoothly to this section
+- **Integrated Form**: Uses the `CreateProductForm` component
+- **Toggle Functionality**: Show/hide form to reduce visual clutter
+- **Proper Spacing**: Dedicated background section with clear visual separation
+
+#### Deep Linking
+
+The post product section can be accessed via:
+
+- Header dropdown menu (`Post Product` option)
+- Direct anchor link (`/#post-product`)
+- Smooth scrolling behavior for better UX
+
 ## ProductDetailPage Component
 
 ### Overview
 
-The `ProductDetailPage` component provides a full-page view for individual products accessed via direct URLs (`/@username/slug`). It offers a comprehensive, card-based layout optimized for product discovery and user engagement.
+The `ProductDetailPage` component provides a full-page view for individual products accessed via direct URLs (`/@username/slug`). It features a large banner image display for enhanced visual appeal.
 
 ### Location
 
@@ -14,39 +77,28 @@ The `ProductDetailPage` component provides a full-page view for individual produ
 
 ### Features
 
-#### Layout & Design
+#### Banner Image Display
 
-- **Responsive Container**: Uses `max-w-4xl mx-auto` for optimal content width
-- **Card-style Layout**: Clean design with rounded corners, padding, and shadow
-- **Mobile Responsive**: Adapts layout for different screen sizes
-- **Dark/Light Mode**: Full theme support with proper color schemes
-- **RTL Support**: Right-to-left layout for Arabic language
+- **Large Banner**: Hero-style image display at the top (`max-h-[400px]`)
+- **Full Width**: Spans the entire card width for maximum visual impact
+- **Object Cover**: Maintains image quality and aspect ratio
+- **Rounded Corners**: Consistent with card design (`rounded-t-lg`)
+- **Fallback UI**: Professional placeholder layout when no image exists
 
-#### Product Information Display
+#### Enhanced Fallback Design
 
-- **Product Title**: Prominent heading with proper typography hierarchy
-- **Seller Information**: Display with avatar placeholder and username
-- **Product Meta**: Organized grid showing:
-  - Location (country or "Global")
-  - Category (if available)
-  - Date posted (localized formatting)
-- **Price Display**: Highlighted in branded primary colors with currency formatting
-- **Description**: Formatted text area with proper whitespace handling
-- **Product Image**: Placeholder with icon when no image is available
+- **Prominent Icon**: Large image icon (`h-20 w-20`) for clear indication
+- **Descriptive Messages**: Clear primary and secondary text
+- **Minimum Height**: Ensures consistent layout (`min-h-[300px]`)
+- **Centered Layout**: Professional appearance even without images
+- **Theme Integration**: Proper dark/light mode support
 
-#### Interactive Elements
+#### Design Considerations
 
-- **Message Seller Button**: Primary CTA for user engagement (functionality placeholder)
-- **Share Button**: Native share API with clipboard fallback
-- **Copy URL Button**: Direct link copying functionality
-- **Back Navigation**: Breadcrumb and header navigation
-
-#### SEO & Meta Tags
-
-- Dynamic page titles with product and seller information
-- OpenGraph and Twitter Card meta tags
-- Canonical URLs for proper indexing
-- Structured product information
+- **Visual Hierarchy**: Image banner draws immediate attention
+- **Content Flow**: Natural progression from image to details
+- **Responsive Design**: Adapts gracefully across device sizes
+- **Performance**: Optimized image loading and display
 
 ### Props Interface
 
@@ -111,6 +163,15 @@ All text elements are fully localized using the translation system:
 ---
 
 ## Related Components
+
+### CreateProductForm
+
+- Modal form for creating new products
+- Supports image upload with preview functionality
+- Image validation (type, size) on frontend
+- Uses multipart/form-data for submission
+- Localized upload interface with drag & drop area
+- Real-time image preview with file management
 
 ### ProductDetailModal
 

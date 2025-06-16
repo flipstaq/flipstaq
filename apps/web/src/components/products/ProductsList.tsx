@@ -21,6 +21,7 @@ interface Product {
   slug: string;
   username: string;
   createdAt: string;
+  imageUrl?: string | null;
 }
 
 interface ProductsListProps {

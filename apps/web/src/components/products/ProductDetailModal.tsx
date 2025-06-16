@@ -22,6 +22,7 @@ interface ProductDetail {
   category: string | null;
   slug: string;
   username: string;
+  imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }

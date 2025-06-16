@@ -26,6 +26,7 @@ interface ProductDetail {
   category: string | null;
   slug: string;
   username: string;
+  imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -272,12 +273,27 @@ export function ProductDetailPage({
         <meta property="og:description" content={product.description || ''} />
         <meta property="og:url" content={getCanonicalUrl()} />
         <meta property="og:type" content="product" />
-        <meta name="twitter:card" content="summary" />
+        {product.imageUrl && (
+          <meta
+            property="og:image"
+            content={`http://localhost:3100${product.imageUrl}`}
+          />
+        )}
+        <meta
+          name="twitter:card"
+          content={product.imageUrl ? 'summary_large_image' : 'summary'}
+        />
         <meta
           name="twitter:title"
           content={`${product.title} by @${product.username}`}
         />
         <meta name="twitter:description" content={product.description || ''} />
+        {product.imageUrl && (
+          <meta
+            name="twitter:image"
+            content={`http://localhost:3100${product.imageUrl}`}
+          />
+        )}
         <link rel="canonical" href={getCanonicalUrl()} />
       </Head>
       <div className="min-h-screen bg-white dark:bg-secondary-900">
@@ -329,20 +345,30 @@ export function ProductDetailPage({
                   </span>
                 </li>
               </ol>
-            </nav>
-
+            </nav>{' '}
             {/* Main Product Card */}
             <div className="overflow-hidden rounded-lg bg-white shadow-lg dark:bg-secondary-800">
-              {/* Product Image Placeholder */}
-              <div className="bg-secondary-100 dark:bg-secondary-700">
-                <div className="flex h-64 items-center justify-center md:h-80">
-                  <div className="text-center">
-                    <ImageIcon className="mx-auto h-16 w-16 text-secondary-400 dark:text-secondary-500" />
-                    <p className="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
-                      {t('products.detail.no_image_available')}
-                    </p>
+              {/* Product Image Banner */}
+              <div className="relative overflow-hidden bg-secondary-100 dark:bg-secondary-700">
+                {product.imageUrl ? (
+                  <img
+                    src={`http://localhost:3100${product.imageUrl}`}
+                    alt={t('products.productImage', { title: product.title })}
+                    className="max-h-[400px] w-full rounded-t-lg object-cover"
+                  />
+                ) : (
+                  <div className="flex max-h-[400px] min-h-[300px] items-center justify-center rounded-t-lg">
+                    <div className="text-center">
+                      <ImageIcon className="mx-auto h-20 w-20 text-secondary-400 dark:text-secondary-500" />
+                      <p className="mt-4 text-lg text-secondary-500 dark:text-secondary-400">
+                        {t('products.noImage')}
+                      </p>
+                      <p className="mt-1 text-sm text-secondary-400 dark:text-secondary-500">
+                        {t('products.noImageDescription')}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="p-6 md:p-8">
@@ -469,7 +495,6 @@ export function ProductDetailPage({
                 </div>
               </div>
             </div>
-
             {/* Product URL Section */}
             {mounted && (
               <div className="mt-6">

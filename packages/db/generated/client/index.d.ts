@@ -3512,6 +3512,7 @@ export namespace Prisma {
     currency: string | null
     location: string | null
     slug: string | null
+    imageUrl: string | null
     userId: string | null
     isActive: boolean | null
     createdAt: Date | null
@@ -3527,6 +3528,7 @@ export namespace Prisma {
     currency: string | null
     location: string | null
     slug: string | null
+    imageUrl: string | null
     userId: string | null
     isActive: boolean | null
     createdAt: Date | null
@@ -3542,6 +3544,7 @@ export namespace Prisma {
     currency: number
     location: number
     slug: number
+    imageUrl: number
     userId: number
     isActive: number
     createdAt: number
@@ -3567,6 +3570,7 @@ export namespace Prisma {
     currency?: true
     location?: true
     slug?: true
+    imageUrl?: true
     userId?: true
     isActive?: true
     createdAt?: true
@@ -3582,6 +3586,7 @@ export namespace Prisma {
     currency?: true
     location?: true
     slug?: true
+    imageUrl?: true
     userId?: true
     isActive?: true
     createdAt?: true
@@ -3597,6 +3602,7 @@ export namespace Prisma {
     currency?: true
     location?: true
     slug?: true
+    imageUrl?: true
     userId?: true
     isActive?: true
     createdAt?: true
@@ -3699,6 +3705,7 @@ export namespace Prisma {
     currency: string
     location: string
     slug: string
+    imageUrl: string | null
     userId: string
     isActive: boolean
     createdAt: Date
@@ -3733,6 +3740,7 @@ export namespace Prisma {
     currency?: boolean
     location?: boolean
     slug?: boolean
+    imageUrl?: boolean
     userId?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -3749,6 +3757,7 @@ export namespace Prisma {
     currency?: boolean
     location?: boolean
     slug?: boolean
+    imageUrl?: boolean
     userId?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -3765,6 +3774,7 @@ export namespace Prisma {
     currency?: boolean
     location?: boolean
     slug?: boolean
+    imageUrl?: boolean
     userId?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -3781,13 +3791,14 @@ export namespace Prisma {
     currency?: boolean
     location?: boolean
     slug?: boolean
+    imageUrl?: boolean
     userId?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "price" | "currency" | "location" | "slug" | "userId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "price" | "currency" | "location" | "slug" | "imageUrl" | "userId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -3812,6 +3823,7 @@ export namespace Prisma {
       currency: string
       location: string
       slug: string
+      imageUrl: string | null
       userId: string
       isActive: boolean
       createdAt: Date
@@ -4248,6 +4260,7 @@ export namespace Prisma {
     readonly currency: FieldRef<"Product", 'String'>
     readonly location: FieldRef<"Product", 'String'>
     readonly slug: FieldRef<"Product", 'String'>
+    readonly imageUrl: FieldRef<"Product", 'String'>
     readonly userId: FieldRef<"Product", 'String'>
     readonly isActive: FieldRef<"Product", 'Boolean'>
     readonly createdAt: FieldRef<"Product", 'DateTime'>
@@ -4721,6 +4734,7 @@ export namespace Prisma {
     currency: 'currency',
     location: 'location',
     slug: 'slug',
+    imageUrl: 'imageUrl',
     userId: 'userId',
     isActive: 'isActive',
     createdAt: 'createdAt',
@@ -5034,6 +5048,7 @@ export namespace Prisma {
     currency?: StringFilter<"Product"> | string
     location?: StringFilter<"Product"> | string
     slug?: StringFilter<"Product"> | string
+    imageUrl?: StringNullableFilter<"Product"> | string | null
     userId?: StringFilter<"Product"> | string
     isActive?: BoolFilter<"Product"> | boolean
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -5050,6 +5065,7 @@ export namespace Prisma {
     currency?: SortOrder
     location?: SortOrder
     slug?: SortOrder
+    imageUrl?: SortOrderInput | SortOrder
     userId?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -5070,6 +5086,7 @@ export namespace Prisma {
     currency?: StringFilter<"Product"> | string
     location?: StringFilter<"Product"> | string
     slug?: StringFilter<"Product"> | string
+    imageUrl?: StringNullableFilter<"Product"> | string | null
     userId?: StringFilter<"Product"> | string
     isActive?: BoolFilter<"Product"> | boolean
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -5086,6 +5103,7 @@ export namespace Prisma {
     currency?: SortOrder
     location?: SortOrder
     slug?: SortOrder
+    imageUrl?: SortOrderInput | SortOrder
     userId?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -5109,6 +5127,7 @@ export namespace Prisma {
     currency?: StringWithAggregatesFilter<"Product"> | string
     location?: StringWithAggregatesFilter<"Product"> | string
     slug?: StringWithAggregatesFilter<"Product"> | string
+    imageUrl?: StringNullableWithAggregatesFilter<"Product"> | string | null
     userId?: StringWithAggregatesFilter<"Product"> | string
     isActive?: BoolWithAggregatesFilter<"Product"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
@@ -5316,6 +5335,7 @@ export namespace Prisma {
     currency?: string
     location: string
     slug: string
+    imageUrl?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -5331,6 +5351,7 @@ export namespace Prisma {
     currency?: string
     location: string
     slug: string
+    imageUrl?: string | null
     userId: string
     isActive?: boolean
     createdAt?: Date | string
@@ -5346,6 +5367,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5361,6 +5383,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5376,6 +5399,7 @@ export namespace Prisma {
     currency?: string
     location: string
     slug: string
+    imageUrl?: string | null
     userId: string
     isActive?: boolean
     createdAt?: Date | string
@@ -5391,6 +5415,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5405,6 +5430,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5722,6 +5748,7 @@ export namespace Prisma {
     currency?: SortOrder
     location?: SortOrder
     slug?: SortOrder
+    imageUrl?: SortOrder
     userId?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -5741,6 +5768,7 @@ export namespace Prisma {
     currency?: SortOrder
     location?: SortOrder
     slug?: SortOrder
+    imageUrl?: SortOrder
     userId?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -5756,6 +5784,7 @@ export namespace Prisma {
     currency?: SortOrder
     location?: SortOrder
     slug?: SortOrder
+    imageUrl?: SortOrder
     userId?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -6229,6 +6258,7 @@ export namespace Prisma {
     currency?: string
     location: string
     slug: string
+    imageUrl?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -6243,6 +6273,7 @@ export namespace Prisma {
     currency?: string
     location: string
     slug: string
+    imageUrl?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -6408,6 +6439,7 @@ export namespace Prisma {
     currency?: StringFilter<"Product"> | string
     location?: StringFilter<"Product"> | string
     slug?: StringFilter<"Product"> | string
+    imageUrl?: StringNullableFilter<"Product"> | string | null
     userId?: StringFilter<"Product"> | string
     isActive?: BoolFilter<"Product"> | boolean
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -6710,6 +6742,7 @@ export namespace Prisma {
     currency?: string
     location: string
     slug: string
+    imageUrl?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -6762,6 +6795,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6776,6 +6810,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6790,6 +6825,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

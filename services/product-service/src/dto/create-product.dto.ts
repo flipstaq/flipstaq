@@ -47,7 +47,6 @@ export class CreateProductDto {
   @IsString()
   @IsIn(['USD', 'AED', 'EUR', 'GBP', 'SAR'])
   currency: string = 'USD';
-
   @ApiProperty({
     description: 'Product location (country or Global)',
     example: 'United States',
@@ -65,4 +64,13 @@ export class CreateProductDto {
   @IsNotEmpty()
   @MinLength(1)
   slug: string;
+
+  @ApiProperty({
+    description: 'Product image URL',
+    example: '/uploads/products/macbook-pro-a1b2.jpg',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  imageUrl?: string;
 }

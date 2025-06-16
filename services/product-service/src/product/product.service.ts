@@ -14,12 +14,12 @@ export class ProductService {
 
   /**
    * Create a new product
-   */
-  async createProduct(
+   */ async createProduct(
     userId: string,
     createProductDto: CreateProductDto,
   ): Promise<ProductResponseDto> {
-    const { title, description, category, price, currency, location, slug } = createProductDto;
+    const { title, description, category, price, currency, location, slug, imageUrl } =
+      createProductDto;
 
     // Validate user exists
     const user = await this.prisma.user.findUnique({
@@ -50,9 +50,7 @@ export class ProductService {
 
     if (existingProduct) {
       throw new ConflictException('A product with this slug already exists for this user');
-    }
-
-    // Create the product
+    } // Create the product
     const product = await this.prisma.product.create({
       data: {
         title,
@@ -62,6 +60,7 @@ export class ProductService {
         currency,
         location,
         slug,
+        imageUrl,
         userId,
       },
       include: {
@@ -82,6 +81,7 @@ export class ProductService {
       currency: product.currency,
       location: product.location,
       slug: product.slug,
+      imageUrl: product.imageUrl,
       userId: product.userId,
       username: product.user.username,
       isActive: product.isActive,
@@ -119,6 +119,7 @@ export class ProductService {
       currency: product.currency,
       location: product.location,
       slug: product.slug,
+      imageUrl: product.imageUrl,
       userId: product.userId,
       username: product.user.username,
       isActive: product.isActive,
@@ -147,7 +148,6 @@ export class ProductService {
         },
       },
     });
-
     if (!product) {
       throw new NotFoundException('Product not found');
     }
@@ -161,6 +161,7 @@ export class ProductService {
       currency: product.currency,
       location: product.location,
       slug: product.slug,
+      imageUrl: product.imageUrl,
       userId: product.userId,
       username: product.user.username,
       isActive: product.isActive,
@@ -199,6 +200,7 @@ export class ProductService {
       currency: product.currency,
       location: product.location,
       slug: product.slug,
+      imageUrl: product.imageUrl,
       userId: product.userId,
       username: product.user.username,
       isActive: product.isActive,

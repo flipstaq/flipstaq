@@ -18,6 +18,9 @@
   "productDeleted": "Product deleted successfully!",
   "noProducts": "No products found",
   "loadingProducts": "Loading products...",
+  "productImage": "{{title}} - Product Image",
+  "noImage": "No Image Available",
+  "noImageDescription": "This product doesn't have an image yet",
   "searching": "Searching...",
   "noSearchResults": "No products found for \"{{query}}\"",
   "tryDifferentSearch": "Try adjusting your search terms",
@@ -79,5 +82,18 @@
     "message_seller": "Message Seller",
     "product_image": "Product Image",
     "no_image_available": "No image available"
+  },
+  "upload": {
+    "upload_image": "Upload Product Image",
+    "preview": "Preview",
+    "image_required": "Product image is required",
+    "select_image": "Select Image",
+    "change_image": "Change Image",
+    "remove_image": "Remove Image",
+    "supported_formats": "Supported formats: JPG, PNG",
+    "max_file_size": "Maximum file size: 5MB",
+    "invalid_file_type": "Please select a valid image file (JPG or PNG)",
+    "file_too_large": "File size must be less than 5MB",
+    "upload_failed": "Failed to upload image. Please try again."
   }
 }

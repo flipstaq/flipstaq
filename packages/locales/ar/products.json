@@ -18,6 +18,9 @@
   "productDeleted": "تم حذف المنتج بنجاح!",
   "noProducts": "لم يتم العثور على منتجات",
   "loadingProducts": "جاري تحميل المنتجات...",
+  "productImage": "{{title}} - صورة المنتج",
+  "noImage": "لا توجد صورة متاحة",
+  "noImageDescription": "هذا المنتج لا يحتوي على صورة حتى الآن",
   "searching": "جاري البحث...",
   "noSearchResults": "لم يتم العثور على منتجات لـ \"{{query}}\"",
   "tryDifferentSearch": "حاول تعديل مصطلحات البحث",
@@ -79,5 +82,18 @@
     "message_seller": "مراسلة البائع",
     "product_image": "صورة المنتج",
     "no_image_available": "لا توجد صورة متاحة"
+  },
+  "upload": {
+    "upload_image": "رفع صورة المنتج",
+    "preview": "معاينة",
+    "image_required": "صورة المنتج مطلوبة",
+    "select_image": "اختر صورة",
+    "change_image": "تغيير الصورة",
+    "remove_image": "إزالة الصورة",
+    "supported_formats": "الصيغ المدعومة: JPG، PNG",
+    "max_file_size": "الحد الأقصى لحجم الملف: 5 ميجابايت",
+    "invalid_file_type": "يرجى اختيار ملف صورة صالح (JPG أو PNG)",
+    "file_too_large": "يجب أن يكون حجم الملف أقل من 5 ميجابايت",
+    "upload_failed": "فشل في رفع الصورة. يرجى المحاولة مرة أخرى."
   }
 }
