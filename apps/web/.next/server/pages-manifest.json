@@ -2,7 +2,9 @@
   "/_error": "pages/_error.js",
   "/_app": "pages/_app.js",
   "/_document": "pages/_document.js",
+  "/": "pages/index.js",
   "/[...params]": "pages/[...params].js",
-  "/404": "pages/404.js",
-  "/": "pages/index.js"
+  "/api/products": "pages/api/products.js",
+  "/api/products/[username]/[slug]": "pages/api/products/[username]/[slug].js",
+  "/admin": "pages/admin.js"
 }

@@ -33,15 +33,8 @@ export function HomePage() {
 
     fetchUserCount();
   }, []);
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement search functionality
-    console.log('Search query:', searchQuery);
   };
 
   return (
@@ -62,7 +55,6 @@ export function HomePage() {
           </div>
         </div>
       </div>
-
       {/* User Count Section */}
       <div className="border-b border-secondary-200 bg-white py-8 dark:border-secondary-700 dark:bg-secondary-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -77,13 +69,12 @@ export function HomePage() {
             </div>
           </div>
         </div>
-      </div>
-
+      </div>{' '}
       {/* Search Section */}
       <div className="bg-white py-8 dark:bg-secondary-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl">
-            <form onSubmit={handleSearchSubmit} className="relative">
+            <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 rtl:left-auto rtl:right-0 rtl:pr-3">
                 <Search
                   className="h-5 w-5 text-secondary-400"
@@ -99,27 +90,26 @@ export function HomePage() {
                 }`}
                 placeholder={t('home.search_placeholder')}
               />
-              <div className="absolute inset-y-0 right-0 flex items-center rtl:left-0 rtl:right-auto">
-                <button
-                  type="submit"
-                  className="mr-3 rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rtl:ml-3 rtl:mr-0"
-                >
-                  {t('search')}
-                </button>
-              </div>
-            </form>
+              {searchQuery && (
+                <div className="absolute inset-y-0 right-0 flex items-center rtl:left-0 rtl:right-auto">
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="mr-3 rounded-md bg-secondary-100 px-3 py-2 text-sm font-medium text-secondary-600 transition-colors duration-200 hover:bg-secondary-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:bg-secondary-700 dark:text-secondary-300 dark:hover:bg-secondary-600 rtl:ml-3 rtl:mr-0"
+                  >
+                    {t('clear')}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-
       {/* Products Section */}
       <div className="bg-white py-16 dark:bg-secondary-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {' '}
-          <ProductsList />
+          <ProductsList searchQuery={searchQuery} />
         </div>
       </div>
-
       {/* CTA Section */}
       <div className="bg-primary-600">
         <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 sm:py-20 lg:px-8">

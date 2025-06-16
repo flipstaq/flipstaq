@@ -5,7 +5,6 @@ import { ProductCard } from './ProductCard';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
 // Import ProductDetailModal - ignore TypeScript error for now
-// @ts-ignore
 import { ProductDetailModal } from './ProductDetailModal';
 
 interface Product {
@@ -15,6 +14,7 @@ interface Product {
   price: number;
   currency: string;
   location: string;
+  category?: string | null;
   slug: string;
   username: string;
   createdAt: string;
@@ -22,12 +22,15 @@ interface Product {
 
 interface ProductsListProps {
   limit?: number;
+  searchQuery?: string;
 }
 
-export function ProductsList({ limit }: ProductsListProps) {
+export function ProductsList({ limit, searchQuery }: ProductsListProps) {
   const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<{
@@ -44,7 +47,6 @@ export function ProductsList({ limit }: ProductsListProps) {
     setModalOpen(false);
     setSelectedProduct(null);
   };
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -58,6 +60,7 @@ export function ProductsList({ limit }: ProductsListProps) {
         const data = await response.json();
         const productsToShow = limit ? data.slice(0, limit) : data;
         setProducts(productsToShow);
+        setFilteredProducts(productsToShow);
       } catch (err) {
         console.error('Error fetching products:', err);
         setError('Failed to load products');
@@ -67,7 +70,36 @@ export function ProductsList({ limit }: ProductsListProps) {
     };
 
     fetchProducts();
-  }, [limit]);
+  }, [limit]); // Filter products based on search query with debouncing
+  useEffect(() => {
+    if (searchQuery !== undefined) {
+      setSearchLoading(true);
+    }
+
+    const debounceTimeout = setTimeout(() => {
+      if (!searchQuery || searchQuery.trim() === '') {
+        setFilteredProducts(products);
+      } else {
+        const query = searchQuery.toLowerCase().trim();
+        const filtered = products.filter((product) => {
+          return (
+            product.title.toLowerCase().includes(query) ||
+            product.description?.toLowerCase().includes(query) ||
+            product.location.toLowerCase().includes(query) ||
+            product.category?.toLowerCase().includes(query) ||
+            product.username.toLowerCase().includes(query)
+          );
+        });
+        setFilteredProducts(filtered);
+      }
+      setSearchLoading(false);
+    }, 300); // 300ms debounce
+
+    return () => {
+      clearTimeout(debounceTimeout);
+      setSearchLoading(false);
+    };
+  }, [searchQuery, products]);
 
   if (loading) {
     return (
@@ -87,7 +119,6 @@ export function ProductsList({ limit }: ProductsListProps) {
       </div>
     );
   }
-
   if (products.length === 0) {
     return (
       <div className="py-12 text-center">
@@ -97,10 +128,40 @@ export function ProductsList({ limit }: ProductsListProps) {
       </div>
     );
   }
+
+  if (filteredProducts.length === 0 && searchQuery) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-secondary-500 dark:text-secondary-400">
+          {t('products.noSearchResults', { query: searchQuery })}
+        </p>
+        <p className="mt-2 text-sm text-secondary-400 dark:text-secondary-500">
+          {t('products.tryDifferentSearch')}
+        </p>
+      </div>
+    );
+  }
   return (
     <div>
+      {searchQuery && (
+        <div className="mb-6 flex items-center justify-between">
+          <p className="text-sm text-secondary-600 dark:text-secondary-400">
+            {searchLoading ? (
+              <span className="flex items-center">
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-primary-600 rtl:ml-2 rtl:mr-0"></div>
+                {t('products.searching')}
+              </span>
+            ) : (
+              t('products.searchResults', {
+                count: filteredProducts.length,
+                query: searchQuery,
+              })
+            )}
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {products.map((product) => (
+        {filteredProducts.map((product) => (
           <ProductCard
             key={product.id}
             product={product}

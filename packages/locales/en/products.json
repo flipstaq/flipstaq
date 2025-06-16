@@ -18,6 +18,10 @@
   "productDeleted": "Product deleted successfully!",
   "noProducts": "No products found",
   "loadingProducts": "Loading products...",
+  "searching": "Searching...",
+  "noSearchResults": "No products found for \"{{query}}\"",
+  "tryDifferentSearch": "Try adjusting your search terms",
+  "searchResults": "{{count}} product(s) found for \"{{query}}\"",
   "productDetails": "Product Details",
   "backToProducts": "Back to Products",
   "validation": {

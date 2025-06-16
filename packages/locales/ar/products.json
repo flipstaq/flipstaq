@@ -18,6 +18,10 @@
   "productDeleted": "تم حذف المنتج بنجاح!",
   "noProducts": "لم يتم العثور على منتجات",
   "loadingProducts": "جاري تحميل المنتجات...",
+  "searching": "جاري البحث...",
+  "noSearchResults": "لم يتم العثور على منتجات لـ \"{{query}}\"",
+  "tryDifferentSearch": "حاول تعديل مصطلحات البحث",
+  "searchResults": "تم العثور على {{count}} منتج لـ \"{{query}}\"",
   "productDetails": "تفاصيل المنتج",
   "backToProducts": "العودة للمنتجات",
   "validation": {
