@@ -12,5 +12,11 @@
   "views_this_month": "Views This Month",
   "recent_activity": "Recent Activity",
   "no_products_yet": "No products yet",
-  "product_stats": "Product Statistics"
+  "product_stats": "Product Statistics",
+  "mark_as_sold": "Mark as Sold",
+  "mark_as_available": "Mark as Available",
+  "sold": "Sold",
+  "available": "Available",
+  "product_marked_sold": "Product marked as sold",
+  "product_marked_available": "Product marked as available"
 }

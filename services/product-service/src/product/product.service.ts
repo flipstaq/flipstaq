@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { ProductResponseDto } from '../dto/product-response.dto';
+import { UpdateProductStatusDto } from '../dto/update-product-status.dto';
 
 @Injectable()
 export class ProductService {
@@ -86,6 +87,7 @@ export class ProductService {
       userId: product.userId,
       username: product.user.username,
       isActive: product.isActive,
+      isSold: product.isSold || false,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     };
@@ -124,6 +126,7 @@ export class ProductService {
       userId: product.userId,
       username: product.user.username,
       isActive: product.isActive,
+      isSold: product.isSold || false,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     }));
@@ -166,6 +169,7 @@ export class ProductService {
       userId: product.userId,
       username: product.user.username,
       isActive: product.isActive,
+      isSold: product.isSold || false,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     };
@@ -205,6 +209,7 @@ export class ProductService {
       userId: product.userId,
       username: product.user.username,
       isActive: product.isActive,
+      isSold: product.isSold || false,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     }));
@@ -309,6 +314,7 @@ export class ProductService {
       userId: updatedProduct.userId,
       username: updatedProduct.user.username,
       isActive: updatedProduct.isActive,
+      isSold: updatedProduct.isSold || false,
       createdAt: updatedProduct.createdAt,
       updatedAt: updatedProduct.updatedAt,
     };
@@ -391,6 +397,64 @@ export class ProductService {
             createdAt: lastProduct.createdAt.toISOString(),
           }
         : null,
+    };
+  }
+
+  /**
+   * Update product sold status
+   */
+  async updateProductStatus(
+    slug: string,
+    userId: string,
+    isSold: boolean,
+  ): Promise<ProductResponseDto> {
+    // Find the product and verify ownership
+    const existingProduct = await this.prisma.product.findFirst({
+      where: {
+        slug,
+        userId,
+        isActive: true,
+      },
+    });
+
+    if (!existingProduct) {
+      throw new NotFoundException('Product not found or you do not have permission to update it');
+    }
+
+    // Update the product sold status
+    const updatedProduct = await this.prisma.product.update({
+      where: {
+        id: existingProduct.id,
+      },
+      data: {
+        isSold,
+        updatedAt: new Date(),
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    });
+
+    return {
+      id: updatedProduct.id,
+      title: updatedProduct.title,
+      description: updatedProduct.description,
+      category: updatedProduct.category,
+      price: updatedProduct.price,
+      currency: updatedProduct.currency,
+      location: updatedProduct.location,
+      slug: updatedProduct.slug,
+      imageUrl: updatedProduct.imageUrl,
+      userId: updatedProduct.userId,
+      username: updatedProduct.user.username,
+      isActive: updatedProduct.isActive,
+      isSold: updatedProduct.isSold,
+      createdAt: updatedProduct.createdAt,
+      updatedAt: updatedProduct.updatedAt,
     };
   }
 }

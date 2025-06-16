@@ -11,11 +11,13 @@ import {
   UseGuards,
   Put,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { ProductResponseDto } from '../dto/product-response.dto';
+import { UpdateProductStatusDto } from '../dto/update-product-status.dto';
 import { InternalServiceGuard } from '../common/guards/internal-service.guard';
 
 @ApiTags('Internal Products')
@@ -209,5 +211,39 @@ export class ProductController {
     }
 
     return this.productService.deleteProduct(slug, userId);
+  }
+
+  @Patch(':slug/status')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update product sold status' })
+  @ApiParam({ name: 'slug', description: 'Product slug' })
+  @ApiBody({ type: UpdateProductStatusDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Product status successfully updated',
+    type: ProductResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request body',
+  })
+  async updateProductStatus(
+    @Param('slug') slug: string,
+    @Headers('x-user-id') userId: string,
+    @Body() updateStatusDto: UpdateProductStatusDto,
+  ): Promise<ProductResponseDto> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    if (!slug || slug.trim() === '') {
+      throw new BadRequestException('Product slug is required and cannot be empty');
+    }
+
+    return this.productService.updateProductStatus(slug, userId, updateStatusDto.isSold);
   }
 }

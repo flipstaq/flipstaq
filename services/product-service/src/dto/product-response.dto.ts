@@ -75,6 +75,11 @@ export class ProductResponseDto {
     example: true,
   })
   isActive: boolean;
+  @ApiProperty({
+    description: 'Whether the product is sold',
+    example: false,
+  })
+  isSold: boolean;
 
   @ApiProperty({
     description: 'Product creation date',

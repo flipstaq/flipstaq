@@ -26,6 +26,7 @@ interface Product {
   imageUrl?: string | null;
   category: string | null;
   isActive: boolean;
+  isSold: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -103,6 +104,41 @@ export function MyProducts() {
     fetchMyProducts(); // Refresh the list
   };
 
+  const handleStatusUpdate = async (product: Product, isSold: boolean) => {
+    try {
+      const token = authService.getAccessToken();
+      if (!token) {
+        throw new Error('No authentication token');
+      }
+
+      const response = await fetch(`/api/products/manage/${product.slug}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isSold }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update product status');
+      }
+
+      // Update the product in the local state
+      setProducts((prevProducts) =>
+        prevProducts.map((p) => (p.id === product.id ? { ...p, isSold } : p))
+      );
+
+      // You could add a toast notification here
+      console.log(
+        `Product ${isSold ? 'marked as sold' : 'marked as available'}`
+      );
+    } catch (error) {
+      console.error('Error updating product status:', error);
+      // You could add error handling/notification here
+    }
+  };
+
   const formatDate = (date: string) => {
     return new Intl.DateTimeFormat(language === 'ar' ? 'ar-AE' : 'en-US', {
       year: 'numeric',
@@ -152,7 +188,11 @@ export function MyProducts() {
           </h2>
           <p className="mt-1 text-secondary-600 dark:text-secondary-400">
             {products.length > 0
-              ? `${formatNumber(products.length, language)} ${products.length === 1 ? t('products:product') : t('products:products')}`
+              ? `${formatNumber(products.length, language)} ${
+                  products.length === 1
+                    ? t('products:product')
+                    : t('products:products')
+                }`
               : t('profile:no_products')}
           </p>
         </div>
@@ -176,13 +216,22 @@ export function MyProducts() {
           {products.map((product) => (
             <div key={product.id} className="relative">
               <ProductCard product={product} onProductClick={() => {}} />
-
               {/* Action Buttons */}
               <div className="absolute right-2 top-2 flex space-x-2 rtl:left-2 rtl:right-auto rtl:space-x-reverse">
+                {' '}
                 <button
                   onClick={() => handleEditProduct(product)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/90 text-secondary-600 shadow-md backdrop-blur-sm transition-colors hover:bg-blue-100 hover:text-blue-600 dark:bg-secondary-800/90 dark:text-secondary-400 dark:hover:bg-blue-900/50 dark:hover:text-blue-400"
-                  title={t('profile:edit_product')}
+                  disabled={product.isSold}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg bg-white/90 text-secondary-600 shadow-md backdrop-blur-sm transition-colors ${
+                    product.isSold
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/50 dark:hover:text-blue-400'
+                  } dark:bg-secondary-800/90 dark:text-secondary-400`}
+                  title={
+                    product.isSold
+                      ? 'Cannot edit sold product'
+                      : t('profile:edit_product')
+                  }
                 >
                   <Edit className="h-4 w-4" />
                 </button>
@@ -193,10 +242,10 @@ export function MyProducts() {
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-              </div>
-
-              {/* Status Badge */}
-              <div className="absolute bottom-2 left-2 rtl:left-auto rtl:right-2">
+              </div>{' '}
+              {/* Status Badges */}
+              <div className="absolute bottom-2 left-2 flex flex-col space-y-1 rtl:left-auto rtl:right-2">
+                {/* Active/Inactive Badge */}
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                     product.isActive
@@ -211,6 +260,33 @@ export function MyProducts() {
                     ? t('profile:active')
                     : t('profile:inactive')}
                 </span>
+                {/* Sold/Available Badge */}
+                {product.isSold && (
+                  <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                    {t('dashboard:sold')}
+                  </span>
+                )}
+              </div>
+              {/* Sold Status Toggle */}
+              <div className="absolute bottom-2 right-2 rtl:left-2 rtl:right-auto">
+                {' '}
+                <button
+                  onClick={() => handleStatusUpdate(product, !product.isSold)}
+                  className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                    product.isSold
+                      ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-800/40'
+                      : 'bg-orange-100 text-orange-800 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:hover:bg-orange-800/40'
+                  }`}
+                  title={
+                    product.isSold
+                      ? t('dashboard:mark_as_available')
+                      : t('dashboard:mark_as_sold')
+                  }
+                >
+                  {product.isSold
+                    ? t('dashboard:mark_as_available')
+                    : t('dashboard:mark_as_sold')}
+                </button>
               </div>
             </div>
           ))}

@@ -166,8 +166,57 @@ export default async function handler(
       console.error('Error deleting product:', error);
       res.status(500).json({ error: 'Failed to delete product' });
     }
+  } else if (req.method === 'PATCH') {
+    try {
+      // Parse JSON body for PATCH requests
+      let body = '';
+      req.on('data', (chunk) => {
+        body += chunk.toString();
+      });
+
+      req.on('end', async () => {
+        try {
+          const updateData = JSON.parse(body);
+
+          const response = await fetch(
+            `${API_GATEWAY_URL}/api/v1/products/${slug}/status`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(updateData),
+            }
+          );
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`API Gateway error (${response.status}):`, errorText);
+            let errorData;
+            try {
+              errorData = JSON.parse(errorText);
+            } catch {
+              errorData = {
+                message: errorText || `Server returned ${response.status}`,
+              };
+            }
+            return res.status(response.status).json(errorData);
+          }
+
+          const data = await response.json();
+          res.status(200).json(data);
+        } catch (parseError) {
+          console.error('Error parsing request body:', parseError);
+          res.status(400).json({ error: 'Invalid request body' });
+        }
+      });
+    } catch (error) {
+      console.error('Error updating product status:', error);
+      res.status(500).json({ error: 'Failed to update product status' });
+    }
   } else {
-    res.setHeader('Allow', ['PUT', 'DELETE']);
+    res.setHeader('Allow', ['PUT', 'DELETE', 'PATCH']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

@@ -15,6 +15,7 @@ import {
   BadRequestException,
   Put,
   Delete,
+  Patch,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -222,10 +223,7 @@ export class ProductGatewayController {
     schema: {
       type: "object",
       properties: {
-        totalProducts: {
-          type: "number",
-          description: "Total active products",
-        },
+        totalProducts: { type: "number", description: "Total active products" },
         totalViews: {
           type: "number",
           description: "Total views across all products",
@@ -386,6 +384,41 @@ export class ProductGatewayController {
       slug,
       "DELETE",
       null,
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Patch(":slug/status")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Update product sold status" })
+  @ApiResponse({
+    status: 200,
+    description: "Product status updated successfully",
+  })
+  async updateProductStatus(
+    @Param("slug") slug: string,
+    @Body() updateStatusDto: { isSold: boolean },
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardProductRequest(
+      `${slug}/status`,
+      "PATCH",
+      updateStatusDto,
       {
         "x-user-id": userId,
         "x-user-email": req.user.email,

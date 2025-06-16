@@ -12,5 +12,11 @@
   "views_this_month": "المشاهدات هذا الشهر",
   "recent_activity": "النشاط الأخير",
   "no_products_yet": "لا توجد منتجات بعد",
-  "product_stats": "إحصائيات المنتجات"
+  "product_stats": "إحصائيات المنتجات",
+  "mark_as_sold": "تعيين كمباع",
+  "mark_as_available": "تعيين كمتاح",
+  "sold": "مباع",
+  "available": "متاح",
+  "product_marked_sold": "تم تعيين المنتج كمباع",
+  "product_marked_available": "تم تعيين المنتج كمتاح"
 }
