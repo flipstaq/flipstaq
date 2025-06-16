@@ -160,7 +160,68 @@ All text elements are fully localized using the translation system:
 - **Review System**: Product ratings and reviews display
 - **Related Products**: Suggestions based on category/seller
 
----
+## Dashboard Components
+
+### DashboardStats Component
+
+**Location**: `apps/web/src/components/dashboard/DashboardStats.tsx`
+
+**Purpose**: Displays key statistics for the authenticated seller's product management dashboard.
+
+#### Features
+
+- **Real-time Stats**: Fetches live data from `/api/dashboard/stats`
+- **Visual Cards**: Four stat cards with icons and colored backgrounds
+- **Responsive Grid**: 1 column on mobile, 2-4 columns on larger screens
+- **RTL Support**: Proper layout for Arabic language
+- **Dark Mode**: Full support for light/dark themes
+- **Loading States**: Skeleton loading animation while fetching data
+- **Error Handling**: Graceful error display with retry functionality
+
+#### Stats Displayed
+
+1. **Total Products**: Count of active products posted by the user
+2. **Total Views**: Aggregated views across all user's products (currently simulated)
+3. **Deleted Products**: Count of products that have been soft-deleted
+4. **Last Product**: Name and creation date of most recently posted product
+
+#### Data Flow
+
+```typescript
+interface DashboardStatsData {
+  totalProducts: number;
+  totalViews: number;
+  deletedProducts: number;
+  lastProduct: {
+    name: string;
+    createdAt: string;
+  } | null;
+}
+```
+
+#### Integration
+
+- Used in `/pages/dashboard.tsx` on the "My Products" tab
+- Positioned above the product grid for contextual information
+- Automatically refreshes when component mounts
+
+#### Localization
+
+All labels are localized using keys from `dashboard.json`:
+
+- `dashboard:product_stats` - Section title
+- `dashboard:total_products` - Total products label
+- `dashboard:total_views` - Total views label
+- `dashboard:deleted_products` - Deleted products label
+- `dashboard:last_product` - Last product label
+- `dashboard:no_products_yet` - Empty state message
+
+#### Styling
+
+- Uses Tailwind CSS for responsive design
+- Color-coded icons (blue, green, red, purple) for different stat types
+- Consistent card design with shadows and rounded corners
+- Smooth animations for loading states
 
 ## Related Components
 

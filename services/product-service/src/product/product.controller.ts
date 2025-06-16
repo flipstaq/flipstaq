@@ -123,6 +123,37 @@ export class ProductController {
     return this.productService.getProductsByUserId(userId);
   }
 
+  @Get('dashboard/stats')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get dashboard statistics for the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dashboard statistics retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        totalProducts: { type: 'number', description: 'Total active products' },
+        totalViews: { type: 'number', description: 'Total views across all products' },
+        deletedProducts: { type: 'number', description: 'Number of deleted products' },
+        lastProduct: {
+          type: 'object',
+          nullable: true,
+          properties: {
+            name: { type: 'string', description: 'Name of last created product' },
+            createdAt: { type: 'string', format: 'date-time', description: 'Creation date' },
+          },
+        },
+      },
+    },
+  })
+  async getDashboardStats(@Headers('x-user-id') userId: string) {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.productService.getDashboardStats(userId);
+  }
+
   @Put(':slug')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update a product' })

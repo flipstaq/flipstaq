@@ -6,6 +6,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { MyProducts } from '@/components/products/MyProducts';
 import { CreateProductForm } from '@/components/products/CreateProductForm';
+import { DashboardStats } from '@/components/dashboard/DashboardStats';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Package, Plus, ArrowLeft, Home } from 'lucide-react';
 
@@ -80,8 +81,12 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {' '}
         <div className="rounded-lg bg-white shadow dark:bg-secondary-800">
           <div className="p-6">
+            {/* Dashboard Stats - Only show on manage tab */}
+            {activeTab === 'manage' && <DashboardStats />}
+
             {/* Tab Navigation */}
             <div className="mb-8 flex justify-center">
               <div className="rounded-lg bg-gray-100 p-1 shadow-sm dark:bg-secondary-700">

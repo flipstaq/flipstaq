@@ -3,8 +3,9 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/dashboard": "pages/dashboard.js",
-  "/api/products/my-products": "pages/api/products/my-products.js",
-  "/": "pages/index.js",
   "/[...params]": "pages/[...params].js",
-  "/api/products/manage/[slug]": "pages/api/products/manage/[slug].js"
+  "/api/dashboard/stats": "pages/api/dashboard/stats.js",
+  "/": "pages/index.js",
+  "/api/products": "pages/api/products.js",
+  "/api/products/my-products": "pages/api/products/my-products.js"
 }

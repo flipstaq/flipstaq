@@ -24,6 +24,65 @@ x-user-email: <user-email>
 x-user-role: <user-role>
 ```
 
+## Dashboard Statistics
+
+### GET /internal/products/dashboard/stats
+
+**Description**: Retrieves dashboard statistics for the authenticated seller including total products, views, deleted products, and last created product.
+
+**Authentication**: Internal service authentication required (x-internal-service header)
+
+**Headers Required**:
+
+```http
+x-internal-service: true
+x-api-gateway: flipstaq-gateway
+x-forwarded-from: api-gateway
+x-user-id: <user-id>
+```
+
+**Response Format**:
+
+```typescript
+interface DashboardStats {
+  totalProducts: number; // Count of active products
+  totalViews: number; // Total views across all products (currently simulated)
+  deletedProducts: number; // Count of soft-deleted products
+  lastProduct: {
+    // Most recently created product
+    name: string;
+    createdAt: string; // ISO date string
+  } | null; // null if no products exist
+}
+```
+
+**Example Response**:
+
+```json
+{
+  "totalProducts": 15,
+  "totalViews": 1250,
+  "deletedProducts": 3,
+  "lastProduct": {
+    "name": "Vintage Leather Jacket",
+    "createdAt": "2025-06-15T10:30:00.000Z"
+  }
+}
+```
+
+**Implementation Details**:
+
+- This endpoint is accessible through the API Gateway at `/api/v1/products/dashboard/stats`
+- Statistics are calculated in real-time from the database
+- Only counts products owned by the specified user
+- `totalViews` is currently generated with simulated data (random factor based on products)
+- Soft-deleted products (isActive: false) are counted separately from active products
+
+**Error Responses**:
+
+- `400 Bad Request`: Missing or invalid user ID
+- `500 Internal Server Error`: Database connection or server error
+
 ## File Storage
 
 ### Image Upload Structure

@@ -341,4 +341,56 @@ export class ProductService {
       },
     });
   }
+
+  /**
+   * Get dashboard statistics for a user
+   */
+  async getDashboardStats(userId: string) {
+    // Get total active products count
+    const totalProducts = await this.prisma.product.count({
+      where: {
+        userId: userId,
+        isActive: true,
+      },
+    });
+
+    // Get deleted products count (soft deleted)
+    const deletedProducts = await this.prisma.product.count({
+      where: {
+        userId: userId,
+        isActive: false,
+      },
+    });
+
+    // Get last created product
+    const lastProduct = await this.prisma.product.findFirst({
+      where: {
+        userId: userId,
+        isActive: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: {
+        title: true,
+        createdAt: true,
+      },
+    });
+
+    // For now, generate simulated views data
+    // In a real implementation, you would track views in a separate table
+    const totalViews = Math.floor(Math.random() * (totalProducts * 50)) + totalProducts * 5;
+
+    return {
+      totalProducts,
+      totalViews,
+      deletedProducts,
+      lastProduct: lastProduct
+        ? {
+            name: lastProduct.title,
+            createdAt: lastProduct.createdAt.toISOString(),
+          }
+        : null,
+    };
+  }
 }

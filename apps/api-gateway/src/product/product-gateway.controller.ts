@@ -211,6 +211,70 @@ export class ProductGatewayController {
     return response.data;
   }
 
+  @Get("dashboard/stats")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get dashboard statistics for the current user" })
+  @ApiResponse({
+    status: 200,
+    description:
+      "Dashboard statistics including total products, views, deleted products, and last product",
+    schema: {
+      type: "object",
+      properties: {
+        totalProducts: {
+          type: "number",
+          description: "Total active products",
+        },
+        totalViews: {
+          type: "number",
+          description: "Total views across all products",
+        },
+        deletedProducts: {
+          type: "number",
+          description: "Number of deleted products",
+        },
+        lastProduct: {
+          type: "object",
+          nullable: true,
+          properties: {
+            name: {
+              type: "string",
+              description: "Name of last created product",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Creation date",
+            },
+          },
+        },
+      },
+    },
+  })
+  async getDashboardStats(@Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardProductRequest(
+      "dashboard/stats",
+      "GET",
+      null,
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
   @Put(":slug")
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(

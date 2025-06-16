@@ -5,7 +5,12 @@
   "no_products": "You haven't posted any products yet",
   "start_selling": "Start selling by posting your first product!",
   "total_products": "Total Products",
+  "total_views": "Total Views",
+  "deleted_products": "Deleted Products",
+  "last_product": "Last Product",
   "active_listings": "Active Listings",
   "views_this_month": "Views This Month",
-  "recent_activity": "Recent Activity"
+  "recent_activity": "Recent Activity",
+  "no_products_yet": "No products yet",
+  "product_stats": "Product Statistics"
 }

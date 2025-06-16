@@ -5,7 +5,12 @@
   "no_products": "لم تقم بنشر أي منتجات بعد",
   "start_selling": "ابدأ البيع عن طريق نشر منتجك الأول!",
   "total_products": "إجمالي المنتجات",
+  "total_views": "إجمالي المشاهدات",
+  "deleted_products": "المنتجات المحذوفة",
+  "last_product": "آخر منتج",
   "active_listings": "القوائم النشطة",
   "views_this_month": "المشاهدات هذا الشهر",
-  "recent_activity": "النشاط الأخير"
+  "recent_activity": "النشاط الأخير",
+  "no_products_yet": "لا توجد منتجات بعد",
+  "product_stats": "إحصائيات المنتجات"
 }
