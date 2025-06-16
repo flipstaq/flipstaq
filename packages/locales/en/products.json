@@ -56,8 +56,7 @@
     "category": "Enter category...",
     "price": "0.00",
     "slug": "my-awesome-product"
-  },
-  "modal": {
+  },  "modal": {
     "close": "Close",
     "loading": "Loading product details...",
     "error": "Failed to load product details",
@@ -69,5 +68,15 @@
     "title": "Open in new page",
     "share": "Share",
     "copy": "Copy"
+  },
+  "detail": {
+    "posted_by": "Posted by",
+    "price": "Price",
+    "category": "Category", 
+    "location": "Location",
+    "posted_on": "Posted on",
+    "message_seller": "Message Seller",
+    "product_image": "Product Image",
+    "no_image_available": "No image available"
   }
 }
