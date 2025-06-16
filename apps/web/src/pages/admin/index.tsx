@@ -4,6 +4,7 @@ import { AdminRouteGuard } from '@/components/providers/AdminRouteGuard';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { userApi } from '@/lib/api/users';
 import { UserInfo, User, PaginatedUsersResponse, UserRole } from '@/types';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 // Toast notification interface
 interface Toast {
@@ -1162,17 +1163,12 @@ export default function AdminPanel() {
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 {t('admin-users:table.description')}
               </p>
-            </div>
-
+            </div>{' '}
             {loading ? (
-              <div className="flex items-center justify-center py-16">
-                <div className="flex flex-col items-center">
-                  <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>{' '}
-                  <span className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-                    {t('admin-users:table.loading')}
-                  </span>
-                </div>
-              </div>
+              <LoadingSpinner
+                text={t('admin-users:table.loading')}
+                className="py-16"
+              />
             ) : error ? (
               <div className="py-16 text-center">
                 <svg

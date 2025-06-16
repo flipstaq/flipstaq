@@ -10,6 +10,7 @@ import {
   Package,
 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface ProductDetail {
   id: string;
@@ -161,17 +162,12 @@ export function ProductDetailModal({
           </div>
           {/* Content */}
           <div className="px-6 py-6">
+            {' '}
             {loading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-600 border-t-transparent"></div>
-                  <span className="text-secondary-600 dark:text-secondary-400">
-                    {t('products.modal.loading')}
-                  </span>
-                </div>
+              <div className="py-12">
+                <LoadingSpinner size="sm" text={t('products.modal.loading')} />
               </div>
             )}
-
             {error && (
               <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/20">
                 <div className="flex">
@@ -186,7 +182,6 @@ export function ProductDetailModal({
                 </div>
               </div>
             )}
-
             {product && (
               <div className="space-y-6">
                 {/* Main Product Info */}

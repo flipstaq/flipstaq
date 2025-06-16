@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from './AuthProvider';
 import { useLanguage } from './LanguageProvider';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface AdminRouteGuardProps {
   children: React.ReactNode;
@@ -31,11 +32,10 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({
       }
     }
   }, [loading, isAuthenticated, hasAdminAccess, router]);
-
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+      <div className="min-h-screen">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

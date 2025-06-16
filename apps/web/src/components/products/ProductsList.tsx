@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { ProductCard } from './ProductCard';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import LoadingSpinner, {
+  LoadingSpinnerSmall,
+} from '@/components/ui/LoadingSpinner';
 
 // Import ProductDetailModal - ignore TypeScript error for now
 import { ProductDetailModal } from './ProductDetailModal';
@@ -100,15 +103,9 @@ export function ProductsList({ limit, searchQuery }: ProductsListProps) {
       setSearchLoading(false);
     };
   }, [searchQuery, products]);
-
   if (loading) {
     return (
-      <div className="py-12 text-center">
-        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-primary-600"></div>
-        <p className="mt-4 text-secondary-500 dark:text-secondary-400">
-          {t('products.loadingProducts')}
-        </p>
-      </div>
+      <LoadingSpinner text={t('products.loadingProducts')} className="py-12" />
     );
   }
 
@@ -146,10 +143,13 @@ export function ProductsList({ limit, searchQuery }: ProductsListProps) {
       {searchQuery && (
         <div className="mb-6 flex items-center justify-between">
           <p className="text-sm text-secondary-600 dark:text-secondary-400">
+            {' '}
             {searchLoading ? (
               <span className="flex items-center">
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-primary-600 rtl:ml-2 rtl:mr-0"></div>
-                {t('products.searching')}
+                <LoadingSpinnerSmall />
+                <span className="ml-2 rtl:ml-0 rtl:mr-2">
+                  {t('products.searching')}
+                </span>
               </span>
             ) : (
               t('products.searchResults', {

@@ -21,6 +21,7 @@
   "terms": "Terms of Service",
   "search": "Search",
   "clear": "Clear",
+  "loading": "Loading...",
   "auth": {
     "loginRequired": "Login Required",
     "redirectingToLogin": "Redirecting to login page..."

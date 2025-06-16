@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/components/providers/AuthProvider';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -43,12 +44,11 @@ export function ProtectedRoute({
       }
     }
   }, [loading, isAuthenticated, user, requiredRole, redirectTo, router]);
-
   // Show loading state while checking authentication
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary-600"></div>
+      <div className="min-h-screen">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
