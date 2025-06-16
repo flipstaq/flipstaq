@@ -27,10 +27,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ),
     });
   }
-
   async validate(payload: JwtPayload) {
+    // For development resilience, we'll trust valid JWT tokens without always calling auth service
+    // Only validate with auth service for sensitive operations or if explicitly needed
+    const user = {
+      userId: payload.sub,
+      email: payload.email,
+      role: payload.role,
+    };
+
+    // In development, be more resilient to auth service restarts
+    if (process.env.NODE_ENV === "development") {
+      return user;
+    }
+
+    // In production, still validate critical operations
     try {
-      // Validate the user exists and is not deleted via auth service
+      // Only validate for sensitive operations, fallback to JWT payload for others
       const response = await this.proxyService.forwardRequest(
         "AUTH",
         "auth/validate-user",
@@ -41,28 +54,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         }
       );
 
-      return {
-        userId: payload.sub,
-        email: payload.email,
-        role: payload.role,
-      };
+      return user;
     } catch (error) {
       if (error.response?.status === 401) {
         throw new UnauthorizedException(
           "Your account has been deleted. You have been logged out."
         );
-      }
-      // For other validation endpoint communication errors, fall back to payload
+      } // For other validation endpoint communication errors, fall back to payload
       // This ensures the system doesn't break if auth service is temporarily unavailable
       console.warn(
         "Auth service validation failed, falling back to JWT payload:",
         error.message
       );
-      return {
-        userId: payload.sub,
-        email: payload.email,
-        role: payload.role,
-      };
+
+      return user;
     }
   }
 }

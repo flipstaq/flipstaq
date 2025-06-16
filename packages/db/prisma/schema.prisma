@@ -44,6 +44,7 @@ model User {
 
   // Relations
   refreshTokens RefreshToken[]
+  products      Product[]
   
   // Self-referential relation for deletion tracking
   deletedBy     User?  @relation("UserDeletions", fields: [deletedById], references: [id])
@@ -63,4 +64,26 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  price       Float
+  currency    String   @default("USD")
+  location    String   // Country or "Global"
+  slug        String   // User-chosen URL part
+  userId      String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Unique constraint for slug per user
+  @@unique([userId, slug])
+  @@map("products")
 }

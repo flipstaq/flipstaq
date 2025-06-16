@@ -122,19 +122,20 @@ export class ProxyService {
       params
     );
   }
-
   async forwardProductRequest(
     endpoint: string,
     method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
     data?: any,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
+    params?: Record<string, any>
   ): Promise<AxiosResponse> {
     return this.forwardRequest(
       "PRODUCT",
-      `product/${endpoint}`,
+      `products${endpoint ? `/${endpoint}` : ""}`,
       method,
       data,
-      headers
+      headers,
+      params
     );
   }
 

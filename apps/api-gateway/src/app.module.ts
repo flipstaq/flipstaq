@@ -5,6 +5,7 @@ import { PassportModule } from "@nestjs/passport";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthGatewayController } from "./auth/auth-gateway.controller";
 import { UserGatewayController } from "./user/user-gateway.controller";
+import { ProductModule } from "./product/product.module";
 import { ProxyService } from "./proxy/proxy.service";
 import { JwtStrategy } from "./common/strategies/jwt.strategy";
 
@@ -31,6 +32,7 @@ import { JwtStrategy } from "./common/strategies/jwt.strategy";
       }),
       inject: [ConfigService],
     }),
+    ProductModule,
   ],
   controllers: [AuthGatewayController, UserGatewayController],
   providers: [ProxyService, JwtStrategy],

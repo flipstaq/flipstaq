@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ShoppingBag, Users, Globe, Shield } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { ProductsList } from '@/components/products/ProductsList';
 
 export function HomePage() {
   const { t } = useLanguage();
@@ -100,7 +101,6 @@ export function HomePage() {
               and performance.
             </p>
           </div>
-
           <div className="mt-10">
             <dl className="space-y-10 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10 md:space-y-0">
               {features.map((feature) => (
@@ -119,6 +119,34 @@ export function HomePage() {
                 </div>
               ))}
             </dl>
+          </div>{' '}
+        </div>
+      </div>
+
+      {/* Products Section */}
+      <div className="bg-white py-16 dark:bg-secondary-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <ProductsList limit={8} />
+          <div className="mt-12 text-center">
+            <Link
+              href="/products"
+              className="inline-flex items-center rounded-md border border-transparent bg-primary-100 px-6 py-3 text-base font-medium text-primary-600 transition-colors duration-200 hover:bg-primary-200 dark:bg-primary-800 dark:text-primary-100 dark:hover:bg-primary-700"
+            >
+              View All Products
+              <svg
+                className="ml-2 h-5 w-5 rtl:ml-0 rtl:mr-2 rtl:rotate-180"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Link>
           </div>
         </div>
       </div>

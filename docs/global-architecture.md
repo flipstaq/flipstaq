@@ -33,6 +33,12 @@ FlipStaq is a modern, scalable, multi-vendor eCommerce platform built with a mic
 │  • User Registration    • JWT Authentication                   │
 │  • Login/Logout        • Token Validation                     │
 │  • Security Middleware • Internal API Only                    │
+├─────────────────────────────────────────────────────────────────┤
+│           Product Service (Internal Only)                      │
+│                      Port 3004                                 │
+│  • Product Creation     • Product Listing                     │
+│  • Slug Management     • User Association                     │
+│  • Data Validation     • Internal API Only                    │
 └─────────────────────────────────────────────────────────────────┘
                                   │
                                   ▼
@@ -42,6 +48,7 @@ FlipStaq is a modern, scalable, multi-vendor eCommerce platform built with a mic
 │            PostgreSQL Database (Port 5432)                     │
 │  • Shared Prisma Schema    • User Management                   │
 │  • Role-based Access      • JWT Token Storage                  │
+│  • Product Management     • Multi-Currency Support             │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -118,13 +125,36 @@ Each business domain is isolated into its own microservice:
 - Internal service protection middleware
 - Integration with shared Prisma database schema
 
+### Product Service (`services/product-service/`)
+
+- **Purpose**: Product management and catalog operations
+- **Port**: 3004 (Internal only - no direct external access)
+- **Technology**: NestJS 11.1.3 + TypeScript + Prisma
+- **Status**: ✅ **Implemented**
+- **Responsibilities**:
+  - Product creation and management
+  - Slug-based product URLs (@username/slug)
+  - Product listing and retrieval
+  - Price and currency management
+  - Location and category support
+  - Internal-only API with security middleware
+
+**Key Features:**
+
+- Complete product posting and listing functionality
+- SEO-friendly URLs with username and slug
+- Multi-currency support (USD, AED, EUR, GBP, SAR)
+- Location-based product organization
+- Slug uniqueness enforcement per user
+- Integration with shared Prisma database schema
+
 ## Currently Implemented Features
 
 ### ✅ User Authentication System
 
 - **User Registration**: Full signup flow with validation
 - **User Login**: Email/username authentication
-- **JWT Tokens**: Access tokens (15min) and refresh tokens (7 days)
+- **JWT Tokens**: Access tokens (2h) and refresh tokens (7 days) with automatic refresh
 - **Password Security**: bcrypt hashing with salt
 - **Age Verification**: Minimum 13 years old requirement
 - **Role Management**: Four-tier role system
@@ -148,6 +178,16 @@ Each business domain is isolated into its own microservice:
 
 - **Internal Service Protection**: Middleware prevents direct access to microservices
 - **JWT Authentication**: Secure token-based authentication
+
+### ✅ Product Management System
+
+- **Product Creation**: Full product posting with validation
+- **Product Listing**: Homepage and catalog product display
+- **Slug Management**: SEO-friendly URLs (@username/slug format)
+- **Multi-Currency**: Support for USD, AED, EUR, GBP, SAR
+- **Location Support**: Country-based or global product listings
+- **User Association**: Products linked to their owners
+- **Data Validation**: Comprehensive input validation and error handling
 - **CORS Configuration**: Restricted to specific origins
 - **Password Security**: Industry-standard bcrypt hashing
 - **Request Validation**: DTO validation with class-validator
@@ -382,8 +422,11 @@ if (internalHeader !== "true" && apiGatewayHeader !== "flipstaq-gateway") {
 
 **JWT Token System:**
 
-- **Access Tokens**: Short-lived (15 minutes) for API requests
-- **Refresh Tokens**: Long-lived (7 days) for token renewal
+- **Access Tokens**: 2-hour expiration for development convenience (15min for production)
+- **Refresh Tokens**: 7-day expiration, stored in database and frontend
+- **Automatic Refresh**: Frontend automatically refreshes expired tokens
+- **Development Resilience**: JWT validation bypasses auth service in development mode
+- **Session Continuity**: Users remain logged in across service restarts
 - **Separate Secrets**: Different secrets for access and refresh tokens
 - **Token Storage**: Refresh tokens stored in database for invalidation
 
@@ -448,7 +491,7 @@ npm run dev
 ```env
 DATABASE_URL="postgresql://postgres:password@localhost:5432/flipstaq_dev"
 JWT_SECRET="your-super-secret-jwt-key"
-JWT_EXPIRES_IN="15m"
+JWT_EXPIRES_IN="2h"
 JWT_REFRESH_SECRET="your-super-secret-refresh-key"
 JWT_REFRESH_EXPIRES_IN="7d"
 PORT=3001

@@ -149,6 +149,49 @@ export class AuthService {
     }
   }
 
+  async refreshTokens(refreshToken: string): Promise<AuthResponseDto> {
+    // Verify refresh token
+    let payload;
+    try {
+      payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    // Check if refresh token exists in database
+    const storedToken = await this.prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: { user: true },
+    });
+
+    if (!storedToken || storedToken.expiresAt < new Date()) {
+      throw new UnauthorizedException('Refresh token expired or not found');
+    }
+
+    // Check if user is still active
+    if (!storedToken.user.isActive || storedToken.user.deletedAt) {
+      throw new UnauthorizedException('User account is inactive');
+    }
+
+    // Generate new tokens
+    const tokens = await this.generateTokens(
+      storedToken.user.id,
+      storedToken.user.email,
+      storedToken.user.role,
+    );
+
+    // Store new refresh token and remove old one
+    await this.storeRefreshToken(storedToken.user.id, tokens.refreshToken);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: this.mapToUserInfo(storedToken.user),
+    };
+  }
+
   private async generateTokens(
     userId: string,
     email: string,

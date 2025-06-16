@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@hookform/resolvers": "^3.3.4",
     "clsx": "^2.1.0",
     "i18next": "^23.10.1",

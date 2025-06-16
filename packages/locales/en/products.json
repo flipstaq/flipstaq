@@ -1,0 +1,56 @@
+{
+  "title": "Title",
+  "description": "Description",
+  "category": "Category",
+  "price": "Price",
+  "currency": "Currency",
+  "location": "Location",
+  "slug": "URL Slug",
+  "owner": "Owner",
+  "createdAt": "Created",
+  "actions": "Actions",
+  "viewProduct": "View Product",
+  "createProduct": "Create Product",
+  "editProduct": "Edit Product",
+  "deleteProduct": "Delete Product",
+  "productPosted": "Product posted successfully!",
+  "productUpdated": "Product updated successfully!",
+  "productDeleted": "Product deleted successfully!",
+  "noProducts": "No products found",
+  "loadingProducts": "Loading products...",
+  "productDetails": "Product Details",
+  "backToProducts": "Back to Products",
+  "validation": {
+    "titleRequired": "Title is required",
+    "titleMinLength": "Title must be at least 1 character",
+    "priceRequired": "Price is required",
+    "priceMin": "Price must be greater than 0",
+    "locationRequired": "Location is required",
+    "slugRequired": "URL slug is required",
+    "slugFormat": "Slug can only contain letters, numbers, hyphens, and underscores",
+    "slugExists": "A product with this slug already exists"
+  },
+  "currencies": {
+    "USD": "USD ($)",
+    "AED": "AED (د.إ)",
+    "EUR": "EUR (€)",
+    "GBP": "GBP (£)",
+    "SAR": "SAR (ر.س)"
+  },
+  "locations": {
+    "global": "Global",
+    "unitedStates": "United States",
+    "unitedArabEmirates": "United Arab Emirates",
+    "unitedKingdom": "United Kingdom",
+    "germany": "Germany",
+    "france": "France",
+    "saudiArabia": "Saudi Arabia"
+  },
+  "placeholders": {
+    "title": "Enter product title...",
+    "description": "Enter product description...",
+    "category": "Enter category...",
+    "price": "0.00",
+    "slug": "my-awesome-product"
+  }
+}

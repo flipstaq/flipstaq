@@ -1,0 +1,56 @@
+{
+  "title": "العنوان",
+  "description": "الوصف",
+  "category": "الفئة",
+  "price": "السعر",
+  "currency": "العملة",
+  "location": "الموقع",
+  "slug": "رابط المنتج",
+  "owner": "المالك",
+  "createdAt": "تاريخ الإنشاء",
+  "actions": "الإجراءات",
+  "viewProduct": "عرض المنتج",
+  "createProduct": "إنشاء منتج",
+  "editProduct": "تعديل المنتج",
+  "deleteProduct": "حذف المنتج",
+  "productPosted": "تم نشر المنتج بنجاح!",
+  "productUpdated": "تم تحديث المنتج بنجاح!",
+  "productDeleted": "تم حذف المنتج بنجاح!",
+  "noProducts": "لم يتم العثور على منتجات",
+  "loadingProducts": "جاري تحميل المنتجات...",
+  "productDetails": "تفاصيل المنتج",
+  "backToProducts": "العودة للمنتجات",
+  "validation": {
+    "titleRequired": "العنوان مطلوب",
+    "titleMinLength": "يجب أن يكون العنوان حرف واحد على الأقل",
+    "priceRequired": "السعر مطلوب",
+    "priceMin": "يجب أن يكون السعر أكبر من 0",
+    "locationRequired": "الموقع مطلوب",
+    "slugRequired": "رابط المنتج مطلوب",
+    "slugFormat": "يمكن أن يحتوي الرابط على أحرف وأرقام وشرطات فقط",
+    "slugExists": "يوجد منتج بهذا الرابط بالفعل"
+  },
+  "currencies": {
+    "USD": "دولار أمريكي ($)",
+    "AED": "درهم إماراتي (د.إ)",
+    "EUR": "يورو (€)",
+    "GBP": "جنيه إسترليني (£)",
+    "SAR": "ريال سعودي (ر.س)"
+  },
+  "locations": {
+    "global": "عالمي",
+    "unitedStates": "الولايات المتحدة",
+    "unitedArabEmirates": "الإمارات العربية المتحدة",
+    "unitedKingdom": "المملكة المتحدة",
+    "germany": "ألمانيا",
+    "france": "فرنسا",
+    "saudiArabia": "المملكة العربية السعودية"
+  },
+  "placeholders": {
+    "title": "أدخل عنوان المنتج...",
+    "description": "أدخل وصف المنتج...",
+    "category": "أدخل الفئة...",
+    "price": "0.00",
+    "slug": "منتجي-الرائع"
+  }
+}

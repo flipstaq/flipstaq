@@ -110,4 +110,20 @@ export class PublicAuthController {
   async validateToken(@Request() req: any): Promise<UserInfoDto> {
     return this.authService.validateUser(req.user.sub);
   }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid refresh token',
+  })
+  async refreshToken(@Body() body: { refreshToken: string }): Promise<AuthResponseDto> {
+    return this.authService.refreshTokens(body.refreshToken);
+  }
 }

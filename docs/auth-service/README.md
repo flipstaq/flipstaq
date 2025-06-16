@@ -470,3 +470,54 @@ if (!user.isActive || user.deletedAt) {
 - Audit logging
 - Rate limiting per user
 - Social login integration
+
+## Session Persistence
+
+### Token Management
+
+The auth service implements a robust token management system designed to survive service restarts and provide seamless user experience:
+
+#### Access Tokens
+
+- **Expiration**: 2 hours (configurable via `JWT_EXPIRES_IN`)
+- **Purpose**: Short-lived tokens for API access
+- **Storage**: Frontend localStorage
+- **Auto-refresh**: Automatic refresh before expiration
+
+#### Refresh Tokens
+
+- **Expiration**: 7 days (configurable via `JWT_REFRESH_EXPIRES_IN`)
+- **Purpose**: Long-lived tokens for obtaining new access tokens
+- **Storage**: Database + Frontend localStorage
+- **Security**: Single-use tokens that generate new refresh tokens
+
+### Development Resilience
+
+In development mode, the system is designed to be resilient to service restarts:
+
+1. **JWT Trust**: Valid JWT tokens are trusted without constant auth service validation
+2. **Automatic Refresh**: Frontend automatically refreshes expired tokens
+3. **Graceful Fallback**: API Gateway falls back to JWT payload if auth service is unavailable
+4. **Session Continuity**: Users remain logged in across service restarts
+
+### Troubleshooting "Unauthorized" Errors
+
+If you encounter persistent "Unauthorized" errors after restarting services:
+
+1. **Check JWT Secrets**: Ensure `JWT_SECRET` is consistent across all services
+2. **Clear Browser Storage**: Clear localStorage if tokens become corrupted
+3. **Service Restart Order**: Start auth service before API gateway
+4. **Token Expiration**: Check if tokens have expired (default: 2h access, 7d refresh)
+
+### Manual Session Reset
+
+If automatic token refresh fails, users can manually reset their session:
+
+```bash
+# Clear browser localStorage
+localStorage.removeItem('authToken');
+localStorage.removeItem('refreshToken');
+localStorage.removeItem('user');
+```
+
+Then refresh the page and log in again.

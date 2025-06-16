@@ -44,6 +44,9 @@ export interface UserInfo {
 }
 
 class AuthApiClient {
+  private isRefreshing = false;
+  private refreshPromise: Promise<AuthResponse> | null = null;
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -74,18 +77,62 @@ class AuthApiClient {
           };
         }
 
-        // Check for deleted account error
-        if (
-          response.status === 401 &&
-          (errorData.message?.includes('deleted') ||
-            errorData.message?.includes('logged out'))
-        ) {
-          // Auto-logout user when account is deleted
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('user');
-            // Redirect to login page
-            window.location.href = '/auth/login?message=account_deleted';
+        // Handle 401 errors with automatic token refresh
+        if (response.status === 401) {
+          // Check for account deletion first
+          if (
+            errorData.message?.includes('deleted') ||
+            errorData.message?.includes('logged out') ||
+            errorData.message?.includes('inactive')
+          ) {
+            // Auto-logout user when account is deleted/inactive
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('user');
+              // Redirect to login page
+              window.location.href = '/auth/login?message=account_deleted';
+            }
+            throw new Error(errorData.message);
+          }
+
+          // Attempt token refresh if not already refreshing and not a refresh request
+          if (
+            !this.isRefreshing &&
+            !endpoint.includes('/auth/refresh') &&
+            !endpoint.includes('/auth/login') &&
+            !endpoint.includes('/auth/signup')
+          ) {
+            try {
+              if (!this.refreshPromise) {
+                this.isRefreshing = true;
+                this.refreshPromise = this.refreshToken();
+              }
+
+              await this.refreshPromise;
+              this.isRefreshing = false;
+              this.refreshPromise = null;
+
+              // Retry original request with new token
+              const newToken = this.getStoredToken();
+              if (newToken && options.headers) {
+                (options.headers as any)['Authorization'] =
+                  `Bearer ${newToken}`;
+              }
+
+              return this.request<T>(endpoint, options);
+            } catch (refreshError) {
+              this.isRefreshing = false;
+              this.refreshPromise = null;
+              // If refresh fails, logout user
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('user');
+                window.location.href = '/auth/login?message=session_expired';
+              }
+              throw new Error('Session expired. Please log in again.');
+            }
           }
         }
 
@@ -183,6 +230,31 @@ class AuthApiClient {
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
     }
+  }
+
+  async refreshToken(): Promise<AuthResponse> {
+    const refreshToken =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('refreshToken')
+        : null;
+
+    if (!refreshToken) {
+      throw new Error('No refresh token found');
+    }
+
+    const response = await this.request<AuthResponse>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    // Update stored tokens
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('authToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('user', JSON.stringify(response.user));
+    }
+
+    return response;
   }
 
   getStoredUser(): UserInfo | null {
