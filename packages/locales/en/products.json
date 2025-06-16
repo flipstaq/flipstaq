@@ -13,6 +13,8 @@
   "createProduct": "Create Product",
   "editProduct": "Edit Product",
   "deleteProduct": "Delete Product",
+  "count_one": "{{count}} product",
+  "count_other": "{{count}} products",
   "productPosted": "Product posted successfully!",
   "productUpdated": "Product updated successfully!",
   "productDeleted": "Product deleted successfully!",

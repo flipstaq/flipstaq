@@ -22,7 +22,6 @@
     "turbo": "^1.13.4",
     "concurrently": "^8.2.2"
   },
-  "packageManager": "npm@10.2.4",
   "engines": {
     "node": ">=18.0.0"
   }

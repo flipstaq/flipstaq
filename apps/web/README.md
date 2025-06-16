@@ -1,4 +1,4 @@
-# FlipStaq Web Frontend
+# Flipstaq Web Frontend
 
 A modern, responsive multi-vendor eCommerce platform built with Next.js 15, TypeScript, and Tailwind CSS.
 
@@ -178,4 +178,4 @@ Testing setup is ready for:
 
 ## 📄 License
 
-This project is part of the FlipStaq eCommerce platform.
+This project is part of the Flipstaq eCommerce platform.

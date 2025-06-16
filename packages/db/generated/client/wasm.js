@@ -163,6 +163,13 @@ exports.Prisma.ProductScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.FavoriteScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -194,7 +201,8 @@ exports.UserStatus = exports.$Enums.UserStatus = {
 exports.Prisma.ModelName = {
   User: 'User',
   RefreshToken: 'RefreshToken',
-  Product: 'Product'
+  Product: 'Product',
+  Favorite: 'Favorite'
 };
 
 /**

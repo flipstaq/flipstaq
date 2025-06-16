@@ -23,7 +23,7 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('FlipStaq Product Service')
+    .setTitle('Flipstaq Product Service')
     .setDescription('Internal API for product management')
     .setVersion('1.0')
     .addTag('Internal Products')

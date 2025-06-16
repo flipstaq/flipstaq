@@ -137,8 +137,9 @@ export function ProductDetailPage({
   if (loading) {
     return (
       <>
+        {' '}
         <Head>
-          <title>Loading Product... - FlipStaq</title>
+          <title>Loading Product... - Flipstaq</title>
         </Head>
         <div className="min-h-screen bg-white dark:bg-secondary-900">
           <div className="container mx-auto px-4 py-8">
@@ -197,12 +198,11 @@ export function ProductDetailPage({
       </>
     );
   }
-
   if (error) {
     return (
       <>
         <Head>
-          <title>Product Not Found - FlipStaq</title>
+          <title>Product Not Found - Flipstaq</title>
         </Head>
         <div className="flex min-h-screen items-center justify-center bg-white dark:bg-secondary-900">
           <div className="space-y-4 text-center">
@@ -224,12 +224,11 @@ export function ProductDetailPage({
       </>
     );
   }
-
   if (!product) {
     return (
       <>
         <Head>
-          <title>Product Not Found - FlipStaq</title>
+          <title>Product Not Found - Flipstaq</title>
         </Head>
         <div className="flex min-h-screen items-center justify-center bg-white dark:bg-secondary-900">
           <div className="space-y-4 text-center">
@@ -257,7 +256,7 @@ export function ProductDetailPage({
       {' '}
       <Head>
         <title>
-          {product.title} by @{product.username} - FlipStaq
+          {product.title} by @{product.username} - Flipstaq
         </title>
         <meta
           name="description"

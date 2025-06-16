@@ -1,4 +1,4 @@
-# FlipStaq Auth Service
+# Flipstaq Auth Service
 
 ## Overview
 

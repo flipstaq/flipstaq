@@ -1,6 +1,6 @@
-# FlipStaq Documentation Structure
+# Flipstaq Documentation Structure
 
-This directory contains comprehensive documentation for the FlipStaq eCommerce platform, reflecting **only currently implemented features and services**.
+This directory contains comprehensive documentation for the Flipstaq eCommerce platform, reflecting **only currently implemented features and services**.
 
 ## 📁 Directory Structure
 

@@ -1,8 +1,8 @@
 {
   "name": "@flipstaq/user-service",
   "version": "0.1.0",
-  "description": "User management microservice for FlipStaq eCommerce platform",
-  "author": "FlipStaq Team",
+  "description": "User management microservice for Flipstaq eCommerce platform",
+  "author": "Flipstaq Team",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

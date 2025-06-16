@@ -1,8 +1,8 @@
 {
   "name": "@flipstaq/auth-service",
   "version": "0.1.0",
-  "description": "Authentication microservice for FlipStaq eCommerce platform",
-  "author": "FlipStaq Team",
+  "description": "Authentication microservice for Flipstaq eCommerce platform",
+  "author": "Flipstaq Team",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

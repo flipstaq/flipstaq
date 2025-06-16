@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/components/providers/LanguageProvider';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
 ];
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const { t } = useTranslation('admin-common');
+  const { t } = useLanguage();
   const router = useRouter();
 
   const isActivePath = (href: string) => {
@@ -49,7 +49,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-5 dark:border-gray-700 dark:bg-gray-800">
             <div className="flex flex-shrink-0 items-center px-4">
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                FlipStaq Admin
+                Flipstaq Admin
               </h1>
             </div>
             <div className="mt-5 flex flex-grow flex-col">
@@ -75,7 +75,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                             : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'
                         }`}
                       />
-                      {t(`navigation.${item.labelKey}`)}
+                      {t(`admin-common:navigation.${item.labelKey}`)}
                     </Link>
                   );
                 })}

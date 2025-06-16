@@ -83,7 +83,7 @@ ecommerce-platform/
 ---
 
 ## 🌐 Internationalization (English + Arabic)
-- Use **i18next** or **next-i18next** with dynamic JSON loading
+- Use **custom LanguageProvider** with dynamic JSON loading
 - **No `/en` or `/ar` routes** — language auto-detected via browser
 - Use cookies/localStorage to store selected language
 - All translations split across JSON files:
@@ -154,3 +154,4 @@ module.exports = {
 - Do run the projects by yourself, I always keep the projects running using turbo so you don't need to worry.
 
 ALWYAYS REFER TO DOCS for microservice-specific guidlines and API details.
+keep in mind to use the custom language provider and not react ii18next

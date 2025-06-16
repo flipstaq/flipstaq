@@ -428,4 +428,181 @@ export class ProductGatewayController {
     );
     return response.data;
   }
+  // Favorite endpoints
+  @Post("favorites")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Add product to favorites" })
+  @ApiResponse({
+    status: 201,
+    description: "Product added to favorites successfully",
+  })
+  async addToFavorites(
+    @Body() createFavoriteDto: { productId: string },
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "favorites",
+      "POST",
+      createFavoriteDto,
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Delete("favorites/:productId")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Remove product from favorites" })
+  @ApiParam({
+    name: "productId",
+    description: "The ID of the product to remove from favorites",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Product removed from favorites successfully",
+  })
+  async removeFromFavorites(
+    @Param("productId") productId: string,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `favorites/${productId}`,
+      "DELETE",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("favorites")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get user favorites" })
+  @ApiResponse({
+    status: 200,
+    description: "User favorites retrieved successfully",
+  })
+  async getUserFavorites(@Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "favorites",
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("favorites/count")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get user favorites count" })
+  @ApiResponse({
+    status: 200,
+    description: "Favorites count retrieved successfully",
+  })
+  async getFavoriteCount(@Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "favorites/count",
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("favorites/check/:productId")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Check if product is favorited" })
+  @ApiParam({
+    name: "productId",
+    description: "The ID of the product to check",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Favorite status retrieved successfully",
+  })
+  async isProductFavorited(
+    @Param("productId") productId: string,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `favorites/check/${productId}`,
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
 }

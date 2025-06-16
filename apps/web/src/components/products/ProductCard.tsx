@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { FavoriteButton } from './FavoriteButton';
 
 interface Product {
   id: string;
@@ -73,8 +74,16 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
           </div>
         )}
 
-        {/* Direct Link Button */}
-        <div className="absolute right-3 top-3 z-10 rtl:left-3 rtl:right-auto">
+        {/* Action Buttons */}
+        <div className="absolute right-3 top-3 z-10 flex flex-col gap-2 rtl:left-3 rtl:right-auto">
+          {/* Favorite Button */}
+          <FavoriteButton
+            productId={product.id}
+            size="md"
+            className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+          />
+
+          {/* Direct Link Button */}
           <Link
             href={`/@${product.username}/${product.slug}`}
             onClick={handleLinkClick}

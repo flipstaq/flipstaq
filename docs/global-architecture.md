@@ -1,8 +1,8 @@
-# FlipStaq eCommerce Platform - Global Architecture
+# Flipstaq eCommerce Platform - Global Architecture
 
 ## Overview
 
-FlipStaq is a modern, scalable, multi-vendor eCommerce platform built with a microservices architecture. The platform uses an **API Gateway pattern** with dedicated microservices for different business domains.
+Flipstaq is a modern, scalable, multi-vendor eCommerce platform built with a microservices architecture. The platform uses an **API Gateway pattern** with dedicated microservices for different business domains.
 
 **Current Implementation Status**: This document reflects only the currently implemented features and services.
 
@@ -211,19 +211,58 @@ The current Prisma schema includes:
 
 ```prisma
 model User {
-  id              String   @id @default(cuid())
-  email           String   @unique
-  username        String   @unique
+  id              String     @id @default(cuid())
+  email           String     @unique
+  username        String     @unique
   firstName       String
   lastName        String
-  password        String   // bcrypt hashed
+  password        String     // bcrypt hashed
   country         String
   birthDate       DateTime
-  role            Role     @default(USER)
-  isEmailVerified Boolean  @default(false)
+  role            Role       @default(USER)
+  isEmailVerified Boolean    @default(false)
   refreshToken    String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Relations
+  products        Product[]
+  favorites       Favorite[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  price       Float
+  currency    String   @default("USD")
+  location    String   // Country or "Global"
+  slug        String   // User-chosen URL part
+  imageUrl    String?  // Product image URL
+  userId      String
+  isActive    Boolean  @default(true)
+  isSold      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favorites   Favorite[]
+
+  @@unique([userId, slug])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
 }
 
 enum Role {
@@ -804,7 +843,7 @@ GET /health/deps # External dependencies
 - **Framework**: Next.js 15.4.0
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Internationalization**: next-i18next
+- **Internationalization**: Custom LanguageProvider
 - **State Management**: React Context + Zustand (future)
 
 ### Development Tools

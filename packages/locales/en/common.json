@@ -24,6 +24,23 @@
   "search": "Search",
   "clear": "Clear",
   "loading": "Loading...",
+  "save": "Save",
+  "unsave": "Unsave",
+  "saved": "Saved",
+  "favorites": "Favorites",
+  "savedProducts": "Saved Products",
+  "noSavedProducts": "You haven't saved any products yet.",
+  "noSavedProductsDescription": "Start exploring products and save the ones you like to see them here.",
+  "saveForLater": "Save for later",
+  "removeFromSaved": "Remove from saved",
+  "exploreProducts": "Explore Products",
+  "back": "Back",
+  "productSingular": "product",
+  "productPlural": "products",
+  "favoriteError": "Unable to save product",
+  "unfavoriteError": "Unable to remove from saved",
+  "favoriteSuccess": "Product saved!",
+  "unfavoriteSuccess": "Product removed from saved",
   "auth": {
     "loginRequired": "Login Required",
     "redirectingToLogin": "Redirecting to login page..."
@@ -33,5 +50,6 @@
     "insufficientPermissions": "You don't have sufficient permissions to access this page."
   },
   "error": "Error",
-  "tryAgain": "Try Again"
+  "tryAgain": "Try Again",
+  "allRightsReserved": "All rights reserved"
 }

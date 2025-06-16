@@ -24,6 +24,23 @@
   "search": "بحث",
   "clear": "مسح",
   "loading": "جاري التحميل...",
+  "save": "حفظ",
+  "unsave": "إلغاء الحفظ",
+  "saved": "محفوظ",
+  "favorites": "المفضلة",
+  "savedProducts": "المنتجات المحفوظة",
+  "noSavedProducts": "لم تقم بحفظ أي منتجات بعد.",
+  "noSavedProductsDescription": "ابدأ في استكشاف المنتجات واحفظ التي تعجبك لتراها هنا.",
+  "saveForLater": "حفظ للمراجعة لاحقاً",
+  "removeFromSaved": "إزالة من المحفوظات",
+  "exploreProducts": "استكشف المنتجات",
+  "back": "رجوع",
+  "productSingular": "منتج",
+  "productPlural": "منتجات",
+  "favoriteError": "تعذر حفظ المنتج",
+  "unfavoriteError": "تعذر إزالة المنتج من المحفوظة",
+  "favoriteSuccess": "تم حفظ المنتج!",
+  "unfavoriteSuccess": "تم إزالة المنتج من المحفوظة",
   "auth": {
     "loginRequired": "تسجيل الدخول مطلوب",
     "redirectingToLogin": "جاري إعادة توجيهك إلى صفحة تسجيل الدخول..."
@@ -33,5 +50,6 @@
     "insufficientPermissions": "ليس لديك صلاحيات كافية للوصول إلى هذه الصفحة."
   },
   "error": "خطأ",
-  "tryAgain": "حاول مرة أخرى"
+  "tryAgain": "حاول مرة أخرى",
+  "allRightsReserved": "جميع الحقوق محفوظة"
 }

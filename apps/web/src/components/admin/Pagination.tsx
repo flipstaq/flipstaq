@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/components/providers/LanguageProvider';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
@@ -21,7 +21,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   totalItems,
   itemsPerPage,
 }) => {
-  const { t } = useTranslation('admin-users');
+  const { t } = useLanguage();
 
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
@@ -68,20 +68,20 @@ export const Pagination: React.FC<PaginationProps> = ({
           disabled={!hasPrev}
           className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         >
-          {t('pagination.previous')}
+          {t('admin-users:pagination.previous')}
         </button>
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={!hasNext}
           className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         >
-          {t('pagination.next')}
+          {t('admin-users:pagination.next')}
         </button>
       </div>
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700 dark:text-gray-300">
-            {t('pagination.showing', {
+            {t('admin-users:pagination.showing', {
               start: startItem,
               end: endItem,
               total: totalItems,
@@ -98,7 +98,9 @@ export const Pagination: React.FC<PaginationProps> = ({
               disabled={!hasPrev}
               className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
             >
-              <span className="sr-only">{t('pagination.previous')}</span>
+              <span className="sr-only">
+                {t('admin-users:pagination.previous')}
+              </span>
               <ChevronLeft className="h-5 w-5" />
             </button>
 
@@ -128,7 +130,9 @@ export const Pagination: React.FC<PaginationProps> = ({
               disabled={!hasNext}
               className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
             >
-              <span className="sr-only">{t('pagination.next')}</span>
+              <span className="sr-only">
+                {t('admin-users:pagination.next')}
+              </span>
               <ChevronRight className="h-5 w-5" />
             </button>
           </nav>

@@ -1225,450 +1225,198 @@ This ensures consistent file access whether running in development (`npm run sta
 
 ---
 
-## Endpoints
+## Favorite Management
 
-### 1. Create Product
+### POST /internal/favorites
 
-**POST** `/internal/products`
+**Description**: Add a product to the user's favorites list.
 
-Creates a new product for the authenticated user with optional image upload.
+**Authentication**: Internal service authentication required + User authentication
 
-#### Headers
+**Headers Required**:
 
 ```http
-Content-Type: multipart/form-data
 x-internal-service: true
 x-api-gateway: flipstaq-gateway
-x-user-id: clx1y2z3a4b5c6d7e8f9g0h1
-x-user-email: user@example.com
-x-user-role: USER
+x-forwarded-from: api-gateway
+x-user-id: <user-id>
 ```
 
-#### Request Body (multipart/form-data)
-
-```
-title: "MacBook Pro 16 inch"
-description: "High-performance laptop for professionals"
-category: "Electronics"
-price: "2499.99"
-currency: "USD"
-location: "United States"
-slug: "macbook-pro-16-mint-condition"
-image: <file> (optional)
-```
-
-#### Field Validations
-
-- **title** (required): String, minimum 1 character
-- **description** (optional): String
-- **category** (optional): String
-- **price** (required): Number, minimum 0
-- **currency** (required): Enum ["USD", "AED", "EUR", "GBP", "SAR"], default "USD"
-- **location** (required): String (country name or "Global")
-- **slug** (required): String, alphanumeric + hyphens + underscores only
-- **image** (optional): File upload (JPG, PNG), max 5MB
-- **imageUrl** (optional): String, auto-generated if image uploaded
-
-#### Image Upload Requirements
-
-- **Supported formats**: JPG, JPEG, PNG
-- **Maximum file size**: 5MB
-- **File naming**: Auto-generated with random suffix
-- **Storage location**: `/uploads/products/`
-- **URL format**: `/uploads/products/{filename}`
-
-#### Slug Rules
-
-- Must contain only letters, numbers, hyphens (-), and underscores (\_)
-- Must be unique per user (not globally unique)
-- Case-sensitive matching
-- No spaces or special characters allowed
-
-#### Response (201 Created)
+**Request Body**:
 
 ```json
 {
-  "id": "clx1y2z3a4b5c6d7e8f9g0h2",
-  "title": "MacBook Pro 16 inch",
-  "description": "High-performance laptop for professionals",
-  "category": "Electronics",
-  "price": 2499.99,
-  "currency": "USD",
-  "location": "United States",
-  "slug": "macbook-pro-16-mint-condition",
-  "imageUrl": "/uploads/products/macbook-pro-a1b2.jpg",
-  "userId": "clx1y2z3a4b5c6d7e8f9g0h1",
-  "username": "johndoe",
-  "isActive": true,
-  "createdAt": "2025-06-15T10:30:00.000Z",
-  "updatedAt": "2025-06-15T10:30:00.000Z"
+  "productId": "cmbzeo9070001w7h8txxutdh0"
+}
+```
+
+**Response Format**:
+
+```json
+{
+  "id": "cmbzf1a2b0001x8i9uvxyze1k",
+  "userId": "cmbz4qbap0000w7o8sdcex7ih",
+  "productId": "cmbzeo9070001w7h8txxutdh0",
+  "createdAt": "2025-06-17T00:15:30.000Z"
 }
 ```
 
 #### Error Responses
 
-**400 Bad Request** - Invalid user ID
-
-```json
-{
-  "message": "Invalid user ID",
-  "statusCode": 400
-}
-```
-
-**400 Bad Request** - Invalid slug format
-
-```json
-{
-  "message": "Slug can only contain letters, numbers, hyphens, and underscores",
-  "statusCode": 400
-}
-```
-
-**409 Conflict** - Slug already exists for user
-
-```json
-{
-  "message": "A product with this slug already exists for this user",
-  "statusCode": 409
-}
-```
+- `400 Bad Request`: Invalid product ID or missing required fields
+- `401 Unauthorized`: Missing or invalid authentication
+- `403 Forbidden`: Cannot favorite inactive product
+- `404 Not Found`: Product not found
+- `409 Conflict`: Product already in favorites
 
 ---
 
-### 2. Get All Products
+### DELETE /internal/favorites/:productId
 
-**GET** `/internal/products`
+**Description**: Remove a product from the user's favorites list.
 
-Retrieves all active products, sorted by creation date (newest first).
+**Authentication**: Internal service authentication required + User authentication
 
-#### Headers
+**Headers Required**:
 
 ```http
 x-internal-service: true
 x-api-gateway: flipstaq-gateway
+x-forwarded-from: api-gateway
+x-user-id: <user-id>
 ```
 
-#### Response (200 OK)
+**URL Parameters**:
+
+- `productId` (string): The ID of the product to remove from favorites
+
+**Response Format**:
+
+```json
+{
+  "message": "Product removed from favorites successfully"
+}
+```
+
+#### Error Responses
+
+- `401 Unauthorized`: Missing or invalid authentication
+- `404 Not Found`: Product not in favorites
+
+---
+
+### GET /internal/favorites
+
+**Description**: Retrieve all favorited products for the authenticated user.
+
+**Authentication**: Internal service authentication required + User authentication
+
+**Headers Required**:
+
+```http
+x-internal-service: true
+x-api-gateway: flipstaq-gateway
+x-forwarded-from: api-gateway
+x-user-id: <user-id>
+```
+
+**Response Format**:
 
 ```json
 [
   {
-    "id": "clx1y2z3a4b5c6d7e8f9g0h2",
-    "title": "MacBook Pro 16 inch",
-    "description": "High-performance laptop for professionals",
-    "category": "Electronics",
-    "price": 2499.99,
-    "currency": "USD",
-    "location": "United States",
-    "slug": "macbook-pro-16-mint-condition",
-    "userId": "clx1y2z3a4b5c6d7e8f9g0h1",
-    "username": "johndoe",
-    "isActive": true,
-    "createdAt": "2025-06-15T10:30:00.000Z",
-    "updatedAt": "2025-06-15T10:30:00.000Z"
+    "id": "cmbzf1a2b0001x8i9uvxyze1k",
+    "createdAt": "2025-06-17T00:15:30.000Z",
+    "product": {
+      "id": "cmbzeo9070001w7h8txxutdh0",
+      "title": "Vintage Laptop",
+      "description": "A classic laptop in excellent condition",
+      "category": "Electronics",
+      "price": 299.99,
+      "currency": "USD",
+      "location": "New York, USA",
+      "slug": "vintage-laptop",
+      "imageUrl": "/uploads/products/laptop-abc123.jpg",
+      "userId": "user456",
+      "username": "janedoe",
+      "isActive": true,
+      "isSold": false,
+      "createdAt": "2025-06-15T10:30:00.000Z",
+      "updatedAt": "2025-06-15T10:30:00.000Z"
+    }
   }
 ]
 ```
 
----
-
-### 3. Get Product by Username and Slug
-
-**GET** `/internal/products/@:username/:slug`
-
-Retrieves a specific product by username and slug.
-
-#### URL Parameters
-
-- **username**: The product owner's username
-- **slug**: The product's URL slug
-
-#### Example
-
-```
-GET /internal/products/@johndoe/macbook-pro-16-mint-condition
-```
-
-#### Headers
-
-```http
-x-internal-service: true
-x-api-gateway: flipstaq-gateway
-```
-
-#### Response (200 OK)
-
-```json
-{
-  "id": "clx1y2z3a4b5c6d7e8f9g0h2",
-  "title": "MacBook Pro 16 inch",
-  "description": "High-performance laptop for professionals",
-  "category": "Electronics",
-  "price": 2499.99,
-  "currency": "USD",
-  "location": "United States",
-  "slug": "macbook-pro-16-mint-condition",
-  "userId": "clx1y2z3a4b5c6d7e8f9g0h1",
-  "username": "johndoe",
-  "isActive": true,
-  "createdAt": "2025-06-15T10:30:00.000Z",
-  "updatedAt": "2025-06-15T10:30:00.000Z"
-}
-```
-
 #### Error Responses
 
-**404 Not Found** - Product not found
-
-```json
-{
-  "message": "Product not found",
-  "statusCode": 404
-}
-```
-
----
-
-### 4. Get Products by User ID
-
-**GET** `/internal/products/user/:userId`
-
-Retrieves all active products for a specific user.
-
-#### URL Parameters
-
-- **userId**: The user's ID
-
-#### Example
-
-```
-GET /internal/products/user/clx1y2z3a4b5c6d7e8f9g0h1
-```
-
-#### Headers
-
-```http
-x-internal-service: true
-x-api-gateway: flipstaq-gateway
-```
-
-#### Response (200 OK)
-
-```json
-[
-  {
-    "id": "clx1y2z3a4b5c6d7e8f9g0h2",
-    "title": "MacBook Pro 16 inch",
-    "description": "High-performance laptop for professionals",
-    "category": "Electronics",
-    "price": 2499.99,
-    "currency": "USD",
-    "location": "United States",
-    "slug": "macbook-pro-16-mint-condition",
-    "userId": "clx1y2z3a4b5c6d7e8f9g0h1",
-    "username": "johndoe",
-    "isActive": true,
-    "createdAt": "2025-06-15T10:30:00.000Z",
-    "updatedAt": "2025-06-15T10:30:00.000Z"
-  }
-]
-```
-
----
-
-### 5. Update Product
-
-**PATCH** `/internal/products/:slug`
-
-Updates an existing product. Only the product owner can update their product.
-
-#### Headers
-
-```http
-Content-Type: application/json
-x-internal-service: true
-x-api-gateway: flipstaq-gateway
-x-user-id: clx1y2z3a4b5c6d7e8f9g0h1
-x-user-email: user@example.com
-x-user-role: USER
-```
-
-#### Request Body
-
-```json
-{
-  "title": "MacBook Pro 16 inch - Updated",
-  "description": "High-performance laptop for professionals, now with M1 chip",
-  "category": "Electronics",
-  "price": 2399.99,
-  "currency": "USD",
-  "location": "United States",
-  "slug": "macbook-pro-16-mint-condition"
-}
-```
-
-#### Response Format
-
-```typescript
-interface ProductResponseDto {
-  id: string;
-  title: string;
-  description: string | null;
-  category: string | null;
-  price: number;
-  currency: string;
-  location: string;
-  slug: string;
-  imageUrl: string | null;
-  userId: string;
-  username: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
-
-#### Example Request
-
-```bash
-PATCH /internal/products/macbook-pro-16-mint-condition
-Content-Type: application/json
-x-user-id: clx1y2z3a4b5c6d7e8f9g0h1
-x-internal-service: true
-
-{
-  "title": "MacBook Pro 16 inch - Updated",
-  "description": "High-performance laptop for professionals, now with M1 chip",
-  "category": "Electronics",
-  "price": 2399.99,
-  "currency": "USD",
-  "location": "United States",
-  "slug": "macbook-pro-16-mint-condition"
-}
-```
-
-#### Example Response
-
-```json
-{
-  "id": "clx1y2z3a4b5c6d7e8f9g0h1",
-  "title": "MacBook Pro 16 inch - Updated",
-  "description": "High-performance laptop for professionals, now with M1 chip",
-  "category": "Electronics",
-  "price": 2399.99,
-  "currency": "USD",
-  "location": "United States",
-  "slug": "macbook-pro-16-mint-condition",
-  "imageUrl": "/uploads/products/macbook-pro-a1b2.jpg",
-  "userId": "clx1y2z3a4b5c6d7e8f9g0h1",
-  "username": "johndoe",
-  "isActive": true,
-  "createdAt": "2025-06-15T10:30:00.000Z",
-  "updatedAt": "2025-06-16T14:45:00.000Z"
-}
-```
-
-#### Error Responses
-
-- `400 Bad Request`: Invalid request body or missing required fields
 - `401 Unauthorized`: Missing or invalid authentication
-- `403 Forbidden`: User does not own the product
-- `404 Not Found`: Product not found
-- `500 Internal Server Error`: Database or server error
 
 ---
 
-### 6. Update Product Status
+### GET /internal/favorites/count
 
-**PATCH** `/internal/products/:slug/status`
+**Description**: Get the total count of favorited products for the authenticated user.
 
-Updates the sold status of a product. Only the product owner can change its status.
+**Authentication**: Internal service authentication required + User authentication
 
-#### Authentication
+**Headers Required**:
 
-Required (Internal service headers)
-
-#### Parameters
-
-- `slug` (path): Product slug identifier
-
-#### Request Body
-
-```json
-{
-  "isSold": true
-}
-```
-
-#### Response Format
-
-```typescript
-interface ProductResponseDto {
-  id: string;
-  title: string;
-  description: string | null;
-  category: string | null;
-  price: number;
-  currency: string;
-  location: string;
-  slug: string;
-  imageUrl: string | null;
-  userId: string;
-  username: string;
-  isActive: boolean;
-  isSold: boolean; // Updated field
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
-
-#### Example Request
-
-```bash
-PATCH /internal/products/vintage-laptop/status
-Content-Type: application/json
-x-user-id: user123
+```http
 x-internal-service: true
-
-{
-  "isSold": true
-}
+x-api-gateway: flipstaq-gateway
+x-forwarded-from: api-gateway
+x-user-id: <user-id>
 ```
 
-#### Example Response
+**Response Format**:
 
 ```json
 {
-  "id": "clx1y2z3a4b5c6d7e8f9g0h1",
-  "title": "Vintage Laptop",
-  "description": "Classic ThinkPad in excellent condition",
-  "category": "Electronics",
-  "price": 250.0,
-  "currency": "USD",
-  "location": "Global",
-  "slug": "vintage-laptop",
-  "imageUrl": "/uploads/products/laptop-abc123.jpg",
-  "userId": "user123",
-  "username": "johndoe",
-  "isActive": true,
-  "isSold": true,
-  "createdAt": "2025-06-15T10:30:00.000Z",
-  "updatedAt": "2025-06-16T14:45:00.000Z"
+  "count": 5
 }
 ```
 
 #### Error Responses
 
-- `400 Bad Request`: Invalid request body or missing required fields
 - `401 Unauthorized`: Missing or invalid authentication
-- `403 Forbidden`: User does not own the product
-- `404 Not Found`: Product not found
-- `500 Internal Server Error`: Database or server error
+
+---
+
+### GET /internal/favorites/check/:productId
+
+**Description**: Check if a specific product is in the user's favorites.
+
+**Authentication**: Internal service authentication required + User authentication
+
+**Headers Required**:
+
+```http
+x-internal-service: true
+x-api-gateway: flipstaq-gateway
+x-forwarded-from: api-gateway
+x-user-id: <user-id>
+```
+
+**URL Parameters**:
+
+- `productId` (string): The ID of the product to check
+
+**Response Format**:
+
+```json
+{
+  "isFavorited": true
+}
+```
+
+#### Error Responses
+
+- `401 Unauthorized`: Missing or invalid authentication
 
 **Business Rules**:
 
-- Only product owners can update the sold status
-- Products marked as sold cannot be edited (frontend restriction)
-- Sold status does not affect product visibility - products remain active
-- Status changes are immediately reflected in dashboard statistics
+- Users cannot favorite inactive products
+- Each user can favorite a product only once (unique constraint)
+- Deleting a product removes it from all users' favorites
+- Deleting a user removes all their favorites

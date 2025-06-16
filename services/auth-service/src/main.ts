@@ -27,9 +27,9 @@ async function bootstrap() {
     }),
   ); // Swagger documentation setup
   const config = new DocumentBuilder()
-    .setTitle('FlipStaq Auth Service')
+    .setTitle('Flipstaq Auth Service')
     .setDescription(
-      '🔒 Authentication microservice for FlipStaq platform\n\nPublic routes (/auth/*) for API Gateway\nInternal routes (/internal/auth/*) for microservice communication',
+      '🔒 Authentication microservice for Flipstaq platform\n\nPublic routes (/auth/*) for API Gateway\nInternal routes (/internal/auth/*) for microservice communication',
     )
     .setVersion('1.0')
     .addBearerAuth()

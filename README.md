@@ -1,4 +1,4 @@
-# 🛒 FlipStaq - Multi-Vendor eCommerce Platform
+# 🛒 Flipstaq - Multi-Vendor eCommerce Platform
 
 A modern, scalable eCommerce platform built with **microservices architecture** and **API Gateway pattern**.
 
@@ -354,4 +354,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**FlipStaq** - Built with ❤️ using modern web technologies
+**Flipstaq** - Built with ❤️ using modern web technologies

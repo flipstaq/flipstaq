@@ -8,19 +8,19 @@ export function Footer() {
   const { t } = useLanguage();
   const footerLinks = [
     {
-      title: t('common:company'),
+      title: t('company'),
       links: [
-        { name: t('common:about'), href: '/about' },
-        { name: t('common:careers'), href: '/careers' },
-        { name: t('common:contact'), href: '/contact' },
+        { name: t('about'), href: '/about' },
+        { name: t('careers'), href: '/careers' },
+        { name: t('contact'), href: '/contact' },
       ],
     },
     {
-      title: t('common:support'),
+      title: t('support'),
       links: [
-        { name: t('common:help'), href: '/help' },
-        { name: t('common:privacy'), href: '/privacy' },
-        { name: t('common:terms'), href: '/terms' },
+        { name: t('help'), href: '/help' },
+        { name: t('privacy'), href: '/privacy' },
+        { name: t('terms'), href: '/terms' },
       ],
     },
   ];
@@ -32,12 +32,13 @@ export function Footer() {
           {/* Logo and description */}
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="mb-4 flex items-center">
+              {' '}
               <span className="text-2xl font-bold text-primary-600">
-                FlipStaq
+                Flipstaq
               </span>
-            </Link>{' '}
+            </Link>
             <p className="max-w-md text-sm text-secondary-600 dark:text-secondary-400">
-              {t('common:welcome')}
+              {t('welcome')}
             </p>
           </div>
 
@@ -61,11 +62,10 @@ export function Footer() {
               </ul>
             </div>
           ))}
-        </div>
-
+        </div>{' '}
         <div className="mt-8 border-t border-secondary-200 pt-8 dark:border-secondary-700">
           <p className="text-center text-sm text-secondary-600 dark:text-secondary-400">
-            © {new Date().getFullYear()} FlipStaq. All rights reserved.
+            © {new Date().getFullYear()} Flipstaq. {t('allRightsReserved')}.
           </p>
         </div>
       </div>

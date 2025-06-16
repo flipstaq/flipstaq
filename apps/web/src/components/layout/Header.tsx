@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Plus,
   LayoutDashboard,
+  Heart,
 } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useLanguage } from '@/components/providers/LanguageProvider';
@@ -56,7 +57,7 @@ export function Header() {
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
               <span className="text-2xl font-bold text-primary-600">
-                FlipStaq
+                Flipstaq
               </span>
             </Link>
           </div>
@@ -122,6 +123,14 @@ export function Header() {
                         >
                           <LayoutDashboard className="h-4 w-4" />
                           <span>{t('dashboard:title')}</span>
+                        </Link>
+                        <Link
+                          href="/favorites"
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="flex items-center space-x-2 px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-700 rtl:space-x-reverse"
+                        >
+                          <Heart className="h-4 w-4" />
+                          <span>{t('common:favorites')}</span>
                         </Link>
                         <Link
                           href="/profile"

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Product Service is a microservice responsible for managing product operations in the FlipStaq eCommerce platform. It handles product creation, retrieval, and management while ensuring data integrity and proper access control.
+The Product Service is a microservice responsible for managing product operations in the Flipstaq eCommerce platform. It handles product creation, retrieval, and management while ensuring data integrity and proper access control.
 
 ## Purpose
 
