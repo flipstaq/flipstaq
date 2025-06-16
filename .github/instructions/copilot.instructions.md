@@ -10,8 +10,8 @@ applyTo: "**"
 - **Frontend:** Next.js `15.4.0`, Tailwind CSS, TypeScript
 - **Backend:** NestJS `11.1.3`, TypeScript
 - **ORM:** Prisma `6.9.0` (PostgreSQL)
-- **Internationalization:** Next-i18next / i18next with auto-detection and RTL support
-- **Monorepo Tooling:** Nx or TurboRepo (choose one)
+- **Internationalization:** With auto-detection and RTL support
+- **Monorepo Tooling:** TurboRepo
 - **API Documentation:** Swagger + Custom markdown docs per microservice
 - **Authentication:** OAuth2 / JWT
 - **Packages Folder:** Shared packages for `locales/`, `db/`, etc.
