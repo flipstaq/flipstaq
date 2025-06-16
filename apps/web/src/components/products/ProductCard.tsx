@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
 interface Product {
@@ -36,11 +38,14 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
       day: 'numeric',
     }).format(new Date(date));
   };
-
   const handleClick = () => {
     if (onProductClick) {
       onProductClick(product.username, product.slug);
     }
+  };
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the modal
   };
 
   return (
@@ -48,6 +53,18 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
       className="group relative cursor-pointer overflow-hidden rounded-lg border border-secondary-200 bg-white shadow-md transition-shadow duration-200 hover:shadow-lg dark:border-secondary-700 dark:bg-secondary-800"
       onClick={handleClick}
     >
+      {/* Direct Link Button */}
+      <div className="absolute right-3 top-3 z-10 rtl:left-3 rtl:right-auto">
+        {' '}
+        <Link
+          href={`/@${product.username}/${product.slug}`}
+          onClick={handleLinkClick}
+          className="rounded-full bg-white/90 p-2 text-secondary-600 opacity-0 transition-all duration-200 hover:bg-white hover:text-primary-600 group-hover:opacity-100 dark:bg-secondary-800/90 dark:text-secondary-400 dark:hover:bg-secondary-800 dark:hover:text-primary-400"
+          title={t('products.directLink.title')}
+        >
+          <ExternalLink className="h-4 w-4" />
+        </Link>
+      </div>
       <div className="p-6">
         {/* Product Title */}
         <h3 className="text-lg font-semibold text-secondary-900 transition-colors duration-200 group-hover:text-primary-600 dark:text-secondary-100 dark:group-hover:text-primary-400">

@@ -60,5 +60,10 @@
     "postedBy": "Posted by",
     "datePosted": "Date Posted",
     "fullUrl": "Full URL"
+  },
+  "directLink": {
+    "title": "Open in new page",
+    "share": "Share",
+    "copy": "Copy"
   }
 }
