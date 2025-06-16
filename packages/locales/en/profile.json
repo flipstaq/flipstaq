@@ -1,0 +1,23 @@
+{
+  "my_products": "My Products",
+  "edit_product": "Edit Product",
+  "delete_product": "Delete Product",
+  "confirm_delete": "Are you sure you want to delete this product?",
+  "delete_confirmation": "Delete Confirmation",
+  "product_deleted": "Product deleted successfully!",
+  "product_updated": "Product updated successfully!",
+  "no_products": "You haven't posted any products yet",
+  "start_selling": "Start selling by posting your first product!",
+  "update_product": "Update Product",
+  "cancel": "Cancel",
+  "save_changes": "Save Changes",
+  "deleting": "Deleting...",
+  "updating": "Updating...",
+  "edit": "Edit",
+  "delete": "Delete",
+  "status": "Status",
+  "active": "Active",
+  "inactive": "Inactive",
+  "posted_on": "Posted on",
+  "last_updated": "Last updated"
+}

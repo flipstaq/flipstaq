@@ -31,5 +31,7 @@
   "admin": {
     "accessDenied": "تم رفض الوصول",
     "insufficientPermissions": "ليس لديك صلاحيات كافية للوصول إلى هذه الصفحة."
-  }
+  },
+  "error": "خطأ",
+  "tryAgain": "حاول مرة أخرى"
 }

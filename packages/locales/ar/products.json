@@ -68,6 +68,15 @@
     "datePosted": "تاريخ النشر",
     "fullUrl": "الرابط الكامل"
   },
+  "image": "صورة المنتج",
+  "imagePreview": "معاينة الصورة",
+  "imageSelected": "تم اختيار الصورة",
+  "selectImage": "اختر صورة",
+  "imageRequirements": "JPG, PNG حتى 5 ميجابايت",
+  "titlePlaceholder": "أدخل عنوان المنتج",
+  "slugPlaceholder": "رابط-المنتج",
+  "descriptionPlaceholder": "صف منتجك...",
+  "categoryPlaceholder": "اختر فئة",
   "directLink": {
     "title": "فتح في صفحة منفصلة",
     "share": "مشاركة",
@@ -95,5 +104,7 @@
     "invalid_file_type": "يرجى اختيار ملف صورة صالح (JPG أو PNG)",
     "file_too_large": "يجب أن يكون حجم الملف أقل من 5 ميجابايت",
     "upload_failed": "فشل في رفع الصورة. يرجى المحاولة مرة أخرى."
-  }
+  },
+  "product": "منتج",
+  "products": "منتجات"
 }

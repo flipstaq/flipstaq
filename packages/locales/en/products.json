@@ -68,6 +68,15 @@
     "datePosted": "Date Posted",
     "fullUrl": "Full URL"
   },
+  "image": "Product Image",
+  "imagePreview": "Image Preview",
+  "imageSelected": "Image selected",
+  "selectImage": "Select Image",
+  "imageRequirements": "JPG, PNG up to 5MB",
+  "titlePlaceholder": "Enter product title",
+  "slugPlaceholder": "product-url-slug",
+  "descriptionPlaceholder": "Describe your product...",
+  "categoryPlaceholder": "Select a category",
   "directLink": {
     "title": "Open in new page",
     "share": "Share",
@@ -95,5 +104,7 @@
     "invalid_file_type": "Please select a valid image file (JPG or PNG)",
     "file_too_large": "File size must be less than 5MB",
     "upload_failed": "Failed to upload image. Please try again."
-  }
+  },
+  "product": "product",
+  "products": "products"
 }

@@ -13,6 +13,8 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Put,
+  Delete,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -175,6 +177,155 @@ export class ProductGatewayController {
       "GET",
       null,
       {
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("my-products")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get products created by the current user" })
+  @ApiResponse({ status: 200, description: "List of user's products" })
+  async getMyProducts(@Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardProductRequest(
+      "my-products",
+      "GET",
+      null,
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Put(":slug")
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor("image", {
+      storage: diskStorage({
+        destination: (req, file, callback) => {
+          // Use src/uploads in development, dist/uploads in production
+          const uploadPath =
+            process.env.NODE_ENV === "production"
+              ? join(process.cwd(), "dist", "uploads", "products")
+              : join(process.cwd(), "src", "uploads", "products");
+          callback(null, uploadPath);
+        },
+        filename: (req, file, callback) => {
+          const name = file.originalname.split(".")[0];
+          const fileExtName = extname(file.originalname);
+          const randomName = Array(4)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join("");
+          callback(null, `${name}-${randomName}${fileExtName}`);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+          return callback(
+            new BadRequestException("Only image files are allowed!"),
+            false
+          );
+        }
+        callback(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    })
+  )
+  @ApiBearerAuth()
+  @ApiConsumes("multipart/form-data")
+  @ApiOperation({ summary: "Update a product" })
+  @ApiParam({ name: "slug", description: "Product slug" })
+  @ApiResponse({ status: 200, description: "Product successfully updated" })
+  @ApiResponse({ status: 404, description: "Product not found" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - user can only update their own products",
+  })
+  async updateProduct(
+    @Param("slug") slug: string,
+    @Body() productData: any,
+    @UploadedFile() image: Express.Multer.File,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Add image URL to product data if image was uploaded
+    let productWithImage = { ...productData };
+
+    // Transform string values to proper types for validation
+    if (productWithImage.price && typeof productWithImage.price === "string") {
+      productWithImage.price = parseFloat(productWithImage.price);
+    }
+
+    if (image) {
+      productWithImage.imageUrl = `/uploads/products/${image.filename}`;
+    }
+
+    const response = await this.proxyService.forwardProductRequest(
+      slug,
+      "PUT",
+      productWithImage,
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Delete(":slug")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Delete a product" })
+  @ApiParam({ name: "slug", description: "Product slug" })
+  @ApiResponse({ status: 204, description: "Product successfully deleted" })
+  @ApiResponse({ status: 404, description: "Product not found" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - user can only delete their own products",
+  })
+  async deleteProduct(@Param("slug") slug: string, @Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardProductRequest(
+      slug,
+      "DELETE",
+      null,
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
         "x-internal-service": "true",
       }
     );

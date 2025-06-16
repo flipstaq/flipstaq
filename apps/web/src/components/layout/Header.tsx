@@ -12,6 +12,7 @@ import {
   User,
   ChevronDown,
   Plus,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useLanguage } from '@/components/providers/LanguageProvider';
@@ -109,28 +110,18 @@ export function Header() {
                       <ChevronDown
                         className={`h-4 w-4 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
                       />
-                    </button>
-
+                    </button>{' '}
                     {/* Dropdown Menu */}
                     {isProfileDropdownOpen && (
                       <div className="absolute right-0 mt-2 w-48 rounded-lg bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-secondary-800 dark:ring-secondary-700 rtl:left-0 rtl:right-auto">
+                        {' '}
                         <Link
-                          href="/#post-product"
-                          onClick={() => {
-                            setIsProfileDropdownOpen(false);
-                            // Scroll to product form if on homepage, or navigate to homepage
-                            const productForm =
-                              document.getElementById('post-product');
-                            if (productForm) {
-                              productForm.scrollIntoView({
-                                behavior: 'smooth',
-                              });
-                            }
-                          }}
+                          href="/dashboard"
+                          onClick={() => setIsProfileDropdownOpen(false)}
                           className="flex items-center space-x-2 px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-700 rtl:space-x-reverse"
                         >
-                          <Plus className="h-4 w-4" />
-                          <span>{t('common:postProduct')}</span>
+                          <LayoutDashboard className="h-4 w-4" />
+                          <span>{t('dashboard:title')}</span>
                         </Link>
                         <Link
                           href="/profile"

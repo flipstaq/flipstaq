@@ -94,10 +94,10 @@ export function CreateProductForm({
 
   const validateImage = (file: File): string | null => {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return t('products.upload.invalid_file_type');
+      return t('products:upload.invalid_file_type');
     }
     if (file.size > MAX_FILE_SIZE) {
-      return t('products.upload.file_too_large');
+      return t('products:upload.file_too_large');
     }
     return null;
   };
@@ -242,7 +242,7 @@ export function CreateProductForm({
       <div className="border-b border-secondary-200 px-6 py-4 dark:border-secondary-700">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100">
-            {t('products.createProduct')}
+            {t('products:createProduct')}
           </h2>
           <button
             onClick={onCancel}
@@ -263,7 +263,7 @@ export function CreateProductForm({
           {/* Title */}
           <div>
             <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-              {t('products.title')} *
+              {t('products:title')} *
             </label>
             <input
               type="text"
@@ -272,7 +272,7 @@ export function CreateProductForm({
               onChange={handleInputChange}
               required
               className="w-full rounded-md border border-secondary-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100"
-              placeholder={t('products.placeholders.title')}
+              placeholder={t('products:placeholders.title')}
             />
           </div>
 
@@ -280,7 +280,7 @@ export function CreateProductForm({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                {t('products.price')} *
+                {t('products:price')} *
               </label>
               <input
                 type="number"
@@ -291,12 +291,12 @@ export function CreateProductForm({
                 onChange={handleInputChange}
                 required
                 className="w-full rounded-md border border-secondary-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100"
-                placeholder={t('products.placeholders.price')}
+                placeholder={t('products:placeholders.price')}
               />
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                {t('products.currency')}
+                {t('products:currency')}
               </label>
               <select
                 name="currency"
@@ -316,7 +316,7 @@ export function CreateProductForm({
           {/* Category */}
           <div>
             <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-              {t('products.category')}
+              {t('products:category')}
             </label>
             <input
               type="text"
@@ -324,14 +324,14 @@ export function CreateProductForm({
               value={formData.category}
               onChange={handleInputChange}
               className="w-full rounded-md border border-secondary-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100"
-              placeholder={t('products.placeholders.category')}
+              placeholder={t('products:placeholders.category')}
             />
           </div>
 
           {/* Location */}
           <div>
             <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-              {t('products.location')} *
+              {t('products:location')} *
             </label>
             <select
               name="location"
@@ -351,7 +351,7 @@ export function CreateProductForm({
         {/* Image Upload Section */}
         <div>
           <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-            {t('products.upload.upload_image')}
+            {t('products:upload.upload_image')}
           </label>
 
           {/* Hidden file input */}
@@ -371,13 +371,13 @@ export function CreateProductForm({
             >
               <Upload className="mx-auto h-12 w-12 text-secondary-400 dark:text-secondary-500" />
               <p className="mt-2 text-sm font-medium text-secondary-600 dark:text-secondary-400">
-                {t('products.upload.select_image')}
+                {t('products:upload.select_image')}
               </p>
               <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-500">
-                {t('products.upload.supported_formats')}
+                {t('products:upload.supported_formats')}
               </p>
               <p className="text-xs text-secondary-500 dark:text-secondary-500">
-                {t('products.upload.max_file_size')}
+                {t('products:upload.max_file_size')}
               </p>
             </div>
           ) : (
@@ -388,7 +388,7 @@ export function CreateProductForm({
                   <div className="relative">
                     <img
                       src={imagePreview}
-                      alt={t('products.upload.preview')}
+                      alt={t('products:upload.preview')}
                       className="h-24 w-24 rounded-lg object-cover"
                     />
                   </div>
@@ -407,14 +407,14 @@ export function CreateProductForm({
                         onClick={handleImageUploadClick}
                         className="text-xs text-primary-600 hover:text-primary-500 dark:text-primary-400"
                       >
-                        {t('products.upload.change_image')}
+                        {t('products:upload.change_image')}
                       </button>
                       <button
                         type="button"
                         onClick={handleRemoveImage}
                         className="text-xs text-red-600 hover:text-red-500 dark:text-red-400"
                       >
-                        {t('products.upload.remove_image')}
+                        {t('products:upload.remove_image')}
                       </button>
                     </div>
                   </div>
@@ -426,7 +426,7 @@ export function CreateProductForm({
         {/* Description */}
         <div>
           <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-            {t('products.description')}
+            {t('products:description')}
           </label>
           <textarea
             name="description"
@@ -434,13 +434,13 @@ export function CreateProductForm({
             onChange={handleInputChange}
             rows={4}
             className="w-full rounded-md border border-secondary-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100"
-            placeholder={t('products.placeholders.description')}
+            placeholder={t('products:placeholders.description')}
           />
         </div>
         {/* Slug */}
         <div>
           <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-            {t('products.slug')} *
+            {t('products:slug')} *
           </label>{' '}
           <input
             type="text"

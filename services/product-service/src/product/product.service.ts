@@ -3,6 +3,7 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from '../dto/create-product.dto';
@@ -171,7 +172,7 @@ export class ProductService {
   }
 
   /**
-   * Get products by user ID
+   * Get products by user ID (for "My Products" section)
    */
   async getProductsByUserId(userId: string): Promise<ProductResponseDto[]> {
     const products = await this.prisma.product.findMany({
@@ -207,5 +208,137 @@ export class ProductService {
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     }));
+  }
+
+  /**
+   * Update a product (only by owner)
+   */
+  async updateProduct(
+    slug: string,
+    userId: string,
+    updateProductDto: CreateProductDto,
+  ): Promise<ProductResponseDto> {
+    // Find the product and verify ownership
+    const existingProduct = await this.prisma.product.findFirst({
+      where: {
+        slug,
+        userId,
+        isActive: true,
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    });
+
+    if (!existingProduct) {
+      throw new NotFoundException('Product not found or you do not have permission to update it');
+    }
+
+    const {
+      title,
+      description,
+      category,
+      price,
+      currency,
+      location,
+      slug: newSlug,
+      imageUrl,
+    } = updateProductDto;
+
+    // If slug is being changed, check if new slug already exists for this user
+    if (newSlug && newSlug !== slug) {
+      const slugExists = await this.prisma.product.findUnique({
+        where: {
+          userId_slug: {
+            userId,
+            slug: newSlug,
+          },
+        },
+      });
+
+      if (slugExists) {
+        throw new ConflictException('A product with this slug already exists for this user');
+      }
+
+      // Validate new slug format
+      if (!/^[a-zA-Z0-9_-]+$/.test(newSlug)) {
+        throw new BadRequestException(
+          'Slug can only contain letters, numbers, hyphens, and underscores',
+        );
+      }
+    }
+
+    // Update the product
+    const updatedProduct = await this.prisma.product.update({
+      where: {
+        id: existingProduct.id,
+      },
+      data: {
+        title,
+        description,
+        category,
+        price,
+        currency,
+        location,
+        slug: newSlug || slug,
+        imageUrl,
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    });
+
+    return {
+      id: updatedProduct.id,
+      title: updatedProduct.title,
+      description: updatedProduct.description,
+      category: updatedProduct.category,
+      price: updatedProduct.price,
+      currency: updatedProduct.currency,
+      location: updatedProduct.location,
+      slug: updatedProduct.slug,
+      imageUrl: updatedProduct.imageUrl,
+      userId: updatedProduct.userId,
+      username: updatedProduct.user.username,
+      isActive: updatedProduct.isActive,
+      createdAt: updatedProduct.createdAt,
+      updatedAt: updatedProduct.updatedAt,
+    };
+  }
+
+  /**
+   * Delete a product (only by owner)
+   */
+  async deleteProduct(slug: string, userId: string): Promise<void> {
+    // Find the product and verify ownership
+    const existingProduct = await this.prisma.product.findFirst({
+      where: {
+        slug,
+        userId,
+        isActive: true,
+      },
+    });
+
+    if (!existingProduct) {
+      throw new NotFoundException('Product not found or you do not have permission to delete it');
+    }
+
+    // Soft delete by setting isActive to false
+    await this.prisma.product.update({
+      where: {
+        id: existingProduct.id,
+      },
+      data: {
+        isActive: false,
+      },
+    });
   }
 }

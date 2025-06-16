@@ -2,9 +2,9 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/dashboard": "pages/dashboard.js",
+  "/api/products/my-products": "pages/api/products/my-products.js",
   "/": "pages/index.js",
-  "/api/products": "pages/api/products.js",
-  "/api/products/[username]/[slug]": "pages/api/products/[username]/[slug].js",
   "/[...params]": "pages/[...params].js",
-  "/404": "pages/404.js"
+  "/api/products/manage/[slug]": "pages/api/products/manage/[slug].js"
 }

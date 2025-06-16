@@ -6,14 +6,12 @@ import { Search, Users } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { ProductsList } from '@/components/products/ProductsList';
-import { CreateProductForm } from '@/components/products/CreateProductForm';
 
 export function HomePage() {
   const { t, language } = useLanguage();
   const { isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [userCount, setUserCount] = useState(0);
-  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const isRTL = language === 'ar';
 
@@ -108,46 +106,7 @@ export function HomePage() {
             </div>
           </div>
         </div>{' '}
-      </div>
-      {/* Post Product Section - Only for authenticated users */}
-      {isAuthenticated && (
-        <div
-          id="post-product"
-          className="bg-secondary-50 py-16 dark:bg-secondary-800"
-        >
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 text-center">
-              <h2 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100 sm:text-4xl">
-                {t('home:post_your_product')}
-              </h2>
-              <p className="mt-4 text-lg text-secondary-600 dark:text-secondary-400">
-                {t('home:share_products_with_world')}
-              </p>
-            </div>
-
-            {!showCreateForm ? (
-              <div className="text-center">
-                <button
-                  onClick={() => setShowCreateForm(true)}
-                  className="btn-primary inline-flex items-center px-8 py-3 text-lg"
-                >
-                  {t('common:postProduct')}
-                </button>
-              </div>
-            ) : (
-              <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-secondary-900">
-                <CreateProductForm
-                  onSuccess={() => {
-                    setShowCreateForm(false);
-                    // Optionally scroll to products section or show success message
-                  }}
-                  onCancel={() => setShowCreateForm(false)}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      </div>{' '}
       {/* Products Section */}
       <div className="bg-white py-16 dark:bg-secondary-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

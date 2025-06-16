@@ -35,6 +35,12 @@
       "static/chunks/_pages-dir-browser_packages_locales_ar_common_json.js"
     ]
   },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/dashboard.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/dashboard.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_dashboard_json.js"
+    ]
+  },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/errors.json": {
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/errors.json",
     "files": [
@@ -51,6 +57,12 @@
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/products.json",
     "files": [
       "static/chunks/_pages-dir-browser_packages_locales_ar_products_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/profile.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/profile.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_profile_json.js"
     ]
   },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/common.json": {
@@ -77,6 +89,12 @@
       "static/chunks/_pages-dir-browser_packages_locales_en_common_json.js"
     ]
   },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/dashboard.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/dashboard.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_dashboard_json.js"
+    ]
+  },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/errors.json": {
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/errors.json",
     "files": [
@@ -93,6 +111,12 @@
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/products.json",
     "files": [
       "static/chunks/_pages-dir-browser_packages_locales_en_products_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/profile.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/profile.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_profile_json.js"
     ]
   }
 }

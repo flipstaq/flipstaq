@@ -9,6 +9,8 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import { ProductService } from './product.service';
@@ -103,5 +105,78 @@ export class ProductController {
   })
   async getProductsByUserId(@Param('userId') userId: string): Promise<ProductResponseDto[]> {
     return this.productService.getProductsByUserId(userId);
+  }
+
+  @Get('my-products')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get products created by the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'User products retrieved successfully',
+    type: [ProductResponseDto],
+  })
+  async getMyProducts(@Headers('x-user-id') userId: string): Promise<ProductResponseDto[]> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.productService.getProductsByUserId(userId);
+  }
+
+  @Put(':slug')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update a product' })
+  @ApiParam({ name: 'slug', description: 'Product slug' })
+  @ApiBody({ type: CreateProductDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Product successfully updated',
+    type: ProductResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - user can only update their own products',
+  })
+  async updateProduct(
+    @Param('slug') slug: string,
+    @Body() updateProductDto: CreateProductDto,
+    @Headers('x-user-id') userId: string,
+  ): Promise<ProductResponseDto> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.productService.updateProduct(slug, userId, updateProductDto);
+  }
+
+  @Delete(':slug')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a product' })
+  @ApiParam({ name: 'slug', description: 'Product slug' })
+  @ApiResponse({
+    status: 204,
+    description: 'Product successfully deleted',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - user can only delete their own products',
+  })
+  async deleteProduct(
+    @Param('slug') slug: string,
+    @Headers('x-user-id') userId: string,
+  ): Promise<void> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.productService.deleteProduct(slug, userId);
   }
 }

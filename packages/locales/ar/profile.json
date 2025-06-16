@@ -1,0 +1,23 @@
+{
+  "my_products": "منتجاتي",
+  "edit_product": "تعديل المنتج",
+  "delete_product": "حذف المنتج",
+  "confirm_delete": "هل أنت متأكد من حذف هذا المنتج؟",
+  "delete_confirmation": "تأكيد الحذف",
+  "product_deleted": "تم حذف المنتج بنجاح!",
+  "product_updated": "تم تحديث المنتج بنجاح!",
+  "no_products": "لم تقم بنشر أي منتجات بعد",
+  "start_selling": "ابدأ البيع عن طريق نشر منتجك الأول!",
+  "update_product": "تحديث المنتج",
+  "cancel": "إلغاء",
+  "save_changes": "حفظ التغييرات",
+  "deleting": "جاري الحذف...",
+  "updating": "جاري التحديث...",
+  "edit": "تعديل",
+  "delete": "حذف",
+  "status": "الحالة",
+  "active": "نشط",
+  "inactive": "غير نشط",
+  "posted_on": "تم النشر في",
+  "last_updated": "آخر تحديث"
+}

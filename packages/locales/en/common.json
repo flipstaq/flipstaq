@@ -31,5 +31,7 @@
   "admin": {
     "accessDenied": "Access Denied",
     "insufficientPermissions": "You don't have sufficient permissions to access this page."
-  }
+  },
+  "error": "Error",
+  "tryAgain": "Try Again"
 }

@@ -50,16 +50,27 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       let translationData: Translations = {};
       if (lang === 'en') {
         // Import all English translations
-        const [common, auth, home, products, errors, adminCommon, adminUsers] =
-          await Promise.all([
-            import('../../../../../packages/locales/en/common.json'),
-            import('../../../../../packages/locales/en/auth.json'),
-            import('../../../../../packages/locales/en/home.json'),
-            import('../../../../../packages/locales/en/products.json'),
-            import('../../../../../packages/locales/en/errors.json'),
-            import('../../../../../packages/locales/en/admin/common.json'),
-            import('../../../../../packages/locales/en/admin/users.json'),
-          ]);
+        const [
+          common,
+          auth,
+          home,
+          products,
+          errors,
+          profile,
+          dashboard,
+          adminCommon,
+          adminUsers,
+        ] = await Promise.all([
+          import('../../../../../packages/locales/en/common.json'),
+          import('../../../../../packages/locales/en/auth.json'),
+          import('../../../../../packages/locales/en/home.json'),
+          import('../../../../../packages/locales/en/products.json'),
+          import('../../../../../packages/locales/en/errors.json'),
+          import('../../../../../packages/locales/en/profile.json'),
+          import('../../../../../packages/locales/en/dashboard.json'),
+          import('../../../../../packages/locales/en/admin/common.json'),
+          import('../../../../../packages/locales/en/admin/users.json'),
+        ]);
 
         translationData = {
           common: common.default,
@@ -67,21 +78,34 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           home: home.default,
           products: products.default,
           errors: errors.default,
+          profile: profile.default,
+          dashboard: dashboard.default,
           'admin-common': adminCommon.default,
           'admin-users': adminUsers.default,
         };
       } else if (lang === 'ar') {
         // Import all Arabic translations
-        const [common, auth, home, products, errors, adminCommon, adminUsers] =
-          await Promise.all([
-            import('../../../../../packages/locales/ar/common.json'),
-            import('../../../../../packages/locales/ar/auth.json'),
-            import('../../../../../packages/locales/ar/home.json'),
-            import('../../../../../packages/locales/ar/products.json'),
-            import('../../../../../packages/locales/ar/errors.json'),
-            import('../../../../../packages/locales/ar/admin/common.json'),
-            import('../../../../../packages/locales/ar/admin/users.json'),
-          ]);
+        const [
+          common,
+          auth,
+          home,
+          products,
+          errors,
+          profile,
+          dashboard,
+          adminCommon,
+          adminUsers,
+        ] = await Promise.all([
+          import('../../../../../packages/locales/ar/common.json'),
+          import('../../../../../packages/locales/ar/auth.json'),
+          import('../../../../../packages/locales/ar/home.json'),
+          import('../../../../../packages/locales/ar/products.json'),
+          import('../../../../../packages/locales/ar/errors.json'),
+          import('../../../../../packages/locales/ar/profile.json'),
+          import('../../../../../packages/locales/ar/dashboard.json'),
+          import('../../../../../packages/locales/ar/admin/common.json'),
+          import('../../../../../packages/locales/ar/admin/users.json'),
+        ]);
 
         translationData = {
           common: common.default,
@@ -89,6 +113,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           home: home.default,
           products: products.default,
           errors: errors.default,
+          profile: profile.default,
+          dashboard: dashboard.default,
           'admin-common': adminCommon.default,
           'admin-users': adminUsers.default,
         };
