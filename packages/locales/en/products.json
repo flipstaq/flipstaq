@@ -56,7 +56,8 @@
     "category": "Enter category...",
     "price": "0.00",
     "slug": "my-awesome-product"
-  },  "modal": {
+  },
+  "modal": {
     "close": "Close",
     "loading": "Loading product details...",
     "error": "Failed to load product details",
@@ -72,7 +73,7 @@
   "detail": {
     "posted_by": "Posted by",
     "price": "Price",
-    "category": "Category", 
+    "category": "Category",
     "location": "Location",
     "posted_on": "Posted on",
     "message_seller": "Message Seller",

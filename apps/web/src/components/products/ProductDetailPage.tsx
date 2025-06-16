@@ -144,16 +144,16 @@ export function ProductDetailPage({
             <div className="mx-auto max-w-4xl">
               {/* Breadcrumb skeleton */}
               <div className="mb-6 h-4 w-64 animate-pulse rounded bg-secondary-200 dark:bg-secondary-700"></div>
-              
+
               {/* Main card skeleton */}
               <div className="overflow-hidden rounded-lg bg-white shadow-lg dark:bg-secondary-800">
                 {/* Image skeleton */}
                 <div className="h-64 animate-pulse bg-secondary-200 dark:bg-secondary-700 md:h-80"></div>
-                
+
                 <div className="p-6 md:p-8">
                   {/* Title skeleton */}
                   <div className="mb-4 h-8 w-3/4 animate-pulse rounded bg-secondary-200 dark:bg-secondary-700"></div>
-                  
+
                   {/* Seller info skeleton */}
                   <div className="mb-4 flex items-center">
                     <div className="h-10 w-10 animate-pulse rounded-full bg-secondary-200 dark:bg-secondary-700"></div>
@@ -162,17 +162,17 @@ export function ProductDetailPage({
                       <div className="h-4 w-24 animate-pulse rounded bg-secondary-200 dark:bg-secondary-700"></div>
                     </div>
                   </div>
-                  
+
                   {/* Meta info skeleton */}
                   <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div className="h-12 animate-pulse rounded bg-secondary-200 dark:bg-secondary-700"></div>
                     <div className="h-12 animate-pulse rounded bg-secondary-200 dark:bg-secondary-700"></div>
                     <div className="h-12 animate-pulse rounded bg-secondary-200 dark:bg-secondary-700"></div>
                   </div>
-                  
+
                   {/* Price skeleton */}
                   <div className="mb-6 h-20 animate-pulse rounded-lg bg-secondary-200 dark:bg-secondary-700"></div>
-                  
+
                   {/* Description skeleton */}
                   <div className="mb-6 space-y-3">
                     <div className="h-6 w-32 animate-pulse rounded bg-secondary-200 dark:bg-secondary-700"></div>
@@ -182,7 +182,7 @@ export function ProductDetailPage({
                       <div className="h-4 w-1/2 animate-pulse rounded bg-secondary-200 dark:bg-secondary-700"></div>
                     </div>
                   </div>
-                  
+
                   {/* Buttons skeleton */}
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <div className="h-12 flex-1 animate-pulse rounded-lg bg-secondary-200 dark:bg-secondary-700"></div>
@@ -301,32 +301,38 @@ export function ProductDetailPage({
               </button>
             </div>
           </div>
-        </div>        {/* Product Content */}
+        </div>{' '}
+        {/* Product Content */}
         <div className="container mx-auto px-4 py-8">
           <div className="mx-auto max-w-4xl">
-            
             {/* Breadcrumb */}
             <nav className="mb-6">
               <ol className="flex items-center space-x-2 text-sm text-secondary-500 dark:text-secondary-400 rtl:space-x-reverse">
                 <li>
-                  <Link href="/" className="hover:text-primary-600 dark:hover:text-primary-400">
+                  <Link
+                    href="/"
+                    className="hover:text-primary-600 dark:hover:text-primary-400"
+                  >
                     {t('common.home')}
                   </Link>
                 </li>
                 <li className="px-2">/</li>
                 <li>
-                  <span className="font-medium text-secondary-900 dark:text-secondary-100">@{product.username}</span>
+                  <span className="font-medium text-secondary-900 dark:text-secondary-100">
+                    @{product.username}
+                  </span>
                 </li>
                 <li className="px-2">/</li>
                 <li>
-                  <span className="font-medium text-secondary-900 dark:text-secondary-100">{product.slug}</span>
+                  <span className="font-medium text-secondary-900 dark:text-secondary-100">
+                    {product.slug}
+                  </span>
                 </li>
               </ol>
             </nav>
 
             {/* Main Product Card */}
             <div className="overflow-hidden rounded-lg bg-white shadow-lg dark:bg-secondary-800">
-              
               {/* Product Image Placeholder */}
               <div className="bg-secondary-100 dark:bg-secondary-700">
                 <div className="flex h-64 items-center justify-center md:h-80">
@@ -363,10 +369,11 @@ export function ProductDetailPage({
 
                   {/* Product Meta */}
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    
                     {/* Location */}
                     <div className="flex items-center">
-                      <MapPin className={`h-4 w-4 text-secondary-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                      <MapPin
+                        className={`h-4 w-4 text-secondary-400 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                      />
                       <div>
                         <p className="text-xs text-secondary-500 dark:text-secondary-400">
                           {t('products.detail.location')}
@@ -380,7 +387,9 @@ export function ProductDetailPage({
                     {/* Category */}
                     {product.category && (
                       <div className="flex items-center">
-                        <Package className={`h-4 w-4 text-secondary-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        <Package
+                          className={`h-4 w-4 text-secondary-400 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                        />
                         <div>
                           <p className="text-xs text-secondary-500 dark:text-secondary-400">
                             {t('products.detail.category')}
@@ -394,7 +403,9 @@ export function ProductDetailPage({
 
                     {/* Date Posted */}
                     <div className="flex items-center">
-                      <Calendar className={`h-4 w-4 text-secondary-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                      <Calendar
+                        className={`h-4 w-4 text-secondary-400 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                      />
                       <div>
                         <p className="text-xs text-secondary-500 dark:text-secondary-400">
                           {t('products.detail.posted_on')}
@@ -437,17 +448,21 @@ export function ProductDetailPage({
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <button className="flex-1 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600">
                     <div className="flex items-center justify-center">
-                      <MessageCircle className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                      <MessageCircle
+                        className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                      />
                       {t('products.detail.message_seller')}
                     </div>
                   </button>
-                  
+
                   <button
                     onClick={handleShare}
                     className="rounded-lg border border-secondary-300 px-6 py-3 font-medium text-secondary-700 transition-colors hover:bg-secondary-50 dark:border-secondary-600 dark:text-secondary-300 dark:hover:bg-secondary-700"
                   >
                     <div className="flex items-center justify-center">
-                      <Share2 className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                      <Share2
+                        className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                      />
                       {t('products.directLink.share')}
                     </div>
                   </button>
@@ -472,7 +487,9 @@ export function ProductDetailPage({
                       </span>
                     </div>
                     <button
-                      onClick={() => navigator.clipboard.writeText(getFullUrl())}
+                      onClick={() =>
+                        navigator.clipboard.writeText(getFullUrl())
+                      }
                       className="ml-3 rounded border border-primary-300 px-3 py-1 text-xs font-medium text-primary-600 hover:text-primary-500 dark:border-primary-600 dark:text-primary-400 rtl:ml-0 rtl:mr-3"
                     >
                       {t('products.directLink.copy')}
