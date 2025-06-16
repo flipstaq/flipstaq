@@ -3,5 +3,9 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/debug": "pages/debug.js"
+  "/auth/signin": "pages/auth/signin.js",
+  "/404": "pages/404.js",
+  "/api/products/[username]/[slug]": "pages/api/products/[username]/[slug].js",
+  "/admin": "pages/admin.js",
+  "/api/products": "pages/api/products.js"
 }

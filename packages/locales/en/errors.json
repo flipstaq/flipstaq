@@ -1,0 +1,14 @@
+{
+  "404_title": "404 - Page Not Found",
+  "404_message": "The page you're looking for doesn't exist or has been moved.",
+  "go_home": "Go back home",
+  "error_title": "Something went wrong.",
+  "error_message": "An unexpected error occurred. Please try again.",
+  "retry": "Try Again",
+  "reload_page": "Reload Page",
+  "go_back": "Go Back",
+  "contact_us": "contact us",
+  "contact_support": "contact support",
+  "if_mistake": "If you think this is a mistake, please",
+  "if_persists": "If this error persists, please"
+}

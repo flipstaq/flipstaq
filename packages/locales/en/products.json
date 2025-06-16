@@ -52,5 +52,13 @@
     "category": "Enter category...",
     "price": "0.00",
     "slug": "my-awesome-product"
+  },
+  "modal": {
+    "close": "Close",
+    "loading": "Loading product details...",
+    "error": "Failed to load product details",
+    "postedBy": "Posted by",
+    "datePosted": "Date Posted",
+    "fullUrl": "Full URL"
   }
 }

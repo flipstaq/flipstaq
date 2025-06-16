@@ -22,10 +22,9 @@ interface Product {
 
 interface ProductsListProps {
   limit?: number;
-  showHeader?: boolean;
 }
 
-export function ProductsList({ limit, showHeader = true }: ProductsListProps) {
+export function ProductsList({ limit }: ProductsListProps) {
   const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,19 +97,8 @@ export function ProductsList({ limit, showHeader = true }: ProductsListProps) {
       </div>
     );
   }
-
   return (
     <div>
-      {showHeader && (
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100">
-            Latest Products
-          </h2>
-          <p className="mt-2 text-secondary-600 dark:text-secondary-400">
-            Discover amazing products from our community
-          </p>
-        </div>
-      )}{' '}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((product) => (
           <ProductCard
@@ -119,7 +107,7 @@ export function ProductsList({ limit, showHeader = true }: ProductsListProps) {
             onProductClick={handleProductClick}
           />
         ))}
-      </div>{' '}
+      </div>
       {/* Product Detail Modal */}
       {selectedProduct && (
         <ProductDetailModal

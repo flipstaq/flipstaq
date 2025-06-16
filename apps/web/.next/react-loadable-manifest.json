@@ -35,6 +35,24 @@
       "static/chunks/_pages-dir-browser_packages_locales_ar_common_json.js"
     ]
   },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/errors.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/errors.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_errors_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/home.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/home.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_home_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/products.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/products.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_products_json.js"
+    ]
+  },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/common.json": {
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/common.json",
     "files": [
@@ -57,6 +75,24 @@
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/common.json",
     "files": [
       "static/chunks/_pages-dir-browser_packages_locales_en_common_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/errors.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/errors.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_errors_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/home.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/home.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_home_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/products.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/products.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_products_json.js"
     ]
   }
 }

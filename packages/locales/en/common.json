@@ -19,6 +19,7 @@
   "help": "Help Center",
   "privacy": "Privacy Policy",
   "terms": "Terms of Service",
+  "search": "Search",
   "auth": {
     "loginRequired": "Login Required",
     "redirectingToLogin": "Redirecting to login page..."

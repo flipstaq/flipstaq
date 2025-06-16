@@ -1,153 +1,122 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, Users, Globe, Shield } from 'lucide-react';
+import { Search, Users } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { ProductsList } from '@/components/products/ProductsList';
 
 export function HomePage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [userCount, setUserCount] = useState(0);
 
-  const features = [
-    {
-      icon: ShoppingBag,
-      title: 'Multi-Vendor Marketplace',
-      description:
-        'Connect buyers and sellers in a comprehensive eCommerce platform',
-    },
-    {
-      icon: Users,
-      title: 'User Management',
-      description:
-        'Advanced role-based access control for different user types',
-    },
-    {
-      icon: Globe,
-      title: 'Global Reach',
-      description: 'Support for multiple languages and international commerce',
-    },
-    {
-      icon: Shield,
-      title: 'Secure Platform',
-      description: 'Enterprise-grade security and data protection',
-    },
-  ];
+  const isRTL = language === 'ar';
+
+  // Mock user count - replace with real API call later
+  useEffect(() => {
+    // Simulating API call for user count
+    const fetchUserCount = async () => {
+      try {
+        // TODO: Replace with real API call to /api/users/count
+        // const response = await fetch('/api/users/count');
+        // const data = await response.json();
+        // setUserCount(data.count);
+
+        // Mock data for now
+        setUserCount(3450);
+      } catch (error) {
+        console.error('Error fetching user count:', error);
+        setUserCount(3450); // Fallback number
+      }
+    };
+
+    fetchUserCount();
+  }, []);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement search functionality
+    console.log('Search query:', searchQuery);
+  };
 
   return (
-    <div className="bg-white dark:bg-secondary-900">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="mx-auto max-w-7xl">
-          <div className="relative z-10 bg-white pb-8 dark:bg-secondary-900 sm:pb-16 md:pb-20 lg:w-full lg:max-w-2xl lg:pb-28 xl:pb-32">
-            <main className="mx-auto mt-10 max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-              <div className="sm:text-center lg:text-left">
-                <h1 className="text-4xl font-bold tracking-tight text-secondary-900 dark:text-secondary-100 sm:text-5xl md:text-6xl">
-                  <span className="block xl:inline">{t('welcome')}</span>
-                  <span className="block text-primary-600 xl:inline">
-                    {' '}
-                    FlipStaq
-                  </span>
-                </h1>
-                <p className="mt-3 text-base text-secondary-500 dark:text-secondary-400 sm:mx-auto sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl lg:mx-0">
-                  A modern multi-vendor eCommerce platform built for the global
-                  marketplace. Connect, trade, and grow your business with
-                  confidence.
-                </p>
-                <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                  <div className="rounded-md shadow">
-                    <Link
-                      href="/auth/signup"
-                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary-600 px-8 py-3 text-base font-medium text-white transition-colors duration-200 hover:bg-primary-700 md:px-10 md:py-4 md:text-lg"
-                    >
-                      {t('signUp')}
-                    </Link>
-                  </div>
-                  <div className="mt-3 sm:ml-3 sm:mt-0">
-                    <Link
-                      href="/products"
-                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary-100 px-8 py-3 text-base font-medium text-primary-700 transition-colors duration-200 hover:bg-primary-200 dark:bg-primary-800 dark:text-primary-100 dark:hover:bg-primary-700 md:px-10 md:py-4 md:text-lg"
-                    >
-                      Browse Products
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </main>
+    <div className="min-h-screen bg-white dark:bg-secondary-900">
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-primary-50 to-primary-100 py-16 dark:from-secondary-800 dark:to-secondary-700">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold tracking-tight text-secondary-900 dark:text-secondary-100 sm:text-5xl md:text-6xl">
+              <span className="block">{t('welcome')}</span>
+              <span className="block text-primary-600 dark:text-primary-400">
+                FlipStaq
+              </span>
+            </h1>
+            <p className="mx-auto mt-3 max-w-md text-base text-secondary-500 dark:text-secondary-400 sm:text-lg md:mt-5 md:max-w-3xl md:text-xl">
+              {t('home.discover_products')}
+            </p>
           </div>
         </div>
-        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-          <div className="flex h-56 w-full items-center justify-center bg-gradient-to-r from-primary-400 to-primary-600 sm:h-72 md:h-96 lg:h-full lg:w-full">
-            <div className="text-center text-white">
-              <ShoppingBag className="mx-auto mb-4 h-24 w-24" />
-              <p className="text-lg font-medium">Your Global Marketplace</p>
+      </div>
+
+      {/* User Count Section */}
+      <div className="border-b border-secondary-200 bg-white py-8 dark:border-secondary-700 dark:bg-secondary-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="inline-flex items-center space-x-2 rounded-full bg-primary-50 px-4 py-2 text-primary-600 dark:bg-primary-900 dark:text-primary-300 rtl:space-x-reverse">
+              <Users className="h-5 w-5" />
+              <span className="text-sm font-medium">
+                {t('home.user_count_text', {
+                  count: userCount.toLocaleString(),
+                })}
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="bg-secondary-50 py-12 dark:bg-secondary-800">
+      {/* Search Section */}
+      <div className="bg-white py-8 dark:bg-secondary-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="lg:text-center">
-            <h2 className="text-base font-semibold uppercase tracking-wide text-primary-600">
-              Features
-            </h2>
-            <p className="mt-2 text-3xl font-bold leading-8 tracking-tight text-secondary-900 dark:text-secondary-100 sm:text-4xl">
-              Everything you need to succeed
-            </p>
-            <p className="mt-4 max-w-2xl text-xl text-secondary-500 dark:text-secondary-400 lg:mx-auto">
-              Built with modern technologies and best practices for scalability
-              and performance.
-            </p>
+          <div className="mx-auto max-w-3xl">
+            <form onSubmit={handleSearchSubmit} className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 rtl:left-auto rtl:right-0 rtl:pr-3">
+                <Search
+                  className="h-5 w-5 text-secondary-400"
+                  aria-hidden="true"
+                />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className={`block w-full rounded-lg border border-secondary-300 bg-white py-4 text-secondary-900 placeholder-secondary-500 focus:border-primary-500 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder-secondary-400 sm:text-sm ${
+                  isRTL ? 'pr-10 text-right' : 'pl-10'
+                }`}
+                placeholder={t('home.search_placeholder')}
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center rtl:left-0 rtl:right-auto">
+                <button
+                  type="submit"
+                  className="mr-3 rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rtl:ml-3 rtl:mr-0"
+                >
+                  {t('search')}
+                </button>
+              </div>
+            </form>
           </div>
-          <div className="mt-10">
-            <dl className="space-y-10 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10 md:space-y-0">
-              {features.map((feature) => (
-                <div key={feature.title} className="relative">
-                  <dt>
-                    <div className="absolute flex h-12 w-12 items-center justify-center rounded-md bg-primary-500 text-white">
-                      <feature.icon className="h-6 w-6" aria-hidden="true" />
-                    </div>
-                    <p className="ml-16 text-lg font-medium leading-6 text-secondary-900 dark:text-secondary-100">
-                      {feature.title}
-                    </p>
-                  </dt>
-                  <dd className="ml-16 mt-2 text-base text-secondary-500 dark:text-secondary-400">
-                    {feature.description}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>{' '}
         </div>
       </div>
 
       {/* Products Section */}
       <div className="bg-white py-16 dark:bg-secondary-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ProductsList limit={8} />
-          <div className="mt-12 text-center">
-            <Link
-              href="/products"
-              className="inline-flex items-center rounded-md border border-transparent bg-primary-100 px-6 py-3 text-base font-medium text-primary-600 transition-colors duration-200 hover:bg-primary-200 dark:bg-primary-800 dark:text-primary-100 dark:hover:bg-primary-700"
-            >
-              View All Products
-              <svg
-                className="ml-2 h-5 w-5 rtl:ml-0 rtl:mr-2 rtl:rotate-180"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </Link>
-          </div>
+          {' '}
+          <ProductsList />
         </div>
       </div>
 

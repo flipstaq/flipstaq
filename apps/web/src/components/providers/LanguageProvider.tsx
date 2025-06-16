@@ -48,34 +48,47 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const loadTranslations = async (lang: Language) => {
     try {
       let translationData: Translations = {};
-
       if (lang === 'en') {
         // Import all English translations
-        const [common, auth, adminCommon, adminUsers] = await Promise.all([
-          import('../../../../../packages/locales/en/common.json'),
-          import('../../../../../packages/locales/en/auth.json'),
-          import('../../../../../packages/locales/en/admin/common.json'),
-          import('../../../../../packages/locales/en/admin/users.json'),
-        ]);
+        const [common, auth, home, products, errors, adminCommon, adminUsers] =
+          await Promise.all([
+            import('../../../../../packages/locales/en/common.json'),
+            import('../../../../../packages/locales/en/auth.json'),
+            import('../../../../../packages/locales/en/home.json'),
+            import('../../../../../packages/locales/en/products.json'),
+            import('../../../../../packages/locales/en/errors.json'),
+            import('../../../../../packages/locales/en/admin/common.json'),
+            import('../../../../../packages/locales/en/admin/users.json'),
+          ]);
 
         translationData = {
           common: common.default,
           auth: auth.default,
+          home: home.default,
+          products: products.default,
+          errors: errors.default,
           'admin-common': adminCommon.default,
           'admin-users': adminUsers.default,
         };
       } else if (lang === 'ar') {
         // Import all Arabic translations
-        const [common, auth, adminCommon, adminUsers] = await Promise.all([
-          import('../../../../../packages/locales/ar/common.json'),
-          import('../../../../../packages/locales/ar/auth.json'),
-          import('../../../../../packages/locales/ar/admin/common.json'),
-          import('../../../../../packages/locales/ar/admin/users.json'),
-        ]);
+        const [common, auth, home, products, errors, adminCommon, adminUsers] =
+          await Promise.all([
+            import('../../../../../packages/locales/ar/common.json'),
+            import('../../../../../packages/locales/ar/auth.json'),
+            import('../../../../../packages/locales/ar/home.json'),
+            import('../../../../../packages/locales/ar/products.json'),
+            import('../../../../../packages/locales/ar/errors.json'),
+            import('../../../../../packages/locales/ar/admin/common.json'),
+            import('../../../../../packages/locales/ar/admin/users.json'),
+          ]);
 
         translationData = {
           common: common.default,
           auth: auth.default,
+          home: home.default,
+          products: products.default,
+          errors: errors.default,
           'admin-common': adminCommon.default,
           'admin-users': adminUsers.default,
         };
@@ -107,6 +120,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       const [ns, k] = key.split(':');
       actualNamespace = ns.replace('/', '-'); // Convert admin/users to admin-users
       actualKey = k;
+    } else if (key.includes('.') && !namespace) {
+      // Handle dot-notation namespace prefix like "home.user_count_text"
+      const parts = key.split('.');
+      if (parts.length > 1 && translations[parts[0]]) {
+        actualNamespace = parts[0];
+        actualKey = parts.slice(1).join('.');
+      }
     }
 
     const keys = actualKey.split('.');
