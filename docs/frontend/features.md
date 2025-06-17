@@ -533,43 +533,110 @@ The reviews system is integrated into the product detail page (`ProductDetailPag
 
 #### Overview
 
-The product management system supports updating products with new images through a multipart form data upload process.
+The product management system supports updating products with new images through a multipart form data upload process. The system uses a dual-routing approach to handle both image and text-only updates efficiently.
 
-#### Fix: Product Image Update Issue (June 2025)
+#### Architecture
 
-**Problem:** When updating a product and changing its image, the API route parsed the image but did not forward it to the API Gateway or product service.
+**Dual Routing Strategy:**
 
-**Solution:** Modified the Next.js API route `/api/products/manage/[slug].ts` to properly handle multipart form data and forward image files to the API Gateway.
+- **With Image**: Multipart FormData → API Gateway (port 3100) → Product Service
+- **Without Image**: JSON → Product Service (port 3004) directly
 
-**Changes Made:**
+#### Implementation Details
 
-1. **Fixed formidable filter**: Updated to accept both image files and other form fields
-2. **Added FormData forwarding**: Used `form-data` package to create multipart data for API Gateway
-3. **Image streaming**: Properly streams image files using `fs.createReadStream()`
-4. **Header management**: Includes proper multipart headers with boundary
+**API Route:** `/api/products/manage/[slug].ts`
 
-**Technical Details:**
+**Dependencies:**
 
-- Uses `formidable` to parse incoming multipart data
-- Creates new `FormData` instance with `form-data` package
-- Streams image file from temporary location to API Gateway
-- Maintains all form fields during transfer
-- Preserves original filename and content type
+- `formidable` - Parse multipart form data
+- `form-data` - Create Node.js multipart streams
+- `axios` - HTTP client with better multipart support
+- `fs` - File system operations
 
-**Files Modified:**
+**Request Flow:**
+
+1. **Parse Request**: Uses `formidable` to parse multipart form data
+2. **Route Decision**: Checks if image file is present
+3. **Image Present**:
+   - Creates `FormData` using `form-data` package
+   - Streams image file using `fs.createReadStream()`
+   - Sends via `axios.put()` to API Gateway
+   - API Gateway handles with `FileInterceptor`
+4. **No Image**:
+   - Extracts user ID from JWT token
+   - Sends JSON directly to Product Service
+   - Bypasses FileInterceptor complications
+
+#### Fix History: "Unexpected end of form" Error (June 2025)
+
+**Problem:** When updating products (especially without images), the API route was sending malformed multipart data to the API Gateway, causing "Multipart: Unexpected end of form" errors.
+
+**Root Causes:**
+
+1. Empty FormData objects being sent to FileInterceptor endpoints
+2. Node.js `fetch` + `form-data` compatibility issues
+3. Incorrect port routing (3003 vs 3004)
+4. Missing internal service authentication headers
+
+**Solutions Applied:**
+
+1. **Dual Routing Architecture**
+
+   - Separate paths for image vs. text-only updates
+   - Conditional logic based on file presence
+
+2. **HTTP Client Upgrade**
+
+   - Switched from `fetch` to `axios` for multipart requests
+   - Better `form-data` package compatibility
+
+3. **Direct Service Access**
+
+   - Text-only updates bypass API Gateway
+   - Direct calls to Product Service (port 3004)
+   - Proper internal service headers
+
+4. **Authentication Handling**
+   - JWT token decoding for user identification
+   - Proper internal service headers:
+     - `x-internal-service: 'true'`
+     - `x-api-gateway: 'flipstaq-gateway'`
+     - `x-user-id: <userId>`
+
+#### API Endpoints
+
+**Image Updates:**
+
+- Route: API Gateway → `PUT /api/v1/products/:slug`
+- Content-Type: `multipart/form-data`
+- Client: `axios` with `form-data`
+
+**Text-Only Updates:**
+
+- Route: Product Service → `PUT /internal/products/:slug`
+- Content-Type: `application/json`
+- Client: `fetch`
+
+#### Error Handling
+
+- JWT decode failures → 401 Unauthorized
+- Missing files → 400 Bad Request
+- Service errors → Proxied status codes
+- Authentication failures → 401/403 responses
+
+#### Files Modified
 
 - `/apps/web/src/pages/api/products/manage/[slug].ts`
+- `/apps/web/package.json` (axios dependency)
 
-**Dependencies Added:**
+#### Testing
 
-- `form-data` package for Node.js multipart handling
+The system supports:
 
-**API Flow:**
-
-1. Frontend sends multipart form data with image and fields
-2. Next.js API route parses data with formidable
-3. API route creates new FormData and streams image file
-4. API Gateway receives multipart data with FileInterceptor
-5. API Gateway processes image and forwards to product service
+- ✅ Product updates with new images
+- ✅ Product updates without image changes
+- ✅ Proper error handling and validation
+- ✅ User authentication and authorization
+- ✅ File type and size validation (5MB limit)
 
 ---

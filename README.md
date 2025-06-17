@@ -460,3 +460,41 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - ✅ **Global Architecture**: Updated with current implementation status
 - ✅ **Feature Documentation**: Complete reviews system documentation
 - ✅ **Fix Documentation**: Detailed routing conflict resolution
+
+## 🔧 Recent Fixes & Updates
+
+### Product Image Update System (June 2025)
+
+**Issue**: "Multipart: Unexpected end of form" errors when updating products
+**Status**: ✅ **RESOLVED**
+
+**Solution**: Implemented dual routing architecture:
+
+- **Image uploads**: API Gateway with FileInterceptor + axios multipart handling
+- **Text-only updates**: Direct Product Service calls with JSON payload
+
+**Key Improvements**:
+
+- ✅ Reliable product updates with or without image changes
+- ✅ Better error handling and validation
+- ✅ Optimized routing for different content types
+- ✅ Comprehensive authentication for both routing paths
+
+**Documentation**: See [`docs/troubleshooting/product-image-update-fix.md`](./docs/troubleshooting/product-image-update-fix.md)
+
+### Reviews and Ratings System
+
+**Status**: ✅ **IMPLEMENTED**
+
+**Features**:
+
+- ✅ Product reviews with 1-5 star ratings
+- ✅ Review management (create, read, update, delete)
+- ✅ Average rating calculation and display
+- ✅ Review statistics on product cards and dashboard
+- ✅ User authentication and ownership validation
+- ✅ Internationalization support (English/Arabic)
+
+**Components**: ReviewForm, ReviewList, ReviewsSection, StarRating
+**API Endpoints**: Review CRUD operations with productId-based routing
+**Integration**: Product detail pages, dashboard statistics, product cards

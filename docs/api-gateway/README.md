@@ -283,3 +283,37 @@ export class AuthGatewayController {
 - Product-specific operations remain at `/api/products/[slug]/`
 
 **Impact**: All frontend components updated to use new route structure. Backend Gateway routes remain unchanged.
+
+## 📝 Product Management Routing
+
+### Dual Routing Strategy
+
+The API Gateway implements a dual routing strategy for product updates to handle both image uploads and text-only updates efficiently:
+
+#### Image Upload Path
+
+- **Route**: `PUT /api/v1/products/:slug`
+- **Content-Type**: `multipart/form-data`
+- **Handler**: Uses `FileInterceptor` for image processing
+- **Source**: Next.js API route with `axios` + `form-data`
+
+#### Text-Only Update Path
+
+- **Route**: Bypassed - Direct to Product Service
+- **Destination**: `PUT http://localhost:3004/internal/products/:slug`
+- **Content-Type**: `application/json`
+- **Source**: Next.js API route with direct `fetch`
+
+### Why Dual Routing?
+
+1. **FileInterceptor Limitations**: NestJS FileInterceptor expects proper multipart data
+2. **Form-Data Complexity**: Node.js `form-data` package requires specific handling
+3. **Performance**: Text-only updates don't need multipart processing
+4. **Reliability**: Separate paths reduce "Unexpected end of form" errors
+
+### Implementation Notes
+
+- **Image Detection**: Next.js API route checks for `files.image` presence
+- **Authentication**: Both paths require proper JWT tokens and internal service headers
+- **Error Handling**: Consistent error responses across both routing strategies
+- **Validation**: File type/size validation maintained for image uploads

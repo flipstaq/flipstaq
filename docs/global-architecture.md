@@ -673,6 +673,70 @@ This pattern provides:
 - **Security**: Frontend routes can add additional validation/auth
 - **Flexibility**: Can modify proxy behavior without changing components
 
+## 🔄 Request Routing Patterns
+
+### Standard API Gateway Pattern
+
+Most requests follow the traditional API Gateway pattern:
+
+```
+Frontend → API Gateway → Microservice → Database
+```
+
+**Example**: User authentication, product listing, reviews
+
+### Dual Routing Pattern (Product Updates)
+
+Product updates use a specialized dual routing pattern to handle different content types efficiently:
+
+#### Image Upload Requests
+
+```
+Frontend (FormData) → Next.js API Route → API Gateway (FileInterceptor) → Product Service → Database
+```
+
+**Characteristics**:
+
+- Content-Type: `multipart/form-data`
+- Uses `axios` + `form-data` package
+- Handles file streaming and validation
+- Requires specialized NestJS FileInterceptor
+
+#### Text-Only Update Requests
+
+```
+Frontend (FormData) → Next.js API Route → Product Service (Direct) → Database
+```
+
+**Characteristics**:
+
+- Content-Type: `application/json`
+- Bypasses API Gateway for efficiency
+- Direct internal service communication
+- Requires internal service authentication headers
+
+### Why Dual Routing?
+
+1. **Technical Constraints**: NestJS FileInterceptor has strict multipart requirements
+2. **Performance**: Text-only updates don't need file processing overhead
+3. **Reliability**: Separate paths prevent "Unexpected end of form" errors
+4. **Maintainability**: Clear separation of concerns between file and data updates
+
+### Authentication in Both Patterns
+
+**API Gateway Route**:
+
+- JWT Bearer token in Authorization header
+- API Gateway validates and forwards with internal headers
+
+**Direct Service Route**:
+
+- JWT token decoded by Next.js API route
+- Internal service headers manually set:
+  - `x-internal-service: 'true'`
+  - `x-api-gateway: 'flipstaq-gateway'`
+  - `x-user-id: <decoded-user-id>`
+
 ````
 
 ### 2. Service Development Process
