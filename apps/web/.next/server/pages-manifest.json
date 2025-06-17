@@ -2,8 +2,15 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/": "pages/index.js",
+  "/api/products": "pages/api/products.js",
+  "/api/favorites": "pages/api/favorites.js",
   "/dashboard": "pages/dashboard.js",
+  "/api/dashboard/stats": "pages/api/dashboard/stats.js",
+  "/api/products/my-products": "pages/api/products/my-products.js",
+  "/api/favorites/[productId]": "pages/api/favorites/[productId].js",
+  "/favorites": "pages/favorites.js",
+  "/[...params]": "pages/[...params].js",
   "/404": "pages/404.js",
-  "/admin": "pages/admin.js",
-  "/[...params]": "pages/[...params].js"
+  "/admin": "pages/admin.js"
 }

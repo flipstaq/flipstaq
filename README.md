@@ -516,3 +516,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 **Components**: ReviewForm, ReviewList, ReviewsSection, StarRating
 **API Endpoints**: Review CRUD operations with productId-based routing
 **Integration**: Product detail pages, dashboard statistics, product cards
+
+# Installing Guide
+
+Just run npm install --legacy-peer-deps, and then npm run dev, thats it
+
+- Some microservice/app might have special dependencies that require them to have their own node modules.
