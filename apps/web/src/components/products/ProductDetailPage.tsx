@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import Link from 'next/link';
 import Head from 'next/head';
 
@@ -26,6 +27,7 @@ interface ProductDetail {
   category: string | null;
   slug: string;
   username: string;
+  userId: string;
   imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -111,7 +113,7 @@ export function ProductDetailPage({
     setError(null);
 
     try {
-      const response = await fetch(`/api/products/${username}/${slug}`);
+      const response = await fetch(`/api/users/${username}/products/${slug}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -255,9 +257,8 @@ export function ProductDetailPage({
     <>
       {' '}
       <Head>
-        <title>
-          {product.title} by @{product.username} - Flipstaq
-        </title>
+        {' '}
+        <title>{`${product.title} by @${product.username} - Flipstaq`}</title>
         <meta
           name="description"
           content={
@@ -522,6 +523,15 @@ export function ProductDetailPage({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Reviews Section */}
+          <div className="mt-8 border-t border-secondary-200 pt-8 dark:border-secondary-700">
+            <ReviewsSection
+              productId={product.id}
+              productSlug={product.slug}
+              productOwnerId={product.userId}
+            />
           </div>
         </div>
       </div>

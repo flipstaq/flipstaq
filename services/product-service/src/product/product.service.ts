@@ -95,8 +95,7 @@ export class ProductService {
 
   /**
    * Get all products (for homepage listing)
-   */
-  async getAllProducts(): Promise<ProductResponseDto[]> {
+   */ async getAllProducts(): Promise<ProductResponseDto[]> {
     const products = await this.prisma.product.findMany({
       where: {
         isActive: true,
@@ -107,29 +106,45 @@ export class ProductService {
             username: true,
           },
         },
+        reviews: {
+          select: {
+            rating: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
 
-    return products.map((product) => ({
-      id: product.id,
-      title: product.title,
-      description: product.description,
-      category: product.category,
-      price: product.price,
-      currency: product.currency,
-      location: product.location,
-      slug: product.slug,
-      imageUrl: product.imageUrl,
-      userId: product.userId,
-      username: product.user.username,
-      isActive: product.isActive,
-      isSold: product.isSold || false,
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-    }));
+    return products.map((product) => {
+      // Calculate review statistics
+      const totalReviews = product.reviews.length;
+      const averageRating =
+        totalReviews > 0
+          ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+          : 0;
+
+      return {
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        currency: product.currency,
+        location: product.location,
+        slug: product.slug,
+        imageUrl: product.imageUrl,
+        userId: product.userId,
+        username: product.user.username,
+        isActive: product.isActive,
+        isSold: product.isSold || false,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        averageRating,
+        totalReviews,
+      };
+    });
   }
 
   /**
@@ -177,8 +192,7 @@ export class ProductService {
 
   /**
    * Get products by user ID (for "My Products" section)
-   */
-  async getProductsByUserId(userId: string): Promise<ProductResponseDto[]> {
+   */ async getProductsByUserId(userId: string): Promise<ProductResponseDto[]> {
     const products = await this.prisma.product.findMany({
       where: {
         userId,
@@ -190,29 +204,45 @@ export class ProductService {
             username: true,
           },
         },
+        reviews: {
+          select: {
+            rating: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
 
-    return products.map((product) => ({
-      id: product.id,
-      title: product.title,
-      description: product.description,
-      category: product.category,
-      price: product.price,
-      currency: product.currency,
-      location: product.location,
-      slug: product.slug,
-      imageUrl: product.imageUrl,
-      userId: product.userId,
-      username: product.user.username,
-      isActive: product.isActive,
-      isSold: product.isSold || false,
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-    }));
+    return products.map((product) => {
+      // Calculate review statistics
+      const totalReviews = product.reviews.length;
+      const averageRating =
+        totalReviews > 0
+          ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+          : 0;
+
+      return {
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        currency: product.currency,
+        location: product.location,
+        slug: product.slug,
+        imageUrl: product.imageUrl,
+        userId: product.userId,
+        username: product.user.username,
+        isActive: product.isActive,
+        isSold: product.isSold || false,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        averageRating,
+        totalReviews,
+      };
+    });
   }
 
   /**
@@ -347,7 +377,6 @@ export class ProductService {
       },
     });
   }
-
   /**
    * Get dashboard statistics for a user
    */
@@ -367,6 +396,25 @@ export class ProductService {
         isActive: false,
       },
     });
+
+    // Get review statistics for user's products
+    const reviewStats = await this.prisma.review.aggregate({
+      where: {
+        product: {
+          userId: userId,
+          isActive: true,
+        },
+      },
+      _count: {
+        id: true,
+      },
+      _avg: {
+        rating: true,
+      },
+    });
+
+    const totalReviews = reviewStats._count.id || 0;
+    const averageRating = reviewStats._avg.rating || 0;
 
     // Get last created product
     const lastProduct = await this.prisma.product.findFirst({
@@ -391,6 +439,8 @@ export class ProductService {
       totalProducts,
       totalViews,
       deletedProducts,
+      totalReviews,
+      averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
       lastProduct: lastProduct
         ? {
             name: lastProduct.title,

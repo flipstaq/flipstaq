@@ -7,6 +7,8 @@ interface DashboardStats {
   totalProducts: number;
   totalViews: number;
   deletedProducts: number;
+  totalReviews: number;
+  averageRating: number;
   lastProduct: {
     name: string;
     createdAt: string;

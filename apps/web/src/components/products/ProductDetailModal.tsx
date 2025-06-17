@@ -77,7 +77,7 @@ export function ProductDetailModal({
     setError(null);
 
     try {
-      const response = await fetch(`/api/products/${username}/${slug}`);
+      const response = await fetch(`/api/users/${username}/products/${slug}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch product details');

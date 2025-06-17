@@ -18,5 +18,10 @@
   "sold": "مباع",
   "available": "متاح",
   "product_marked_sold": "تم تعيين المنتج كمباع",
-  "product_marked_available": "تم تعيين المنتج كمتاح"
+  "product_marked_available": "تم تعيين المنتج كمتاح",
+  "total_reviews": "إجمالي التقييمات",
+  "average_rating": "متوسط التقييم",
+  "from": "من",
+  "reviews": "تقييم",
+  "no_reviews_yet": "لا توجد تقييمات بعد"
 }

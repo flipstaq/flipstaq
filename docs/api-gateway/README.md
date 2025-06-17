@@ -265,3 +265,21 @@ export class AuthGatewayController {
 - Load balancing for multiple service instances
 - API analytics and monitoring
 - WebSocket support for real-time features
+
+## Recent Updates & Fixes
+
+### API Route Restructuring (June 2025)
+
+**Issue Resolved**: Fixed Next.js routing conflict in frontend API routes.
+
+**Problem**: Conflicting dynamic routes at the same level:
+
+- `/api/products/[slug]/` (for reviews)
+- `/api/products/[username]/` (for user products)
+
+**Solution**: Restructured routes to eliminate conflicts:
+
+- User-specific products moved to `/api/users/[username]/products/[slug]`
+- Product-specific operations remain at `/api/products/[slug]/`
+
+**Impact**: All frontend components updated to use new route structure. Backend Gateway routes remain unchanged.

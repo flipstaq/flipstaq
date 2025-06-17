@@ -224,10 +224,10 @@ model User {
   refreshToken    String?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
-
   // Relations
   products        Product[]
   favorites       Favorite[]
+  reviews         Review[]
 }
 
 model Product {
@@ -245,10 +245,10 @@ model Product {
   isSold      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
   // Relations
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   favorites   Favorite[]
+  reviews     Review[]
 
   @@unique([userId, slug])
 }
@@ -263,6 +263,21 @@ model Favorite {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1–5
+  comment   String
+  productId String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId]) // One review per user per product
 }
 
 enum Role {
@@ -593,6 +608,71 @@ curl -X POST http://localhost:3001/internal/auth/signup \
 
 cd apps/web && npm run dev
 
+## Frontend API Route Architecture
+
+### Route Organization
+
+The frontend uses a carefully organized API route structure to avoid conflicts and provide clear separation of concerns:
+
+```
+/api/
+├── products/
+│   ├── index.ts                    # Get all products, create products
+│   ├── my-products.ts              # Current user's products
+│   └── [slug]/
+│       ├── reviews.ts              # All reviews for a product
+│       └── user-review.ts          # Current user's review for a product
+├── users/
+│   └── [username]/
+│       └── products/
+│           └── [slug].ts           # Get product by username and slug
+├── reviews/
+│   ├── index.ts                    # Create review, get user reviews
+│   └── [reviewId].ts               # Update/delete specific review
+├── favorites/
+│   ├── index.ts                    # Get favorites, add favorite
+│   └── [productId].ts              # Remove specific favorite
+├── auth/
+│   ├── login.ts                    # User authentication
+│   ├── signup.ts                   # User registration
+│   └── logout.ts                   # User logout
+└── dashboard/
+    └── stats.ts                    # Dashboard statistics
+```
+
+### Recent Routing Fix (June 2025)
+
+**Issue Resolved**: Fixed Next.js dynamic route conflict.
+
+**Problem**: Conflicting parameter names at the same route level:
+
+- `/api/products/[slug]/` and `/api/products/[username]/` caused Next.js error
+
+**Solution**: Restructured routes to eliminate conflicts:
+
+- User-specific product routes moved to `/api/users/[username]/products/[slug]`
+- Product-specific operations remain at `/api/products/[slug]/`
+
+**Components Updated**:
+
+- `ProductDetailPage.tsx` now uses `/api/users/${username}/products/${slug}`
+- `ProductDetailModal.tsx` now uses `/api/users/${username}/products/${slug}`
+
+### API Proxy Pattern
+
+All frontend API routes act as proxies to the API Gateway:
+
+1. **Frontend Route**: `/api/products` → **Gateway**: `/api/v1/products`
+2. **Frontend Route**: `/api/auth/login` → **Gateway**: `/api/v1/auth/login`
+3. **Frontend Route**: `/api/reviews` → **Gateway**: `/api/v1/products/reviews`
+
+This pattern provides:
+
+- **Simplified Frontend**: Clean route structure for components
+- **Centralized Logic**: All business logic remains in microservices
+- **Security**: Frontend routes can add additional validation/auth
+- **Flexibility**: Can modify proxy behavior without changing components
+
 ````
 
 ### 2. Service Development Process
@@ -611,7 +691,7 @@ cd apps/web && npm run dev
 
 ```bash
 cd services/auth-service && npm test
-````
+```
 
 **Integration Tests**: Service-to-service communication
 
@@ -780,8 +860,8 @@ flipstaq/
 
 ---
 
-**Last Updated**: June 13, 2025  
-**Implementation Status**: Phase 1 Complete - Authentication and API Gateway  
+**Last Updated**: June 13, 2025
+**Implementation Status**: Phase 1 Complete - Authentication and API Gateway
 **Next Milestone**: User Service Implementation
 ├── Payment Service (2+ instances)
 └── Database Cluster (Primary + Read Replicas)
@@ -818,102 +898,4 @@ GET /health/deps # External dependencies
   "userId": "user_123",
   "correlationId": "req_456"
 }
-````
-
-### 3. Metrics Collection
-
-- **Request Metrics**: Count, duration, status codes
-- **Business Metrics**: Registrations, orders, revenue
-- **System Metrics**: CPU, memory, disk usage
-- **Error Rates**: By service and endpoint
-
-## Technology Stack
-
-### Backend Services
-
-- **Runtime**: Node.js 18+ (LTS)
-- **Framework**: NestJS 10.x (API Gateway + Microservices)
-- **Database**: PostgreSQL 15
-- **ORM**: Prisma 6.9.0
-- **Caching**: Redis 7
-- **Authentication**: JWT + bcrypt
-
-### Frontend Applications
-
-- **Framework**: Next.js 15.4.0
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Internationalization**: Custom LanguageProvider
-- **State Management**: React Context + Zustand (future)
-
-### Development Tools
-
-- **Containerization**: Docker + Docker Compose
-- **API Documentation**: Swagger/OpenAPI
-- **Code Quality**: ESLint + Prettier
-- **Testing**: Jest + Supertest
-- **Version Control**: Git + GitHub
-
-## Future Roadmap
-
-### Phase 1: Core Platform (Current)
-
-- ✅ Project setup and architecture
-- ✅ API Gateway implementation
-- ✅ Auth Service with JWT
-- ✅ Frontend with auth flow
-- 🔄 User Service
-- 🔄 Product Service (basic)
-
-### Phase 2: MVP Features
-
-- 📋 Order management
-- 📋 Payment integration
-- 📋 Basic admin panel
-- 📋 Product search and filtering
-- 📋 Shopping cart
-
-### Phase 3: Advanced Features
-
-- 📋 Multi-vendor support
-- 📋 Review and rating system
-- 📋 Advanced notifications
-- 📋 Analytics dashboard
-- 📋 Mobile app (React Native)
-
-### Phase 4: Scale and Optimize
-
-- 📋 Performance optimization
-- 📋 Advanced caching strategies
-- 📋 Event-driven architecture
-- 📋 Machine learning recommendations
-- 📋 Advanced reporting
-
-## Contributing
-
-### Code Standards
-
-- **TypeScript**: Strict mode enabled
-- **Naming**: camelCase for variables, PascalCase for classes
-- **Imports**: Use absolute paths with `@/` prefix
-- **Comments**: JSDoc for public APIs
-
-### Git Workflow
-
-1. Create feature branch from `main`
-2. Implement changes with tests
-3. Create pull request with description
-4. Code review and approval
-5. Merge to main and deploy
-
-### Service Creation Checklist
-
-- [ ] Create service directory in `services/`
-- [ ] Implement NestJS modules and controllers
-- [ ] Add internal route prefix (`/internal`)
-- [ ] Update Prisma schema if needed
-- [ ] Add routes to API Gateway
-- [ ] Create service documentation
-- [ ] Add Docker configuration
-- [ ] Write unit and integration tests
-- [ ] Update global architecture docs
+```

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { ExternalLink, Image as ImageIcon, Star } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { FavoriteButton } from './FavoriteButton';
 
@@ -17,6 +17,8 @@ interface Product {
   username: string;
   imageUrl?: string | null;
   createdAt: string;
+  averageRating?: number;
+  totalReviews?: number;
 }
 
 interface ProductCardProps {
@@ -99,21 +101,31 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
         <h3 className="text-lg font-semibold text-secondary-900 transition-colors duration-200 group-hover:text-primary-600 dark:text-secondary-100 dark:group-hover:text-primary-400">
           {product.title}
         </h3>
-
         {/* Product Description */}
         {product.description && (
           <p className="mt-2 line-clamp-2 text-sm text-secondary-500 dark:text-secondary-400">
             {product.description}
           </p>
-        )}
-
-        {/* Price */}
-        <div className="mt-3">
+        )}{' '}
+        {/* Price and Reviews */}
+        <div className="mt-3 flex items-center justify-between">
           <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
             {formatPrice(product.price, product.currency)}
           </span>
-        </div>
 
+          {/* Reviews Display */}
+          {product.totalReviews !== undefined && product.totalReviews > 0 && (
+            <div className="flex items-center space-x-1 rtl:space-x-reverse">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100">
+                {product.averageRating?.toFixed(1) || '0.0'}
+              </span>
+              <span className="text-sm text-secondary-500 dark:text-secondary-400">
+                ({product.totalReviews})
+              </span>
+            </div>
+          )}
+        </div>
         {/* Product Meta */}
         <div className="mt-4 flex items-center justify-between text-sm text-secondary-500 dark:text-secondary-400">
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -123,7 +135,6 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
           </div>
           <span>{formatDate(product.createdAt)}</span>
         </div>
-
         {/* View Product Link */}
         <div className="mt-4">
           <span className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Package, Eye, Trash2, Clock } from 'lucide-react';
+import { Package, Eye, Trash2, Clock, Star, MessageSquare } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { authService } from '@/lib/auth';
 import { formatNumber, formatDate } from '@/utils/formatters';
@@ -10,6 +10,8 @@ interface DashboardStatsData {
   totalProducts: number;
   totalViews: number;
   deletedProducts: number;
+  totalReviews: number;
+  averageRating: number;
   lastProduct: {
     name: string;
     createdAt: string;
@@ -96,7 +98,6 @@ export function DashboardStats() {
   if (!stats) {
     return null;
   }
-
   const statCards = [
     {
       icon: Package,
@@ -105,16 +106,20 @@ export function DashboardStats() {
       color: 'blue',
     },
     {
-      icon: Eye,
-      label: t('dashboard:total_views'),
-      value: formatNumber(stats.totalViews, language),
+      icon: MessageSquare,
+      label: t('dashboard:total_reviews'),
+      value: formatNumber(stats.totalReviews, language),
       color: 'green',
     },
     {
-      icon: Trash2,
-      label: t('dashboard:deleted_products'),
-      value: formatNumber(stats.deletedProducts, language),
-      color: 'red',
+      icon: Star,
+      label: t('dashboard:average_rating'),
+      value: stats.averageRating > 0 ? stats.averageRating.toFixed(1) : '0.0',
+      subtitle:
+        stats.totalReviews > 0
+          ? `${t('dashboard:from')} ${formatNumber(stats.totalReviews, language)} ${t('dashboard:reviews')}`
+          : t('dashboard:no_reviews_yet'),
+      color: 'yellow',
     },
     {
       icon: Clock,
@@ -126,13 +131,14 @@ export function DashboardStats() {
       color: 'purple',
     },
   ];
-
   const getColorClasses = (color: string) => {
     const colors = {
       blue: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
       green:
         'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
       red: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
+      yellow:
+        'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400',
       purple:
         'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
     };

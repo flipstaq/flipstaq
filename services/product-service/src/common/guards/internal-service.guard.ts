@@ -15,11 +15,11 @@ export class InternalServiceGuard implements CanActivate {
     const userId = request.headers['x-user-id'];
     const userEmail = request.headers['x-user-email'];
     const userRole = request.headers['x-user-role'];
-
     if (userId && userId !== '' && userEmail && userRole) {
       // Use the actual user information from the API Gateway
       request.user = {
-        sub: userId,
+        id: userId,
+        sub: userId, // Keep sub for compatibility
         email: userEmail,
         role: userRole,
       };
@@ -27,6 +27,7 @@ export class InternalServiceGuard implements CanActivate {
       // Fallback to mock admin user for internal requests without user context
       // This is normal for public endpoints that don't require authentication
       request.user = {
+        id: 'internal-service',
         sub: 'internal-service',
         role: 'OWNER',
         email: 'internal@flipstaq.com',

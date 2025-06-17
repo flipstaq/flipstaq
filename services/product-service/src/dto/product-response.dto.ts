@@ -92,4 +92,18 @@ export class ProductResponseDto {
     example: '2025-06-15T10:30:00.000Z',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Average rating from reviews',
+    example: 4.5,
+    nullable: true,
+  })
+  averageRating?: number;
+
+  @ApiProperty({
+    description: 'Total number of reviews',
+    example: 12,
+    nullable: true,
+  })
+  totalReviews?: number;
 }

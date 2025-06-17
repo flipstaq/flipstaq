@@ -219,7 +219,7 @@ export class ProductGatewayController {
   @ApiResponse({
     status: 200,
     description:
-      "Dashboard statistics including total products, views, deleted products, and last product",
+      "Dashboard statistics including total products, views, deleted products, reviews, and last product",
     schema: {
       type: "object",
       properties: {
@@ -231,6 +231,14 @@ export class ProductGatewayController {
         deletedProducts: {
           type: "number",
           description: "Number of deleted products",
+        },
+        totalReviews: {
+          type: "number",
+          description: "Total reviews across all products",
+        },
+        averageRating: {
+          type: "number",
+          description: "Average rating across all products",
         },
         lastProduct: {
           type: "object",
@@ -595,6 +603,296 @@ export class ProductGatewayController {
       "PRODUCT",
       `favorites/check/${productId}`,
       "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  // === Review Endpoints ===
+
+  @Post("reviews")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Create a review for a product" })
+  @ApiResponse({
+    status: 201,
+    description: "Review created successfully",
+  })
+  @ApiResponse({ status: 400, description: "Bad request" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Cannot review own product" })
+  @ApiResponse({ status: 409, description: "Already reviewed this product" })
+  async createReview(@Body() body: any, @Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "reviews",
+      "POST",
+      body,
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("reviews/me")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get current user's reviews" })
+  @ApiResponse({
+    status: 200,
+    description: "User reviews retrieved successfully",
+  })
+  async getUserReviews(@Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "reviews/me",
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get(":slug/reviews")
+  @ApiOperation({ summary: "Get all reviews for a product" })
+  @ApiParam({ name: "slug", description: "Product slug" })
+  @ApiResponse({
+    status: 200,
+    description: "Product reviews retrieved successfully",
+  })
+  async getProductReviews(@Param("slug") slug: string) {
+    // First get the product to get the productId
+    const productResponse = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `products/slug/${slug}`,
+      "GET",
+      {},
+      {
+        "x-internal-service": "true",
+      }
+    );
+
+    const productId = productResponse.data.id;
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `reviews/product/${productId}`,
+      "GET",
+      {},
+      {
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("reviews/product/:productId")
+  @ApiOperation({ summary: "Get all reviews for a product by productId" })
+  @ApiParam({ name: "productId", description: "Product ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Product reviews retrieved successfully",
+  })
+  async getProductReviewsById(@Param("productId") productId: string) {
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `reviews/product/${productId}`,
+      "GET",
+      {},
+      {
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get(":slug/reviews/user")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get current user's review for a specific product" })
+  @ApiParam({ name: "slug", description: "Product slug" })
+  @ApiResponse({
+    status: 200,
+    description: "User review for product retrieved successfully",
+  })
+  async getUserReviewForProduct(
+    @Param("slug") slug: string,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // First get the product to get the productId
+    const productResponse = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `products/slug/${slug}`,
+      "GET",
+      {},
+      {
+        "x-internal-service": "true",
+      }
+    );
+
+    const productId = productResponse.data.id;
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `reviews/product/${productId}/user`,
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("reviews/product/:productId/user")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: "Get current user's review for a specific product by productId",
+  })
+  @ApiParam({ name: "productId", description: "Product ID" })
+  @ApiResponse({
+    status: 200,
+    description: "User review for product retrieved successfully",
+  })
+  async getUserProductReviewById(
+    @Param("productId") productId: string,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `reviews/product/${productId}/user`,
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Put("reviews/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Update a review" })
+  @ApiParam({ name: "id", description: "Review ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Review updated successfully",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Cannot update another user's review",
+  })
+  @ApiResponse({ status: 404, description: "Review not found" })
+  async updateReview(
+    @Param("id") reviewId: string,
+    @Body() body: any,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `reviews/${reviewId}`,
+      "PUT",
+      body,
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Delete("reviews/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Delete a review" })
+  @ApiParam({ name: "id", description: "Review ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Review deleted successfully",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Cannot delete another user's review",
+  })
+  @ApiResponse({ status: 404, description: "Review not found" })
+  async deleteReview(@Param("id") reviewId: string, @Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `reviews/${reviewId}`,
+      "DELETE",
       {},
       {
         "x-user-id": userId,

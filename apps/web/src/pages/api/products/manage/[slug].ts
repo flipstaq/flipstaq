@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import formidable from 'formidable';
+import FormData from 'form-data';
+import fs from 'fs';
+import axios from 'axios';
 
 const API_GATEWAY_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3100';
@@ -36,7 +39,6 @@ export default async function handler(
   }
 
   const token = authHeader.split(' ')[1];
-
   if (req.method === 'PUT') {
     try {
       // Parse multipart form data
@@ -45,58 +47,135 @@ export default async function handler(
         maxFileSize: 5 * 1024 * 1024, // 5MB
         filter: ({ name, mimetype }) => {
           return Boolean(
-            name === 'image' &&
+            (name === 'image' &&
               mimetype &&
               mimetype.includes('image') &&
-              ['image/jpeg', 'image/png', 'image/jpg'].includes(mimetype)
+              ['image/jpeg', 'image/png', 'image/jpg'].includes(mimetype)) ||
+              name !== 'image'
           );
         },
       });
-
       const [fields, files] = await form.parse(req);
 
-      // Extract product data from fields
-      const productData: any = {};
-      Object.entries(fields).forEach(([fieldName, value]) => {
-        if (fieldName !== 'image' && value) {
-          if (fieldName === 'price') {
-            productData[fieldName] = parseFloat(value[0]);
-          } else {
-            productData[fieldName] = value[0];
-          }
-        }
-      });
-
-      console.log('📊 API Route: Update product data:', productData);
-
-      const response = await fetch(
-        `${API_GATEWAY_URL}/api/v1/products/${slug}`,
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(productData),
-        }
+      console.log(
+        '📊 API Route: Updating product with fields:',
+        Object.keys(fields),
+        'and files:',
+        Object.keys(files)
       );
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`API Gateway error (${response.status}):`, errorText);
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = {
-            message: errorText || `Server returned ${response.status}`,
-          };
-        }
-        return res.status(response.status).json(errorData);
-      }
+      // Check if there's an image file
+      const hasImage = files.image && files.image[0];
+      if (hasImage) {
+        // Send as multipart form data when image is present
+        console.log('📊 API Route: Processing image upload');
 
-      const data = await response.json();
-      res.status(200).json(data);
+        const imageFile = files.image![0];
+
+        // Create a proper multipart form using form-data
+        const multipartForm = new FormData();
+
+        // Add all fields
+        Object.entries(fields).forEach(([fieldName, value]) => {
+          if (value && value[0]) {
+            multipartForm.append(fieldName, value[0]);
+          }
+        });
+
+        // Add the image file with proper stream handling
+        multipartForm.append('image', fs.createReadStream(imageFile.filepath), {
+          filename: imageFile.originalFilename || 'image.jpg',
+          contentType: imageFile.mimetype || 'image/jpeg',
+        });
+        console.log(
+          '📊 API Route: Sending multipart with image using form-data package'
+        );
+
+        try {
+          const response = await axios.put(
+            `${API_GATEWAY_URL}/api/v1/products/${slug}`,
+            multipartForm,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                ...multipartForm.getHeaders(),
+              },
+            }
+          );
+
+          res.status(200).json(response.data);
+        } catch (error: any) {
+          console.error(
+            `API Gateway error:`,
+            error.response?.data || error.message
+          );
+          const errorData = error.response?.data || {
+            message: error.message || 'Failed to update product',
+          };
+          return res.status(error.response?.status || 500).json(errorData);
+        }
+      } else {
+        // Send as JSON when no image is present (fallback to original working approach)
+        const productData: any = {};
+        Object.entries(fields).forEach(([fieldName, value]) => {
+          if (value && value[0]) {
+            if (fieldName === 'price') {
+              productData[fieldName] = parseFloat(value[0]);
+            } else {
+              productData[fieldName] = value[0];
+            }
+          }
+        });
+        console.log(
+          '📊 API Route: Sending JSON update (no image):',
+          productData
+        );
+
+        // Decode JWT to get user info
+        let userId;
+        try {
+          const tokenPayload = JSON.parse(
+            Buffer.from(token.split('.')[1], 'base64').toString()
+          );
+          userId = tokenPayload.sub || tokenPayload.userId;
+        } catch (error) {
+          console.error('Failed to decode JWT:', error);
+          return res.status(401).json({ error: 'Invalid token' });
+        } // Call the product service directly for JSON-only updates
+        const response = await fetch(
+          `http://localhost:3004/internal/products/${slug}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-user-id': userId,
+              'x-internal-service': 'true',
+              'x-api-gateway': 'flipstaq-gateway',
+            },
+            body: JSON.stringify(productData),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(
+            `Product Service error (${response.status}):`,
+            errorText
+          );
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = {
+              message: errorText || `Server returned ${response.status}`,
+            };
+          }
+          return res.status(response.status).json(errorData);
+        }
+
+        const data = await response.json();
+        res.status(200).json(data);
+      }
     } catch (error) {
       console.error('💥 API Route Error:', error);
       res.status(500).json({ error: 'Failed to update product' });

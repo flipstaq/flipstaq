@@ -108,6 +108,80 @@ All frontend API routes proxy to the API Gateway which forwards to the Product S
 - `GET /api/v1/products/favorites/count`
 - `GET /api/v1/products/favorites/check/:productId`
 
+## API Route Architecture
+
+### Route Structure
+
+The frontend API routes are organized to avoid conflicts and provide clear separation of concerns:
+
+#### Product-Specific Routes
+
+- `/api/products/index.ts` - Get all products, create new products
+- `/api/products/my-products.ts` - Get current user's products
+- `/api/products/[slug]/reviews.ts` - Get all reviews for a product by slug
+- `/api/products/[slug]/user-review.ts` - Get current user's review for a product by slug
+
+#### User-Specific Routes
+
+- `/api/users/[username]/products/[slug].ts` - Get specific product by username and slug
+
+#### Review Routes
+
+- `/api/reviews/index.ts` - Create review, get user's reviews
+- `/api/reviews/[reviewId].ts` - Update or delete specific review
+
+#### Favorites Routes
+
+- `/api/favorites/index.ts` - Get user favorites, add favorite
+- `/api/favorites/[productId].ts` - Remove specific favorite
+
+### Recent Route Restructuring
+
+**Issue Fixed**: Resolved Next.js routing conflict where different dynamic parameter names (`slug` vs `username`) were used at the same route level.
+
+**Previous Conflicting Structure**:
+
+```
+/api/products/
+├── [slug]/          # ❌ Conflict
+│   ├── reviews.ts
+│   └── user-review.ts
+└── [username]/      # ❌ Conflict with [slug]
+    └── [slug].ts
+```
+
+**New Structure**:
+
+```
+/api/
+├── products/
+│   ├── index.ts
+│   ├── my-products.ts
+│   └── [slug]/
+│       ├── reviews.ts
+│       └── user-review.ts
+├── users/
+│   └── [username]/
+│       └── products/
+│           └── [slug].ts
+└── reviews/
+    ├── index.ts
+    └── [reviewId].ts
+```
+
+**Migration**: Updated all frontend components to use the new route structure:
+
+- `ProductDetailPage.tsx` now calls `/api/users/${username}/products/${slug}`
+- `ProductDetailModal.tsx` now calls `/api/users/${username}/products/${slug}`
+
+### Backend Integration
+
+All frontend API routes proxy requests to the API Gateway (`localhost:3100`) which forwards them to appropriate microservices:
+
+- **Products**: Forward to Product Service (`localhost:3004`)
+- **Authentication**: Forward to Auth Service (`localhost:3001`)
+- **Users**: Forward to User Service (`localhost:3003`)
+
 ### User Experience
 
 #### Navigation
@@ -232,3 +306,270 @@ function MyComponent() {
 - `title`: Main message text
 - `message`: Optional additional details
 - `duration`: Auto-dismiss time in ms (default: 5000)
+
+## Reviews and Ratings System
+
+### Overview
+
+The reviews and ratings system allows authenticated users to leave feedback on products they have interacted with. This feature builds trust, increases credibility for sellers, and encourages higher quality listings.
+
+### Components
+
+#### StarRating (`/components/ui/StarRating.tsx`)
+
+A reusable component for displaying and interacting with star ratings.
+
+**Props:**
+
+- `rating` (number): Current rating value
+- `maxRating` (number, optional): Maximum rating value (default: 5)
+- `size` ('sm' | 'md' | 'lg', optional): Star size (default: 'md')
+- `interactive` (boolean, optional): Whether stars are clickable (default: false)
+- `onRatingChange` (function, optional): Callback when rating is changed
+- `showValue` (boolean, optional): Show numeric rating value (default: false)
+- `className` (string, optional): Additional CSS classes
+
+**Features:**
+
+- Visual star representation with yellow fill
+- Support for partial ratings (half stars)
+- Interactive mode for rating input
+- Hover effects in interactive mode
+- Multiple sizes (sm, md, lg)
+- Dark/light theme support
+- Displays numeric value optionally
+
+**Usage:**
+
+```tsx
+import { StarRating } from "@/components/ui/StarRating";
+
+// Display only
+<StarRating rating={4.5} showValue size="lg" />
+
+// Interactive rating input
+<StarRating
+  rating={currentRating}
+  interactive
+  onRatingChange={setRating}
+  size="lg"
+/>
+```
+
+#### ReviewForm (`/components/reviews/ReviewForm.tsx`)
+
+A form component for creating and editing product reviews.
+
+**Props:**
+
+- `productId` (string): The ID of the product being reviewed
+- `existingReview` (Review, optional): Existing review data for editing
+- `onSuccess` (function, optional): Callback on successful submission
+- `onCancel` (function, optional): Callback when form is cancelled
+
+**Features:**
+
+- Interactive star rating input (1-5 stars)
+- Text area for detailed comments
+- Form validation (rating and comment required)
+- Loading states during submission
+- Success/error toast notifications
+- Support for both creating and editing reviews
+- Character count display (500 character limit)
+- Multilingual support
+
+**Usage:**
+
+```tsx
+import { ReviewForm } from "@/components/reviews/ReviewForm";
+
+// New review
+<ReviewForm
+  productId="product-123"
+  onSuccess={() => refetchReviews()}
+/>
+
+// Edit existing review
+<ReviewForm
+  productId="product-123"
+  existingReview={userReview}
+  onSuccess={() => handleUpdateSuccess()}
+  onCancel={() => setEditMode(false)}
+/>
+```
+
+#### ReviewList (`/components/reviews/ReviewList.tsx`)
+
+A component that displays a list of reviews with summary statistics.
+
+**Props:**
+
+- `reviews` (Review[]): Array of review objects
+- `averageRating` (number): Average rating for the product
+- `totalReviews` (number): Total number of reviews
+- `onReviewUpdate` (function, optional): Callback when reviews need to be refreshed
+
+**Features:**
+
+- Review summary with average rating and total count
+- Individual review cards with user info, rating, and comments
+- Edit/delete buttons for user's own reviews
+- Date formatting and "edited" indicators
+- Empty state for products with no reviews
+- User avatar placeholders
+- Responsive design
+
+#### ReviewsSection (`/components/reviews/ReviewsSection.tsx`)
+
+The main component that orchestrates the entire reviews experience for a product.
+
+**Props:**
+
+- `productId` (string): The ID of the product
+- `productSlug` (string): The slug of the product for API calls
+- `productOwnerId` (string): The ID of the product owner
+
+**Features:**
+
+- Complete reviews management for a product
+- Integrates ReviewForm and ReviewList components
+- Handles user authentication state
+- Prevents product owners from reviewing their own products
+- Manages review creation, editing, and deletion
+- Loading states and error handling
+- Automatic data refresh after actions
+
+### Hooks
+
+#### useReviews (`/hooks/useReviews.ts`)
+
+Custom hook for managing review operations.
+
+**Methods:**
+
+- `createReview(reviewData)`: Create a new review
+- `updateReview(reviewId, updateData)`: Update an existing review
+- `deleteReview(reviewId)`: Delete a review
+- `getUserReviews()`: Get all reviews by the current user
+
+**State:**
+
+- `loading`: Boolean indicating if an operation is in progress
+- `error`: Error message if an operation fails
+
+#### useProductReviews (`/hooks/useReviews.ts`)
+
+Custom hook for fetching reviews for a specific product.
+
+**Parameters:**
+
+- `slug` (string): Product slug
+
+**Returns:**
+
+- `reviews`: Object containing reviews array, averageRating, and totalReviews
+- `loading`: Loading state
+- `error`: Error message
+- `refetchReviews()`: Function to refresh the reviews data
+
+#### useUserProductReview (`/hooks/useReviews.ts`)
+
+Custom hook for managing the current user's review for a specific product.
+
+**Parameters:**
+
+- `slug` (string): Product slug
+
+**Returns:**
+
+- `userReview`: The user's review for the product (null if none)
+- `loading`: Loading state
+- `error`: Error message
+- `refetchUserReview()`: Function to refresh the user's review
+
+### Business Rules
+
+- **One Review Per Product**: Each user can only submit one review per product
+- **No Self-Review**: Product owners cannot review their own products
+- **Authentication Required**: Only logged-in users can create reviews
+- **Rating Range**: Ratings must be between 1 and 5 stars
+- **Required Fields**: Both rating and comment are mandatory
+- **Edit/Delete Permissions**: Users can only edit or delete their own reviews
+- **Data Integrity**: Reviews are automatically deleted when products or users are deleted
+
+### Localization
+
+The reviews system is fully localized with support for English and Arabic:
+
+**English Keys:**
+
+- `reviews.leave_review`: "Leave a Review"
+- `reviews.rating`: "Rating"
+- `reviews.comment`: "Comment"
+- `reviews.submit_review`: "Submit Review"
+- `reviews.no_reviews_yet`: "No reviews yet"
+
+**Arabic Keys:**
+
+- `reviews.leave_review`: "اترك تقييماً"
+- `reviews.rating`: "التقييم"
+- `reviews.comment`: "التعليق"
+- `reviews.submit_review`: "إرسال التقييم"
+- `reviews.no_reviews_yet`: "لا توجد تقييمات بعد"
+
+### Integration
+
+The reviews system is integrated into the product detail page (`ProductDetailPage.tsx`) and automatically appears below the product information. It provides:
+
+- Review summary statistics
+- Interactive review form for eligible users
+- Complete list of existing reviews
+- User-friendly empty states
+- Responsive design for all screen sizes
+
+## Product Management
+
+### Product Image Updates
+
+#### Overview
+
+The product management system supports updating products with new images through a multipart form data upload process.
+
+#### Fix: Product Image Update Issue (June 2025)
+
+**Problem:** When updating a product and changing its image, the API route parsed the image but did not forward it to the API Gateway or product service.
+
+**Solution:** Modified the Next.js API route `/api/products/manage/[slug].ts` to properly handle multipart form data and forward image files to the API Gateway.
+
+**Changes Made:**
+
+1. **Fixed formidable filter**: Updated to accept both image files and other form fields
+2. **Added FormData forwarding**: Used `form-data` package to create multipart data for API Gateway
+3. **Image streaming**: Properly streams image files using `fs.createReadStream()`
+4. **Header management**: Includes proper multipart headers with boundary
+
+**Technical Details:**
+
+- Uses `formidable` to parse incoming multipart data
+- Creates new `FormData` instance with `form-data` package
+- Streams image file from temporary location to API Gateway
+- Maintains all form fields during transfer
+- Preserves original filename and content type
+
+**Files Modified:**
+
+- `/apps/web/src/pages/api/products/manage/[slug].ts`
+
+**Dependencies Added:**
+
+- `form-data` package for Node.js multipart handling
+
+**API Flow:**
+
+1. Frontend sends multipart form data with image and fields
+2. Next.js API route parses data with formidable
+3. API route creates new FormData and streams image file
+4. API Gateway receives multipart data with FileInterceptor
+5. API Gateway processes image and forwards to product service
+
+---

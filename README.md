@@ -111,6 +111,83 @@ All external requests go through the **API Gateway** at `http://localhost:3100/a
 | GET    | `/api/v1/auth/validate` | Token validation    |
 | POST   | `/api/v1/auth/refresh`  | Refresh JWT token   |
 
+### Reviews API
+
+```bash
+# Get all reviews for a product
+GET /api/v1/products/reviews/product/{productId}
+
+# Get user's review for a product
+GET /api/v1/products/reviews/product/{productId}/user
+
+# Create a review
+POST /api/v1/products/reviews
+
+# Update a review
+PUT /api/v1/products/reviews/{reviewId}
+
+# Delete a review
+DELETE /api/v1/products/reviews/{reviewId}
+```
+
+## ✅ Completed Features
+
+### 🔐 Authentication & User Management
+
+- [x] JWT-based authentication with refresh tokens
+- [x] Multi-role support (Owner, Staff, User)
+- [x] User registration with validation
+- [x] Protected routes and authorization
+
+### 🛍️ Product Management
+
+- [x] Product CRUD operations
+- [x] Product search and filtering
+- [x] Image upload support
+- [x] Slug-based product URLs
+- [x] Product favorites system
+
+### ⭐ Reviews & Ratings System
+
+- [x] Product reviews and ratings (1-5 stars)
+- [x] Review CRUD operations with proper authorization
+- [x] Business rules enforcement:
+  - [x] One review per user per product
+  - [x] No self-review for product owners
+  - [x] Reviews sorted by latest first
+- [x] API integration across all layers:
+  - [x] Product Service: `/internal/reviews/*` endpoints
+  - [x] API Gateway: `/products/reviews/*` endpoints
+  - [x] Frontend API: `/api/reviews/*` endpoints
+- [x] React hooks: `useProductReviews`, `useUserProductReview`
+- [x] UI Components: ReviewsSection, ReviewForm, ReviewList, StarRating
+- [x] Full localization support (English/Arabic)
+
+### 🌐 Internationalization
+
+- [x] Custom LanguageProvider (no route-based i18n)
+- [x] English and Arabic language support
+- [x] RTL support for Arabic
+- [x] Auto-detection with manual override
+- [x] Localized content across all features
+
+### 🎨 UI/UX
+
+- [x] Modern, responsive design with Tailwind CSS
+- [x] Dark/Light theme support with auto-detection
+- [x] Toast notifications for user feedback
+- [x] Loading states and error handling
+- [x] Mobile-first responsive design
+
+### 🏗️ Architecture
+
+- [x] Monorepo setup with TurboRepo
+- [x] Microservices architecture
+- [x] API Gateway for request routing
+- [x] Shared database schema with Prisma
+- [x] Internal service communication with proper guards
+- [x] Comprehensive documentation
+
 ## 🏢 Project Structure
 
 ```
@@ -355,3 +432,31 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **Flipstaq** - Built with ❤️ using modern web technologies
+
+## 🔄 Recent Updates
+
+### June 2025: API Route Restructuring
+
+**Fixed Next.js routing conflict** that was preventing the development server from starting.
+
+- **Issue**: Conflicting dynamic routes (`[slug]` vs `[username]`) at the same path level
+- **Solution**: Restructured user-specific routes to `/api/users/[username]/products/[slug]`
+- **Impact**: No breaking changes, improved route organization
+- **Documentation**: See `docs/routing-fix-june-2025.md` for full details
+
+### Product Reviews & Ratings System
+
+**Implemented complete reviews and ratings functionality**:
+
+- ✅ **Backend**: Review CRUD operations with business rule validation
+- ✅ **Frontend**: Star ratings, review forms, and management UI
+- ✅ **Integration**: Seamlessly integrated into product detail pages
+- ✅ **Localization**: Full English and Arabic translation support
+- ✅ **Business Rules**: One review per user per product, no self-reviews
+
+### Enhanced Documentation
+
+- ✅ **API Routes**: Comprehensive frontend route architecture docs
+- ✅ **Global Architecture**: Updated with current implementation status
+- ✅ **Feature Documentation**: Complete reviews system documentation
+- ✅ **Fix Documentation**: Detailed routing conflict resolution

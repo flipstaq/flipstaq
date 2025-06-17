@@ -40,11 +40,11 @@ model User {
   deletedAt     DateTime? // Soft delete timestamp
   deletedById   String? // ID of admin who deleted this user
   createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  // Relations
+  updatedAt     DateTime       @updatedAt // Relations
   refreshTokens RefreshToken[]
   products      Product[]
   favorites     Favorite[]
+  reviews       Review[]
 
   // Self-referential relation for deletion tracking
   deletedBy    User?  @relation("UserDeletions", fields: [deletedById], references: [id])
@@ -80,10 +80,10 @@ model Product {
   isActive    Boolean    @default(true)
   isSold      Boolean    @default(false) // New field for marking products as sold
   createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  // Relations
+  updatedAt   DateTime   @updatedAt // Relations
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   favorites   Favorite[]
+  reviews     Review[]
 
   // Unique constraint for slug per user
   @@unique([userId, slug])
@@ -101,4 +101,20 @@ model Favorite {
 
   @@unique([userId, productId])
   @@map("favorites")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int // 1–5
+  comment   String
+  productId String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId]) // One review per user per product
+  @@map("reviews")
 }

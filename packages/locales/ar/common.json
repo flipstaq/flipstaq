@@ -51,5 +51,30 @@
   },
   "error": "خطأ",
   "tryAgain": "حاول مرة أخرى",
-  "allRightsReserved": "جميع الحقوق محفوظة"
+  "allRightsReserved": "جميع الحقوق محفوظة",
+  "cancel": "إلغاء",
+  "reviews": {
+    "leave_review": "اترك تقييماً",
+    "your_review": "تقييمك",
+    "reviews": "التقييمات",
+    "rating": "التقييم",
+    "comment": "التعليق",
+    "submit_review": "إرسال التقييم",
+    "update_review": "تحديث التقييم",
+    "no_reviews_yet": "لا توجد تقييمات بعد",
+    "be_first_to_review": "كن أول من يقيم هذا المنتج",
+    "based_on_reviews": "بناءً على {{count}} تقييمات",
+    "rating_required": "يرجى اختيار تقييم",
+    "comment_required": "يرجى كتابة تعليق",
+    "comment_placeholder": "شارك تجربتك مع هذا المنتج...",
+    "review_created": "تم إرسال التقييم بنجاح!",
+    "review_updated": "تم تحديث التقييم بنجاح!",
+    "review_deleted": "تم حذف التقييم بنجاح!",
+    "review_error": "فشل في إرسال التقييم",
+    "delete_error": "فشل في حذف التقييم",
+    "edit_review": "تعديل التقييم",
+    "delete_review": "حذف التقييم",
+    "confirm_delete": "هل أنت متأكد من حذف هذا التقييم؟",
+    "edited": "تم التعديل"
+  }
 }
