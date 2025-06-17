@@ -996,10 +996,14 @@ export default function AdminPanel() {
               </div>
             </div>{' '}
           </div>
-        </div>        {/* Tab Navigation */}
+        </div>{' '}
+        {/* Tab Navigation */}
         <div className="bg-white shadow dark:bg-gray-800">
           <div className="px-4 sm:px-6 lg:px-8">
-            <div className={`flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <div
+              className={`flex ${isRTL ? 'space-x-8 space-x-reverse' : 'space-x-8'}`}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            >
               <button
                 onClick={() => setActiveTab('users')}
                 className={`${
@@ -1072,10 +1076,12 @@ export default function AdminPanel() {
             </div>
           </div>
         </div>{' '}
-        <div className="px-4 py-8 sm:px-6 lg:px-8">
+        <div
+          className={`px-4 py-8 sm:px-6 lg:px-8 ${isRTL ? 'space-y-8' : 'space-y-6'}`}
+        >
           {/* Users Tab Content */}
           {activeTab === 'users' && (
-            <>
+            <div className="space-y-6">
               {/* Stats Cards */}
               <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5 xl:gap-6">
                 <div className="overflow-hidden rounded-lg bg-white shadow-lg transition-shadow hover:shadow-xl dark:bg-gray-800">
@@ -1695,12 +1701,14 @@ export default function AdminPanel() {
                   </div>
                 )}{' '}
               </div>
-            </>
-          )}
-          {/* Products Tab Content */}
+            </div>
+          )}{' '}
+          {/* Products Tab Content */}{' '}
           {activeTab === 'products' && (
-            <div className="space-y-6">
-              <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+            <div className={`space-y-6 ${isRTL ? 'mt-8' : 'mt-6'}`}>
+              <div
+                className={`rounded-lg bg-white shadow dark:bg-gray-800 ${isRTL ? 'p-8' : 'p-6'}`}
+              >
                 <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
                   {t('admin-common:tabs.products')}{' '}
                   {t('admin-common:tabs.moderation')}
@@ -1728,32 +1736,48 @@ export default function AdminPanel() {
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
                       {t('admin-products:noProducts')}
-                    </h3>
+                    </h3>{' '}
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                       {t('admin-products:noProductsDescription')}
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                    <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600">                      <thead className="bg-gray-50 dark:bg-gray-700">
+                  <div
+                    className={`overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg ${isRTL ? 'mt-8' : 'mt-6'}`}
+                  >
+                    <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
+                      {' '}
+                      <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                          <th className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-products:table.product')}
                           </th>
-                          <th className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-products:table.seller')}
                           </th>
-                          <th className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-products:table.visibility')}
                           </th>
-                          <th className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-products:table.actions')}
                           </th>
                         </tr>
                       </thead>{' '}
                       <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                         {products.map((product) => (
-                          <tr key={product.id}>                            <td className="whitespace-nowrap px-6 py-4">
+                          <tr key={product.id}>
+                            {' '}
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
                               <div className="flex items-center">
                                 <div className="h-10 w-10 flex-shrink-0">
                                   {product.imageUrl ? (
@@ -1779,21 +1803,33 @@ export default function AdminPanel() {
                                       </svg>
                                     </div>
                                   )}
-                                </div>                                <div className={isRTL ? 'mr-4' : 'ml-4'}>
-                                  <div className={`text-sm font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>
+                                </div>{' '}
+                                <div className={isRTL ? 'mr-4' : 'ml-4'}>
+                                  <div
+                                    className={`text-sm font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+                                  >
                                     {product.title}
                                   </div>
-                                  <div className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                  <div
+                                    className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                                  >
                                     {product.slug}
                                   </div>
                                 </div>
                               </div>
-                            </td>                            <td className="whitespace-nowrap px-6 py-4">
-                              <div className={`text-sm text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>
+                            </td>{' '}
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
+                              <div
+                                className={`text-sm text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
                                 @{product.username}
                               </div>
                             </td>
-                            <td className="whitespace-nowrap px-6 py-4">
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
                               <span
                                 className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                                   product.visible
@@ -1805,8 +1841,13 @@ export default function AdminPanel() {
                                   ? t('admin-products:status.visible')
                                   : t('admin-products:status.hidden')}
                               </span>
-                            </td>                            <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                              <div className={`flex ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                            </td>{' '}
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
+                              <div
+                                className={`flex ${isRTL ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}
+                              >
                                 <button
                                   onClick={() =>
                                     handleToggleProductVisibility(product.id)
@@ -1841,11 +1882,13 @@ export default function AdminPanel() {
                 )}
               </div>
             </div>
-          )}
-          {/* Reviews Tab Content */}
+          )}{' '}
+          {/* Reviews Tab Content */}{' '}
           {activeTab === 'reviews' && (
-            <div className="space-y-6">
-              <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+            <div className={`space-y-6 ${isRTL ? 'mt-8' : 'mt-6'}`}>
+              <div
+                className={`rounded-lg bg-white shadow dark:bg-gray-800 ${isRTL ? 'p-8' : 'p-6'}`}
+              >
                 <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
                   {t('admin-common:tabs.reviews')}{' '}
                   {t('admin-common:tabs.moderation')}
@@ -1873,38 +1916,63 @@ export default function AdminPanel() {
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
                       {t('admin-reviews:noReviews')}
-                    </h3>
+                    </h3>{' '}
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                       {t('admin-reviews:noReviewsDescription')}
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                    <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600">                      <thead className="bg-gray-50 dark:bg-gray-700">
+                  <div
+                    className={`overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg ${isRTL ? 'mt-8' : 'mt-6'}`}
+                  >
+                    <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
+                      {' '}
+                      <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                          <th className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-reviews:table.review')}
                           </th>
-                          <th className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-reviews:table.product')}
                           </th>
-                          <th className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-reviews:table.reviewer')}
                           </th>
-                          <th className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-reviews:table.visibility')}
                           </th>
-                          <th className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-reviews:table.actions')}
                           </th>
                         </tr>
                       </thead>{' '}
                       <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                        {' '}
                         {reviews.map((review) => (
-                          <tr key={review.id}>                            <td className="whitespace-nowrap px-6 py-4">
-                              <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                <div className="flex-shrink-0">
-                                  <div className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <tr key={review.id}>
+                            {' '}
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
+                              <div
+                                className={`flex items-start ${isRTL ? 'justify-end' : 'justify-start'}`}
+                              >
+                                <div
+                                  className={`${isRTL ? 'order-2' : 'order-1'} flex-shrink-0`}
+                                >
+                                  <div
+                                    className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}
+                                  >
                                     {[...Array(5)].map((_, i) => (
                                       <svg
                                         key={i}
@@ -1921,33 +1989,55 @@ export default function AdminPanel() {
                                     ))}
                                   </div>
                                 </div>
-                                <div className={isRTL ? 'mr-4' : 'ml-4'}>
-                                  <div className={`line-clamp-2 text-sm text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>
+                                <div
+                                  className={`${isRTL ? 'order-1 mr-4' : 'order-2 ml-4'} min-w-0 flex-1`}
+                                >
+                                  <div
+                                    className={`line-clamp-2 text-sm text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+                                  >
                                     {review.comment}
                                   </div>
-                                  <div className={`mt-1 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                  <div
+                                    className={`mt-1 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                                  >
                                     {new Date(
                                       review.createdAt
                                     ).toLocaleDateString()}
                                   </div>
-                                </div>
+                                </div>{' '}
                               </div>
-                            </td>                            <td className="whitespace-nowrap px-6 py-4">
-                              <div className={`text-sm text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>
+                            </td>{' '}
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
+                              <div
+                                className={`text-sm text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
                                 {review.product.title}
                               </div>
-                              <div className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                              <div
+                                className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
                                 {review.product.slug}
-                              </div>
-                            </td>                            <td className="whitespace-nowrap px-6 py-4">
-                              <div className={`text-sm text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>
+                              </div>{' '}
+                            </td>{' '}
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
+                              <div
+                                className={`text-sm text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
                                 {review.user.firstName} {review.user.lastName}
                               </div>
-                              <div className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                              <div
+                                className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
                                 @{review.user.username}
-                              </div>
+                              </div>{' '}
                             </td>
-                            <td className="whitespace-nowrap px-6 py-4">
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
                               <span
                                 className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                                   review.visible
@@ -1957,10 +2047,15 @@ export default function AdminPanel() {
                               >
                                 {review.visible
                                   ? t('admin-reviews:status.visible')
-                                  : t('admin-reviews:status.hidden')}
+                                  : t('admin-reviews:status.hidden')}{' '}
                               </span>
-                            </td>                            <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                              <div className={`flex ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                            </td>{' '}
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
+                              <div
+                                className={`flex ${isRTL ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}
+                              >
                                 <button
                                   onClick={() =>
                                     handleToggleReviewVisibility(review.id)
