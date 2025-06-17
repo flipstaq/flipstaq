@@ -159,6 +159,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   userId: 'userId',
   isActive: 'isActive',
   isSold: 'isSold',
+  visible: 'visible',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -176,6 +177,7 @@ exports.Prisma.ReviewScalarFieldEnum = {
   comment: 'comment',
   productId: 'productId',
   userId: 'userId',
+  visible: 'visible',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

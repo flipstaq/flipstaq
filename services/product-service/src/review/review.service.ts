@@ -14,9 +14,9 @@ export class ReviewService {
   async createReview(userId: string, createReviewDto: CreateReviewDto) {
     const { productId, rating, comment } = createReviewDto;
 
-    // Check if product exists
+    // Check if product exists and is visible
     const product = await this.prisma.product.findUnique({
-      where: { id: productId },
+      where: { id: productId, visible: true },
       include: { user: true },
     });
 
@@ -68,7 +68,10 @@ export class ReviewService {
 
   async getProductReviews(productId: string) {
     const reviews = await this.prisma.review.findMany({
-      where: { productId },
+      where: {
+        productId,
+        visible: true, // Only show visible reviews to public
+      },
       include: {
         user: {
           select: {
@@ -97,7 +100,10 @@ export class ReviewService {
 
   async getUserReviews(userId: string) {
     const reviews = await this.prisma.review.findMany({
-      where: { userId },
+      where: {
+        userId,
+        visible: true, // Only show visible reviews to public
+      },
       include: {
         product: {
           select: {
@@ -191,5 +197,111 @@ export class ReviewService {
     });
 
     return review;
+  }
+
+  // ADMIN MODERATION METHODS
+
+  /**
+   * Admin: Get all reviews for moderation (regardless of visibility)
+   */
+  async getAllReviewsForAdmin() {
+    const reviews = await this.prisma.review.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        product: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            user: {
+              select: {
+                username: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return reviews;
+  }
+
+  /**
+   * Admin: Toggle review visibility
+   */
+  async toggleReviewVisibility(reviewId: string): Promise<{ visible: boolean }> {
+    const review = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+      select: { visible: true },
+    });
+
+    if (!review) {
+      throw new NotFoundException('Review not found');
+    }
+
+    const updatedReview = await this.prisma.review.update({
+      where: { id: reviewId },
+      data: { visible: !review.visible },
+      select: { visible: true },
+    });
+
+    return { visible: updatedReview.visible };
+  }
+
+  /**
+   * Admin: Delete review permanently
+   */
+  async deleteReviewPermanently(reviewId: string): Promise<void> {
+    const review = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+    });
+
+    if (!review) {
+      throw new NotFoundException('Review not found');
+    }
+
+    await this.prisma.review.delete({
+      where: { id: reviewId },
+    });
+  }
+
+  /**
+   * Admin: Get all reviews for a specific product (regardless of visibility)
+   */
+  async getProductReviewsForAdmin(productId: string) {
+    const reviews = await this.prisma.review.findMany({
+      where: { productId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Calculate average rating including all reviews
+    const averageRating =
+      reviews.length > 0
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+        : 0;
+
+    return {
+      reviews,
+      averageRating: Math.round(averageRating * 10) / 10,
+      totalReviews: reviews.length,
+    };
   }
 }

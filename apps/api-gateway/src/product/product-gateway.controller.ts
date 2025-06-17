@@ -903,4 +903,312 @@ export class ProductGatewayController {
     );
     return response.data;
   }
+
+  // ADMIN ENDPOINTS
+
+  @Get("admin/all")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Get all products for moderation" })
+  @ApiResponse({
+    status: 200,
+    description: "All products retrieved successfully",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  async getAllProductsForAdmin(@Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Check admin role
+    if (!["OWNER", "HIGHER_STAFF"].includes(userRole)) {
+      throw new UnauthorizedException("Admin access required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "products/admin/all",
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Patch("admin/:id/visibility")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Toggle product visibility" })
+  @ApiParam({ name: "id", description: "Product ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Product visibility toggled successfully",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  @ApiResponse({ status: 404, description: "Product not found" })
+  async toggleProductVisibility(
+    @Param("id") productId: string,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Check admin role
+    if (!["OWNER", "HIGHER_STAFF"].includes(userRole)) {
+      throw new UnauthorizedException("Admin access required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `products/admin/${productId}/visibility`,
+      "PATCH",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Delete("admin/:id/permanent")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Delete product permanently" })
+  @ApiParam({ name: "id", description: "Product ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Product deleted permanently",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  @ApiResponse({ status: 404, description: "Product not found" })
+  async deleteProductPermanently(
+    @Param("id") productId: string,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Check admin role
+    if (!["OWNER", "HIGHER_STAFF"].includes(userRole)) {
+      throw new UnauthorizedException("Admin access required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `products/admin/${productId}/permanent`,
+      "DELETE",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  // ADMIN REVIEW ENDPOINTS
+
+  @Get("reviews/admin/all")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Get all reviews for moderation" })
+  @ApiResponse({
+    status: 200,
+    description: "All reviews retrieved successfully",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  async getAllReviewsForAdmin(@Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Check admin role
+    if (!["OWNER", "HIGHER_STAFF"].includes(userRole)) {
+      throw new UnauthorizedException("Admin access required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "reviews/admin/all",
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("reviews/admin/product/:productId")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Get all reviews for a product" })
+  @ApiParam({ name: "productId", description: "Product ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Product reviews retrieved successfully",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  async getProductReviewsForAdmin(
+    @Param("productId") productId: string,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Check admin role
+    if (!["OWNER", "HIGHER_STAFF"].includes(userRole)) {
+      throw new UnauthorizedException("Admin access required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `reviews/admin/product/${productId}`,
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Patch("reviews/admin/:id/visibility")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Toggle review visibility" })
+  @ApiParam({ name: "id", description: "Review ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Review visibility toggled successfully",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  @ApiResponse({ status: 404, description: "Review not found" })
+  async toggleReviewVisibility(
+    @Param("id") reviewId: string,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Check admin role
+    if (!["OWNER", "HIGHER_STAFF"].includes(userRole)) {
+      throw new UnauthorizedException("Admin access required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `reviews/admin/${reviewId}/visibility`,
+      "PATCH",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Delete("reviews/admin/:id/permanent")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Delete review permanently" })
+  @ApiParam({ name: "id", description: "Review ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Review deleted permanently",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  @ApiResponse({ status: 404, description: "Review not found" })
+  async deleteReviewPermanently(
+    @Param("id") reviewId: string,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Check admin role
+    if (!["OWNER", "HIGHER_STAFF"].includes(userRole)) {
+      throw new UnauthorizedException("Admin access required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `reviews/admin/${reviewId}/permanent`,
+      "DELETE",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
 }

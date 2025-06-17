@@ -79,6 +79,7 @@ model Product {
   userId      String
   isActive    Boolean    @default(true)
   isSold      Boolean    @default(false) // New field for marking products as sold
+  visible     Boolean    @default(true) // Moderation visibility flag
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt // Relations
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -109,6 +110,7 @@ model Review {
   comment   String
   productId String
   userId    String
+  visible   Boolean  @default(true) // Moderation visibility flag
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -1166,3 +1166,183 @@ x-user-role: <user-role>
 - **Ownership**: Users can only edit/delete their own reviews
 - **Deletion Cascade**: Deleting a product removes all its reviews
 - **Deletion Cascade**: Deleting a user removes all their reviews
+
+---
+
+## Admin Moderation Endpoints
+
+These endpoints are exclusively for admin users (OWNER and HIGHER_STAFF roles) to moderate products and reviews across the platform.
+
+### Product Moderation
+
+#### GET /internal/products/admin/all
+
+**Description**: Retrieves all products for admin moderation, regardless of visibility status.
+
+**Authentication**: Internal service authentication + Admin role required
+
+**Headers Required**:
+
+```http
+x-internal-service: true
+x-api-gateway: flipstaq-gateway
+x-forwarded-from: api-gateway
+x-user-id: <admin-user-id>
+x-user-role: OWNER|HIGHER_STAFF
+```
+
+**Response**:
+
+```json
+{
+  "id": "product-id",
+  "title": "Product Title",
+  "description": "Product description",
+  "price": 99.99,
+  "currency": "USD",
+  "location": "Global",
+  "slug": "product-slug",
+  "imageUrl": "https://example.com/image.jpg",
+  "userId": "seller-id",
+  "username": "seller_username",
+  "isActive": true,
+  "isSold": false,
+  "visible": true,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "averageRating": 4.5,
+  "totalReviews": 10
+}
+```
+
+#### PATCH /internal/products/admin/:id/visibility
+
+**Description**: Toggles product visibility (hide/show from public view).
+
+**Parameters**:
+
+- `id` (path): Product ID
+
+**Response**:
+
+```json
+{
+  "visible": false
+}
+```
+
+#### DELETE /internal/products/admin/:id/permanent
+
+**Description**: Permanently deletes a product and all associated data.
+
+**Parameters**:
+
+- `id` (path): Product ID
+
+**Response**:
+
+```json
+{
+  "message": "Product deleted permanently"
+}
+```
+
+### Review Moderation
+
+#### GET /internal/reviews/admin/all
+
+**Description**: Retrieves all reviews for admin moderation, regardless of visibility status.
+
+**Authentication**: Internal service authentication + Admin role required
+
+**Response**:
+
+```json
+{
+  "id": "review-id",
+  "rating": 5,
+  "comment": "Great product!",
+  "productId": "product-id",
+  "userId": "user-id",
+  "visible": true,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "user": {
+    "id": "user-id",
+    "username": "reviewer",
+    "firstName": "John",
+    "lastName": "Doe"
+  },
+  "product": {
+    "id": "product-id",
+    "title": "Product Title",
+    "slug": "product-slug",
+    "user": {
+      "username": "seller"
+    }
+  }
+}
+```
+
+#### GET /internal/reviews/admin/product/:productId
+
+**Description**: Retrieves all reviews for a specific product (admin view).
+
+**Parameters**:
+
+- `productId` (path): Product ID
+
+**Response**: Same as above but filtered for the specific product.
+
+#### PATCH /internal/reviews/admin/:id/visibility
+
+**Description**: Toggles review visibility (hide inappropriate content).
+
+**Parameters**:
+
+- `id` (path): Review ID
+
+**Response**:
+
+```json
+{
+  "visible": false
+}
+```
+
+#### DELETE /internal/reviews/admin/:id/permanent
+
+**Description**: Permanently deletes a review.
+
+**Parameters**:
+
+- `id` (path): Review ID
+
+**Response**:
+
+```json
+{
+  "message": "Review deleted permanently"
+}
+```
+
+### Visibility Logic
+
+**For Public Users:**
+
+- Product APIs (`getAllProducts`, `getProductBySlug`) filter by `visible: true`
+- Review APIs (`getProductReviews`) filter by `visible: true`
+- Hidden content is completely invisible to non-admin users
+
+**For Admin Users:**
+
+- Admin endpoints return ALL products/reviews regardless of visibility
+- Regular endpoints still respect visibility for consistency
+- Visibility status is clearly indicated in admin interface
+
+### Security Notes
+
+- Role validation is handled by the API Gateway
+- Admin endpoints require OWNER or HIGHER_STAFF role
+- All moderation actions are logged for audit purposes
+- Permanent deletion is irreversible - use with caution

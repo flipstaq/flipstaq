@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewService } from './review.service';
@@ -87,5 +88,55 @@ export class ReviewController {
   @ApiResponse({ status: 404, description: 'Review not found' })
   async deleteReview(@Req() req: AuthenticatedRequest, @Param('id') reviewId: string) {
     return this.reviewService.deleteReview(req.user.id, reviewId);
+  }
+
+  // ADMIN MODERATION ENDPOINTS
+
+  @Get('admin/all')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Admin: Get all reviews for moderation' })
+  @ApiResponse({ status: 200, description: 'All reviews retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  async getAllReviewsForAdmin(@Req() req: AuthenticatedRequest) {
+    // Note: Role validation should be handled by the API Gateway
+    return this.reviewService.getAllReviewsForAdmin();
+  }
+
+  @Get('admin/product/:productId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Admin: Get all reviews for a product (including hidden)' })
+  @ApiResponse({ status: 200, description: 'Product reviews retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  async getProductReviewsForAdmin(
+    @Req() req: AuthenticatedRequest,
+    @Param('productId') productId: string,
+  ) {
+    return this.reviewService.getProductReviewsForAdmin(productId);
+  }
+
+  @Patch('admin/:id/visibility')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Admin: Toggle review visibility' })
+  @ApiResponse({ status: 200, description: 'Review visibility toggled successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  @ApiResponse({ status: 404, description: 'Review not found' })
+  async toggleReviewVisibility(@Req() req: AuthenticatedRequest, @Param('id') reviewId: string) {
+    return this.reviewService.toggleReviewVisibility(reviewId);
+  }
+
+  @Delete('admin/:id/permanent')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Admin: Delete review permanently' })
+  @ApiResponse({ status: 200, description: 'Review deleted permanently' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  @ApiResponse({ status: 404, description: 'Review not found' })
+  async deleteReviewPermanently(@Req() req: AuthenticatedRequest, @Param('id') reviewId: string) {
+    await this.reviewService.deleteReviewPermanently(reviewId);
+    return { message: 'Review deleted permanently' };
   }
 }

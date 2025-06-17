@@ -1,0 +1,49 @@
+{
+  "description": "Manage and moderate products across the platform. You can hide products from public view or delete them permanently.",
+  "loading": "Loading products...",
+  "noProducts": "No products found",
+  "noProductsDescription": "There are currently no products to moderate.",
+  "table": {
+    "product": "Product",
+    "seller": "Seller",
+    "visibility": "Visibility",
+    "actions": "Actions"
+  },
+  "status": {
+    "visible": "Visible",
+    "hidden": "Hidden",
+    "sold": "Sold",
+    "active": "Active"
+  },
+  "actions": {
+    "hide": "Hide",
+    "show": "Show",
+    "delete": "Delete Permanently",
+    "view": "View Details"
+  },
+  "modals": {
+    "delete": {
+      "title": "Delete Product Permanently",
+      "message": "Are you sure you want to permanently delete this product?",
+      "warning": "This action cannot be undone. The product and all its data will be permanently removed."
+    },
+    "visibility": {
+      "hide": {
+        "title": "Hide Product",
+        "message": "Are you sure you want to hide this product from public view?"
+      },
+      "show": {
+        "title": "Show Product",
+        "message": "Are you sure you want to make this product visible to the public?"
+      }
+    }
+  },
+  "notifications": {
+    "hideSuccess": "Product hidden successfully",
+    "showSuccess": "Product made visible successfully",
+    "deleteSuccess": "Product deleted permanently",
+    "hideError": "Failed to hide product",
+    "showError": "Failed to show product",
+    "deleteError": "Failed to delete product"
+  }
+}

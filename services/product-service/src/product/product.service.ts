@@ -92,13 +92,13 @@ export class ProductService {
       updatedAt: product.updatedAt,
     };
   }
-
   /**
    * Get all products (for homepage listing)
    */ async getAllProducts(): Promise<ProductResponseDto[]> {
     const products = await this.prisma.product.findMany({
       where: {
         isActive: true,
+        visible: true, // Only show visible products to public
       },
       include: {
         user: {
@@ -107,6 +107,9 @@ export class ProductService {
           },
         },
         reviews: {
+          where: {
+            visible: true, // Only include visible reviews
+          },
           select: {
             rating: true,
           },
@@ -506,5 +509,97 @@ export class ProductService {
       createdAt: updatedProduct.createdAt,
       updatedAt: updatedProduct.updatedAt,
     };
+  }
+
+  /**
+   * Admin: Get all products with visibility status (for moderation)
+   */
+  async getAllProductsForAdmin(): Promise<ProductResponseDto[]> {
+    const products = await this.prisma.product.findMany({
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
+        reviews: {
+          select: {
+            rating: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return products.map((product) => {
+      // Calculate review statistics
+      const totalReviews = product.reviews.length;
+      const averageRating =
+        totalReviews > 0
+          ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+          : 0;
+
+      return {
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        currency: product.currency,
+        location: product.location,
+        slug: product.slug,
+        imageUrl: product.imageUrl,
+        userId: product.userId,
+        username: product.user.username,
+        isActive: product.isActive,
+        isSold: product.isSold || false,
+        visible: product.visible,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        averageRating,
+        totalReviews,
+      };
+    });
+  }
+
+  /**
+   * Admin: Toggle product visibility
+   */
+  async toggleProductVisibility(productId: string): Promise<{ visible: boolean }> {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: { visible: true },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    const updatedProduct = await this.prisma.product.update({
+      where: { id: productId },
+      data: { visible: !product.visible },
+      select: { visible: true },
+    });
+
+    return { visible: updatedProduct.visible };
+  }
+
+  /**
+   * Admin: Delete product permanently
+   */
+  async deleteProductPermanently(productId: string): Promise<void> {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    await this.prisma.product.delete({
+      where: { id: productId },
+    });
   }
 }

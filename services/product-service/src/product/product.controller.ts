@@ -246,4 +246,108 @@ export class ProductController {
 
     return this.productService.updateProductStatus(slug, userId, updateStatusDto.isSold);
   }
+
+  // ADMIN MODERATION ENDPOINTS
+
+  @Get('admin/all')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin: Get all products for moderation' })
+  @ApiResponse({
+    status: 200,
+    description: 'All products retrieved successfully',
+    type: [ProductResponseDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Admin access required',
+  })
+  async getAllProductsForAdmin(
+    @Headers('x-user-id') userId: string,
+  ): Promise<ProductResponseDto[]> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    // Note: Role validation should be handled by the API Gateway
+    return this.productService.getAllProductsForAdmin();
+  }
+
+  @Patch('admin/:id/visibility')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin: Toggle product visibility' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product visibility toggled successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        visible: { type: 'boolean' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Admin access required',
+  })
+  async toggleProductVisibility(
+    @Param('id') productId: string,
+    @Headers('x-user-id') userId: string,
+  ): Promise<{ visible: boolean }> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.productService.toggleProductVisibility(productId);
+  }
+
+  @Delete('admin/:id/permanent')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin: Delete product permanently' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product deleted permanently',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Admin access required',
+  })
+  async deleteProductPermanently(
+    @Param('id') productId: string,
+    @Headers('x-user-id') userId: string,
+  ): Promise<{ message: string }> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    await this.productService.deleteProductPermanently(productId);
+    return { message: 'Product deleted permanently' };
+  }
 }

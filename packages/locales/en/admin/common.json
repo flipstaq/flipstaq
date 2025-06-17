@@ -7,6 +7,12 @@
       "arabic": "🇸🇦 AR"
     }
   },
+  "tabs": {
+    "users": "Users",
+    "products": "Products",
+    "reviews": "Reviews",
+    "moderation": "Moderation"
+  },
   "stats": {
     "totalUsers": "Total Users",
     "owners": "Owners",

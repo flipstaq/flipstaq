@@ -1,0 +1,49 @@
+{
+  "description": "Manage and moderate reviews across the platform. You can hide inappropriate reviews from public view or delete them permanently.",
+  "loading": "Loading reviews...",
+  "noReviews": "No reviews found",
+  "noReviewsDescription": "There are currently no reviews to moderate.",
+  "table": {
+    "review": "Review",
+    "product": "Product",
+    "reviewer": "Reviewer",
+    "rating": "Rating",
+    "visibility": "Visibility",
+    "actions": "Actions"
+  },
+  "status": {
+    "visible": "Visible",
+    "hidden": "Hidden"
+  },
+  "actions": {
+    "hide": "Hide",
+    "show": "Show",
+    "delete": "Delete Permanently",
+    "view": "View Details"
+  },
+  "modals": {
+    "delete": {
+      "title": "Delete Review Permanently",
+      "message": "Are you sure you want to permanently delete this review?",
+      "warning": "This action cannot be undone. The review will be permanently removed."
+    },
+    "visibility": {
+      "hide": {
+        "title": "Hide Review",
+        "message": "Are you sure you want to hide this review from public view?"
+      },
+      "show": {
+        "title": "Show Review",
+        "message": "Are you sure you want to make this review visible to the public?"
+      }
+    }
+  },
+  "notifications": {
+    "hideSuccess": "Review hidden successfully",
+    "showSuccess": "Review made visible successfully",
+    "deleteSuccess": "Review deleted permanently",
+    "hideError": "Failed to hide review",
+    "showError": "Failed to show review",
+    "deleteError": "Failed to delete review"
+  }
+}

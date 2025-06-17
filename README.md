@@ -163,6 +163,24 @@ DELETE /api/v1/products/reviews/{reviewId}
 - [x] UI Components: ReviewsSection, ReviewForm, ReviewList, StarRating
 - [x] Full localization support (English/Arabic)
 
+### 🛡️ Admin Moderation System
+
+- [x] Content moderation tools for products and reviews
+- [x] Visibility control with `visible` boolean flag in database
+- [x] Admin-only endpoints for content management:
+  - [x] View all products/reviews regardless of visibility
+  - [x] Toggle product/review visibility (hide/show)
+  - [x] Permanent deletion with cascade cleanup
+- [x] Role-based access (OWNER and HIGHER_STAFF only)
+- [x] Dual routing pattern: public APIs filter by visibility, admin APIs show all
+- [x] Admin panel UI with tabbed interface:
+  - [x] Users tab for user management
+  - [x] Products tab for product moderation
+  - [x] Reviews tab for review moderation
+- [x] Comprehensive admin documentation and API specs
+- [x] Full RTL and dark/light mode support
+- [x] Localized admin interface (English/Arabic)
+
 ### 🌐 Internationalization
 
 - [x] Custom LanguageProvider (no route-based i18n)

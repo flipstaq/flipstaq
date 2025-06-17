@@ -46,6 +46,63 @@ Admin Panel → API Gateway (Port 3100) → Microservices
 - **Authentication**: JWT Bearer tokens in `Authorization` header
 - **CORS**: Enabled for frontend origin (`http://localhost:3000`)
 
+## 📊 Admin Panel Features
+
+### Tab Navigation
+
+The admin panel is organized into three main tabs:
+
+1. **Users Tab**: User management and role administration
+2. **Products Tab**: Product moderation and visibility control
+3. **Reviews Tab**: Review moderation and content management
+
+**Access Control**: Only OWNER and HIGHER_STAFF roles can access Products and Reviews tabs.
+
+### Content Moderation Tools
+
+#### Product Moderation
+
+**Features:**
+
+- View all products across the platform (visible and hidden)
+- Toggle product visibility (hide/show from public)
+- Permanently delete products and all associated data
+- View product details including seller information
+
+**Visibility Control:**
+
+- `visible: true` - Product appears in public listings
+- `visible: false` - Product hidden from public but accessible to admins
+- All product fetching APIs filter by `visible == true` for non-admin users
+
+**Endpoints Used:**
+
+- `GET /api/v1/products/admin/all` - List all products for moderation
+- `PATCH /api/v1/products/admin/:id/visibility` - Toggle product visibility
+- `DELETE /api/v1/products/admin/:id/permanent` - Delete product permanently
+
+#### Review Moderation
+
+**Features:**
+
+- View all reviews across the platform (visible and hidden)
+- Toggle review visibility (hide inappropriate content)
+- Permanently delete reviews
+- View review details including product and reviewer information
+
+**Visibility Control:**
+
+- `visible: true` - Review appears in public product listings
+- `visible: false` - Review hidden from public but accessible to admins
+- All review fetching APIs filter by `visible == true` for non-admin users
+
+**Endpoints Used:**
+
+- `GET /api/v1/reviews/admin/all` - List all reviews for moderation
+- `GET /api/v1/reviews/admin/product/:productId` - List all reviews for a product
+- `PATCH /api/v1/reviews/admin/:id/visibility` - Toggle review visibility
+- `DELETE /api/v1/reviews/admin/:id/permanent` - Delete review permanently
+
 ### User Management API
 
 **Endpoint**: `GET /api/v1/users`

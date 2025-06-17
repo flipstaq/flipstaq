@@ -17,6 +17,18 @@
       "static/chunks/_pages-dir-browser_packages_locales_ar_admin_common_json.js"
     ]
   },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/products.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/products.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_admin_products_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/reviews.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/reviews.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_admin_reviews_json.js"
+    ]
+  },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/users.json": {
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/users.json",
     "files": [
@@ -69,6 +81,18 @@
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/common.json",
     "files": [
       "static/chunks/_pages-dir-browser_packages_locales_en_admin_common_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/products.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/products.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_admin_products_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/reviews.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/reviews.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_admin_reviews_json.js"
     ]
   },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/users.json": {
