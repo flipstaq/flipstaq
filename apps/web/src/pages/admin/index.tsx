@@ -996,11 +996,10 @@ export default function AdminPanel() {
               </div>
             </div>{' '}
           </div>
-        </div>
-        {/* Tab Navigation */}
+        </div>        {/* Tab Navigation */}
         <div className="bg-white shadow dark:bg-gray-800">
           <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex space-x-8" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={`flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               <button
                 onClick={() => setActiveTab('users')}
                 className={`${
