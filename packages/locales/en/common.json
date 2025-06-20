@@ -28,6 +28,8 @@
   "unsave": "Unsave",
   "saved": "Saved",
   "favorites": "Favorites",
+  "retry": "Retry",
+  "load_more": "Load More",
   "savedProducts": "Saved Products",
   "noSavedProducts": "You haven't saved any products yet.",
   "noSavedProductsDescription": "Start exploring products and save the ones you like to see them here.",
@@ -41,6 +43,8 @@
   "unfavoriteError": "Unable to remove from saved",
   "favoriteSuccess": "Product saved!",
   "unfavoriteSuccess": "Product removed from saved",
+  "online": "Online",
+  "offline": "Offline",
   "auth": {
     "loginRequired": "Login Required",
     "redirectingToLogin": "Redirecting to login page..."
@@ -76,5 +80,12 @@
     "delete_review": "Delete Review",
     "confirm_delete": "Are you sure you want to delete this review?",
     "edited": "Edited"
+  },
+  "chat": {
+    "typing": {
+      "single": "{{username}} is typing...",
+      "two": "{{username1}} and {{username2}} are typing...",
+      "multiple": "{{count}} people are typing..."
+    }
   }
 }

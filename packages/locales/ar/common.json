@@ -28,6 +28,8 @@
   "unsave": "إلغاء الحفظ",
   "saved": "محفوظ",
   "favorites": "المفضلة",
+  "retry": "إعادة المحاولة",
+  "load_more": "تحميل المزيد",
   "savedProducts": "المنتجات المحفوظة",
   "noSavedProducts": "لم تقم بحفظ أي منتجات بعد.",
   "noSavedProductsDescription": "ابدأ في استكشاف المنتجات واحفظ التي تعجبك لتراها هنا.",
@@ -41,6 +43,8 @@
   "unfavoriteError": "تعذر إزالة المنتج من المحفوظة",
   "favoriteSuccess": "تم حفظ المنتج!",
   "unfavoriteSuccess": "تم إزالة المنتج من المحفوظة",
+  "online": "متصل",
+  "offline": "غير متصل",
   "auth": {
     "loginRequired": "تسجيل الدخول مطلوب",
     "redirectingToLogin": "جاري إعادة توجيهك إلى صفحة تسجيل الدخول..."
@@ -76,5 +80,12 @@
     "delete_review": "حذف التقييم",
     "confirm_delete": "هل أنت متأكد من حذف هذا التقييم؟",
     "edited": "تم التعديل"
+  },
+  "chat": {
+    "typing": {
+      "single": "{{username}} يكتب...",
+      "two": "{{username1}} و {{username2}} يكتبان...",
+      "multiple": "{{count}} أشخاص يكتبون..."
+    }
   }
 }

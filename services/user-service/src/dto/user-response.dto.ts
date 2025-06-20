@@ -35,9 +35,18 @@ export class UserResponseDto {
     enum: ['ACTIVE', 'INACTIVE', 'BANNED', 'PENDING_VERIFICATION'],
   })
   status: string;
-
   @ApiProperty({ example: true, description: 'Whether user account is active' })
   isActive: boolean;
+
+  @ApiProperty({ example: false, description: 'Whether user is currently online' })
+  isOnline: boolean;
+
+  @ApiProperty({
+    example: '2024-01-01T00:00:00.000Z',
+    description: 'Last seen timestamp',
+    required: false,
+  })
+  lastSeen?: Date;
 
   @ApiProperty({
     example: '2024-01-01T00:00:00.000Z',

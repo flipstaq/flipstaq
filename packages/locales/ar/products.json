@@ -94,6 +94,8 @@
     "location": "الموقع",
     "posted_on": "تاريخ النشر",
     "message_seller": "مراسلة البائع",
+    "cannot_message_yourself": "لا يمكنك مراسلة نفسك",
+    "chat_opened": "تم فتح المحادثة مع البائع",
     "product_image": "صورة المنتج",
     "no_image_available": "لا توجد صورة متاحة"
   },

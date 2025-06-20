@@ -31,6 +31,18 @@ The API Gateway now correctly forwards admin requests to fetch real user data:
 
 **Test Results**: Complete authentication flow verified with 24 real users returned from database.
 
+## 🔍 Public User Search
+
+The API Gateway now provides a public user search endpoint that doesn't require authentication:
+
+- **Endpoint**: `GET /api/v1/public/users/search?query=<search_term>&limit=<number>`
+- **Access**: Public (no authentication required)
+- **Purpose**: Allows users to search for other users by username, first name, or last name
+- **Rate Limiting**: Limited to prevent abuse (default 10 results max)
+- **Security**: Only returns public user information (id, username, firstName, lastName)
+
+This endpoint enables messaging functionality by allowing users to find and start conversations with other users.
+
 ## Architecture
 
 ```
@@ -106,214 +118,119 @@ All authentication routes are proxied to the internal auth service:
 
 - **Purpose**: Access token refresh
 - **Forwards to**: `auth-service:3001/internal/auth/refresh`
-- **Body**: Refresh token
+- **Body**: RefreshDto (refreshToken)
 - **Response**: New access token
 
-#### POST `/api/v1/auth/forgot-password`
+### Messaging Routes
 
-- **Purpose**: Password reset initiation
-- **Forwards to**: `auth-service:3001/internal/auth/forgot-password`
-- **Body**: Email address
-- **Response**: Success message
+All messaging routes are proxied to the internal message service and require authentication:
 
-#### POST `/api/v1/auth/reset-password`
+#### GET `/api/v1/messages/conversations`
 
-- **Purpose**: Password reset completion
-- **Forwards to**: `auth-service:3001/internal/auth/reset-password`
-- **Body**: Reset token and new password
-- **Response**: Success message
+- **Purpose**: Get user's conversations
+- **Forwards to**: `message-service:3003/internal/conversations`
+- **Headers**: Authorization Bearer token required
+- **Response**: Array of conversations with participants and last message
 
-## Internal Communication
+#### GET `/api/v1/messages/conversations/:id/messages`
 
-### Security Headers
+- **Purpose**: Get messages for a specific conversation
+- **Forwards to**: `message-service:3003/internal/conversations/:id/messages`
+- **Headers**: Authorization Bearer token required
+- **Query Params**: `limit` (optional), `offset` (optional)
+- **Response**: Array of messages
 
-When forwarding requests to internal services, the gateway adds security headers:
+#### POST `/api/v1/messages/conversations`
+
+- **Purpose**: Create a new conversation
+- **Forwards to**: `message-service:3003/internal/conversations`
+- **Headers**: Authorization Bearer token required
+- **Body**: CreateConversationDto (participantUsername)
+- **Response**: Created conversation
+
+#### POST `/api/v1/messages/send`
+
+- **Purpose**: Send a message
+- **Forwards to**: `message-service:3003/internal/send`
+- **Headers**: Authorization Bearer token required
+- **Body**: SendMessageDto (content, conversationId)
+- **Response**: Created message
+
+### User Search Routes
+
+#### GET `/api/v1/public/users/search`
+
+- **Purpose**: Search for users by username, first name, or last name
+- **Access**: Public (no authentication required)
+- **Forwards to**: `user-service:3002/public/users/search`
+- **Query Params**: `query` (required), `limit` (optional, max 10)
+- **Response**: Array of public user information (id, username, firstName, lastName)
+
+### User Management Routes (Protected)
+
+#### GET `/api/v1/users`
+
+- **Purpose**: Get user list (admin only)
+- **Forwards to**: `user-service:3002/internal/users`
+- **Headers**: Authorization Bearer token required
+- **Access**: HIGHER_STAFF role or above
+- **Response**: Array of users
+
+#### GET `/api/v1/users/:id`
+
+- **Purpose**: Get user by ID
+- **Forwards to**: `user-service:3002/internal/users/:id`
+- **Headers**: Authorization Bearer token required
+- **Response**: User information
+
+#### PUT `/api/v1/users/:id`
+
+- **Purpose**: Update user (admin or self)
+- **Forwards to**: `user-service:3002/internal/users/:id`
+- **Headers**: Authorization Bearer token required
+- **Body**: UpdateUserDto
+- **Response**: Updated user information
+
+## Service Routing
 
 ```typescript
-headers: {
-  'Content-Type': 'application/json',
-  'x-api-gateway': 'flipstaq-gateway',
-  'x-internal-service': 'true',
-  'x-forwarded-from': 'api-gateway'
+// Example internal service URLs
+const serviceUrls = {
+  auth: "http://localhost:3001",
+  user: "http://localhost:3002",
+  message: "http://localhost:3003",
+  product: "http://localhost:3004", // Future
+  order: "http://localhost:3005", // Future
+  payment: "http://localhost:3006", // Future
+};
+```
+
+### Internal Communication
+
+- All internal service calls use `/internal/*` paths
+- Public endpoints bypass internal routing
+- JWT tokens are validated before forwarding to protected services
+- Service responses are cleaned to avoid circular JSON issues
+
+## Response Format
+
+### Success Response
+
+```json
+{
+  "status": "success",
+  "data": {
+    /* service response */
+  }
 }
 ```
 
-### Error Handling
+### Error Response
 
-- **400 Bad Request**: Validation errors from microservices
-- **401 Unauthorized**: Authentication failures
-- **500 Internal Server Error**: Communication failures with microservices
-
-## Development
-
-### Starting the Gateway
-
-```bash
-cd apps/api-gateway
-npm install
-npm run start:dev
-```
-
-The gateway will be available at `http://localhost:3100`
-
-### API Documentation
-
-Swagger documentation is available at:
-
-- **URL**: `http://localhost:3100/api/docs`
-- **Description**: Interactive API documentation for all public endpoints
-
-## Security
-
-- **CORS**: Restricted to specific origins (frontend and gateway)
-- **Internal Headers**: Required for microservice communication
-- **Token Validation**: JWT tokens validated through auth service
-- **Rate Limiting**: Future implementation planned
-
-## Service Dependencies
-
-The API Gateway depends on:
-
-- **Auth Service** (`localhost:3001`) - User authentication and authorization
-- **Future Services** - Will be added as they are implemented
-
-## Monitoring & Logging
-
-- Request forwarding is logged with service targets
-- Error responses include service-specific information
-- Future: Health checks and metrics collection
-
-## Testing
-
-### Manual Testing
-
-```bash
-# Test gateway health
-curl http://localhost:3100/api/docs
-
-# Test auth signup via gateway
-curl -X POST http://localhost:3100/api/v1/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{
-    "firstName": "Test",
-    "lastName": "User",
-    "email": "test@example.com",
-    "username": "testuser",
-    "password": "password123",
-    "country": "US",
-    "birthDate": "1990-01-01"
-  }'
-
-# Test auth login via gateway
-curl -X POST http://localhost:3100/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "emailOrUsername": "test@example.com",
-    "password": "password123"
-  }'
-```
-
-## Project Structure
-
-```
-apps/api-gateway/
-├── src/
-│   ├── auth/                 # Auth route handlers
-│   │   └── auth-gateway.controller.ts
-│   ├── proxy/                # Service forwarding logic
-│   │   └── proxy.service.ts
-│   ├── common/               # Shared utilities
-│   │   └── config/
-│   ├── app.module.ts
-│   └── main.ts
-├── .env                      # Environment configuration
-├── Dockerfile                # Container configuration
-└── package.json
-```
-
-## Implementation Details
-
-### Proxy Service
-
-The `ProxyService` handles forwarding requests to internal microservices:
-
-```typescript
-async forwardAuthRequest(
-  endpoint: string,
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
-  data?: any,
-  headers?: Record<string, string>
-): Promise<AxiosResponse>
-```
-
-### Controller Pattern
-
-Each service domain has its own gateway controller:
-
-```typescript
-@Controller("api/v1/auth")
-export class AuthGatewayController {
-  // Routes that forward to auth-service
+```json
+{
+  "status": "error",
+  "message": "Error description",
+  "code": "ERROR_CODE"
 }
 ```
-
-## Future Enhancements
-
-- Rate limiting per client
-- Request/response caching
-- Circuit breaker pattern
-- Load balancing for multiple service instances
-- API analytics and monitoring
-- WebSocket support for real-time features
-
-## Recent Updates & Fixes
-
-### API Route Restructuring (June 2025)
-
-**Issue Resolved**: Fixed Next.js routing conflict in frontend API routes.
-
-**Problem**: Conflicting dynamic routes at the same level:
-
-- `/api/products/[slug]/` (for reviews)
-- `/api/products/[username]/` (for user products)
-
-**Solution**: Restructured routes to eliminate conflicts:
-
-- User-specific products moved to `/api/users/[username]/products/[slug]`
-- Product-specific operations remain at `/api/products/[slug]/`
-
-**Impact**: All frontend components updated to use new route structure. Backend Gateway routes remain unchanged.
-
-## 📝 Product Management Routing
-
-### Dual Routing Strategy
-
-The API Gateway implements a dual routing strategy for product updates to handle both image uploads and text-only updates efficiently:
-
-#### Image Upload Path
-
-- **Route**: `PUT /api/v1/products/:slug`
-- **Content-Type**: `multipart/form-data`
-- **Handler**: Uses `FileInterceptor` for image processing
-- **Source**: Next.js API route with `axios` + `form-data`
-
-#### Text-Only Update Path
-
-- **Route**: Bypassed - Direct to Product Service
-- **Destination**: `PUT http://localhost:3004/internal/products/:slug`
-- **Content-Type**: `application/json`
-- **Source**: Next.js API route with direct `fetch`
-
-### Why Dual Routing?
-
-1. **FileInterceptor Limitations**: NestJS FileInterceptor expects proper multipart data
-2. **Form-Data Complexity**: Node.js `form-data` package requires specific handling
-3. **Performance**: Text-only updates don't need multipart processing
-4. **Reliability**: Separate paths reduce "Unexpected end of form" errors
-
-### Implementation Notes
-
-- **Image Detection**: Next.js API route checks for `files.image` presence
-- **Authentication**: Both paths require proper JWT tokens and internal service headers
-- **Error Handling**: Consistent error responses across both routing strategies
-- **Validation**: File type/size validation maintained for image uploads

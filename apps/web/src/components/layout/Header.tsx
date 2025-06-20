@@ -14,16 +14,20 @@ import {
   Plus,
   LayoutDashboard,
   Heart,
+  MessageCircle,
 } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useState, useRef, useEffect } from 'react';
+import ChatDrawer from '@/components/chat/ChatDrawer';
+import { useChat } from '@/contexts/ChatContext';
 
 export function Header() {
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
+  const { isChatOpen, startConversationWith, openChat, closeChat } = useChat();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -91,11 +95,24 @@ export function Header() {
               <span className="text-sm font-medium">
                 {language === 'en' ? 'EN' : 'ع'}
               </span>
-            </button>
+            </button>{' '}
             {/* Auth Section */}
             <div className="hidden items-center space-x-2 md:flex rtl:space-x-reverse">
               {isAuthenticated ? (
                 <div className="relative flex items-center space-x-3 rtl:space-x-reverse">
+                  {/* Messages Button */}
+                  <button
+                    onClick={() => openChat()}
+                    className="relative rounded-lg bg-secondary-100 p-2 text-secondary-700 transition-colors duration-200 hover:bg-secondary-200 dark:bg-secondary-800 dark:text-secondary-300 dark:hover:bg-secondary-700"
+                    title={t('chat:messages')}
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                    {/* Unread indicator - you can replace with actual unread count */}
+                    <div className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center rounded-full bg-red-500">
+                      <span className="text-xs font-bold text-white">2</span>
+                    </div>
+                  </button>
+
                   {/* Profile Dropdown */}
                   <div className="relative" ref={dropdownRef}>
                     <button
@@ -211,7 +228,7 @@ export function Header() {
                     >
                       <Plus className="mr-1 inline h-4 w-4" />
                       {t('common:postProduct')}
-                    </Link>
+                    </Link>{' '}
                     <Link
                       href="/profile"
                       className="btn-secondary block w-full text-center"
@@ -220,6 +237,16 @@ export function Header() {
                       <User className="mr-1 inline h-4 w-4" />
                       {t('common:myProfile')}
                     </Link>
+                    <button
+                      onClick={() => {
+                        openChat();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="btn-secondary block w-full text-center"
+                    >
+                      <MessageCircle className="mr-1 inline h-4 w-4" />
+                      {t('chat:messages')}
+                    </button>
                     <button
                       onClick={() => {
                         logout();
@@ -253,7 +280,13 @@ export function Header() {
             </div>
           </div>
         )}
-      </div>
+      </div>{' '}
+      {/* Chat Drawer */}
+      <ChatDrawer
+        isOpen={isChatOpen}
+        onClose={closeChat}
+        startConversationWith={startConversationWith}
+      />
     </header>
   );
 }

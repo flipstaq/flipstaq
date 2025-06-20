@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently --names \"WEB,AUTH,USER,PRODUCT,GATEWAY\" --prefix-colors \"blue,green,yellow,cyan,magenta\" \"npm run dev --workspace=@flipstaq/web\" \"npm run start:dev --workspace=@flipstaq/auth-service\" \"npm run start:dev --workspace=@flipstaq/user-service\" \"npm run start:dev --workspace=@flipstaq/product-service\" \"npm run start:dev --workspace=@flipstaq/api-gateway\"",
+    "dev": "concurrently --names \"WEB,AUTH,USER,PRODUCT,MESSAGE,GATEWAY\" --prefix-colors \"blue,green,yellow,cyan,orange,magenta\" \"npm run dev --workspace=@flipstaq/web\" \"npm run start:dev --workspace=@flipstaq/auth-service\" \"npm run start:dev --workspace=@flipstaq/user-service\" \"npm run start:dev --workspace=@flipstaq/product-service\" \"npm run start:dev --workspace=@flipstaq/message-service\" \"npm run start:dev --workspace=@flipstaq/api-gateway\"",
     "build": "turbo run build",
     "start": "turbo run start",
     "lint": "turbo run lint",

@@ -14,7 +14,6 @@ import { AxiosResponse } from "axios";
 @Injectable()
 export class ProxyService {
   constructor(private readonly httpService: HttpService) {}
-
   async forwardRequest(
     service: keyof typeof SERVICE_ENDPOINTS,
     endpoint: string,
@@ -43,7 +42,6 @@ export class ProxyService {
         ...(data && { data }),
         ...(params && { params }),
       };
-
       const response = await firstValueFrom(this.httpService.request(config));
       return response;
     } catch (error) {
@@ -87,7 +85,6 @@ export class ProxyService {
         },
         ...(data && { data }),
       };
-
       const response = await firstValueFrom(this.httpService.request(config));
       return response;
     } catch (error) {
@@ -138,7 +135,6 @@ export class ProxyService {
       params
     );
   }
-
   async forwardOrderRequest(
     endpoint: string,
     method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
@@ -153,7 +149,6 @@ export class ProxyService {
       headers
     );
   }
-
   async forwardPaymentRequest(
     endpoint: string,
     method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
@@ -168,7 +163,6 @@ export class ProxyService {
       headers
     );
   }
-
   async forwardReviewRequest(
     endpoint: string,
     method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
@@ -183,7 +177,6 @@ export class ProxyService {
       headers
     );
   }
-
   async forwardNotificationRequest(
     endpoint: string,
     method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",

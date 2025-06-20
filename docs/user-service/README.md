@@ -2,12 +2,13 @@
 
 ## Overview
 
-The User Service is a NestJS-based microservice responsible for user management operations within the eCommerce platform. It provides admin-only endpoints for managing user accounts, including querying, updating, and soft deletion of users.
+The User Service is a NestJS-based microservice responsible for user management operations within the eCommerce platform. It provides both admin endpoints for managing user accounts and public endpoints for user discovery in messaging.
 
 ## Purpose
 
 - **User Management**: CRUD operations for user accounts
 - **Admin Operations**: Restricted access for administrative tasks
+- **Public User Search**: Allow users to find others for messaging
 - **Role-Based Access**: Enforces role-based permissions
 - **Soft Deletion**: Maintains data integrity with soft delete functionality
 
@@ -16,11 +17,16 @@ The User Service is a NestJS-based microservice responsible for user management 
 - **Framework**: NestJS 11.1.3
 - **Database**: PostgreSQL with Prisma ORM 6.9.0
 - **Authentication**: JWT-based with role validation
-- **Access Control**: Admin-only endpoints with role guards
+- **Access Control**: Mixed public and admin-only endpoints
+- **Public Search**: Unauthenticated user discovery for messaging
 
 ## Key Features
 
-### User Operations
+### Public Features (No Authentication Required)
+
+- **User Search**: Find users by username, first name, or last name for messaging
+
+### Admin Features (Authentication Required)
 
 - **List Users**: Paginated user listing with filtering
 - **Get User**: Retrieve specific user details
@@ -29,12 +35,14 @@ The User Service is a NestJS-based microservice responsible for user management 
 
 ### Security
 
-- **Role-Based Access**: All endpoints require admin privileges
-- **JWT Validation**: Token-based authentication
+- **Mixed Access Control**: Public search endpoints + protected admin endpoints
+- **JWT Validation**: Token-based authentication for protected routes
 - **Internal Service Protection**: Middleware for service-to-service calls
+- **Rate Limiting**: Public endpoints limited to prevent abuse
 
 ### Data Management
 
+- **Public User Data**: Limited information returned for search (id, username, names)
 - **Filtering**: By role, status, and other criteria
 - **Pagination**: Efficient data retrieval
 - **Soft Deletion**: Maintains referential integrity
@@ -48,7 +56,7 @@ The User Service is a NestJS-based microservice responsible for user management 
 - **Language**: TypeScript
 - **Authentication**: JWT tokens
 
-## Internal Routes
+## Internal API (Protected)
 
 All routes are prefixed with `/internal/users` and are only accessible from the API Gateway:
 
@@ -57,25 +65,43 @@ All routes are prefixed with `/internal/users` and are only accessible from the 
 - `PATCH /internal/users/:id` - Update user (admin only)
 - `DELETE /internal/users/:id` - Soft delete user (admin only)
 
-## Public API (via Gateway)
+## Public API (No Authentication Required)
+
+### User Search for Messaging
+
+- `GET /public/users/search` - Search users by username, first name, or last name
+  - **Query Parameters**:
+    - `query` (required): Search term
+    - `limit` (optional): Number of results (default: 10, max: 10)
+  - **Response**: Array of user objects with limited public information
+  - **Example**: `/public/users/search?query=john&limit=5`
+
+## Protected API (via Gateway)
 
 Access through API Gateway at `/api/v1/users/*`:
 
-- `GET /api/v1/users` - List users
+- `GET /api/v1/users` - List users (admin only)
 - `GET /api/v1/users/:id` - Get user details
 - `PATCH /api/v1/users/:id` - Update user
 - `DELETE /api/v1/users/:id` - Delete user
 
+### Public Search (via Gateway)
+
+Access through API Gateway at `/api/v1/public/users/*`:
+
+- `GET /api/v1/public/users/search` - Search users for messaging (no auth required)
+
 ## Internal Route Mappings
 
-The User Service exposes internal endpoints that are accessed through the API Gateway. The following table shows how public API routes map to internal service routes:
+The User Service exposes both public and internal endpoints that are accessed through the API Gateway. The following table shows how public API routes map to internal service routes:
 
-| Public Route (API Gateway) | Internal Route (User Service) | Description                              |
-| -------------------------- | ----------------------------- | ---------------------------------------- |
-| `GET /api/v1/users`        | `GET /internal/users`         | List users with filtering and pagination |
-| `GET /api/v1/users/:id`    | `GET /internal/users/:id`     | Get specific user by ID                  |
-| `PATCH /api/v1/users/:id`  | `PATCH /internal/users/:id`   | Update user information                  |
-| `DELETE /api/v1/users/:id` | `DELETE /internal/users/:id`  | Soft delete user                         |
+| Public Route (API Gateway)        | Internal Route (User Service) | Authentication | Description                              |
+| --------------------------------- | ----------------------------- | -------------- | ---------------------------------------- |
+| `GET /api/v1/public/users/search` | `GET /public/users/search`    | None           | Search users for messaging               |
+| `GET /api/v1/users`               | `GET /internal/users`         | JWT + Admin    | List users with filtering and pagination |
+| `GET /api/v1/users/:id`           | `GET /internal/users/:id`     | JWT + Admin    | Get specific user by ID                  |
+| `PATCH /api/v1/users/:id`         | `PATCH /internal/users/:id`   | JWT + Admin    | Update user information                  |
+| `DELETE /api/v1/users/:id`        | `DELETE /internal/users/:id`  | JWT + Admin    | Soft delete user                         |
 
 ### Internal Service Authentication
 
@@ -87,19 +113,30 @@ Internal requests are authenticated using special headers:
 
 ### Security Model
 
-1. **API Gateway**: Handles external authentication (JWT tokens) and role-based access control
-2. **User Service**: Validates internal service headers and grants elevated permissions to internal requests
-3. **Double Authentication**: External users must pass both gateway authentication and internal service validation
+1. **Public Endpoints**: `/public/*` routes require no authentication and return limited user data
+2. **API Gateway**: Handles external authentication (JWT tokens) and role-based access control for protected routes
+3. **User Service**: Validates internal service headers for protected endpoints and processes public requests directly
+4. **Mixed Authentication**: Public search available to all, admin operations require JWT + role validation
 
 ### Request Flow
 
+#### Public User Search
+
 ```
-External Client → API Gateway → User Service
+External Client → API Gateway → User Service (Public Controller)
+    ↓               ↓              ↓
+No Auth → Route Forwarding → Public Data Response
+```
+
+#### Protected Operations
+
+```
+External Client → API Gateway → User Service (Internal Controller)
     ↓               ↓              ↓
 JWT Token → Role Validation → Internal Headers → Response
 ```
 
-The API Gateway acts as the security boundary, while the User Service handles the business logic and data operations.
+The API Gateway acts as the security boundary for protected operations, while public endpoints bypass authentication entirely.
 
 ## Environment Configuration
 

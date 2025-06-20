@@ -31,9 +31,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // For development resilience, we'll trust valid JWT tokens without always calling auth service
     // Only validate with auth service for sensitive operations or if explicitly needed
     const user = {
+      sub: payload.sub,
       userId: payload.sub,
       email: payload.email,
       role: payload.role,
+      username: payload.email, // fallback if not provided
     };
 
     // In development, be more resilient to auth service restarts

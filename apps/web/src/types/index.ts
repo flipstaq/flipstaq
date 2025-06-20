@@ -16,6 +16,8 @@ export interface User {
   role: UserRole;
   status: UserStatus;
   isActive: boolean;
+  isOnline: boolean;
+  lastSeen?: string;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;

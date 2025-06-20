@@ -1,5 +1,134 @@
 # Frontend Features Documentation
 
+## Messaging System
+
+### Overview
+
+The messaging system enables direct communication between users, particularly for product inquiries. It features a real-time chat interface with conversation management and user search capabilities.
+
+### Key Features
+
+- **Direct Messaging**: One-on-one conversations between users
+- **Product Integration**: Message sellers directly from product pages
+- **Real-time Chat Interface**: Live messaging with conversation history and auto-refresh
+- **Inline User Search**: Find users to start conversations without modal popups
+- **Auto-polling**: New messages appear automatically every 3 seconds
+- **Mobile Responsive**: Optimized for all screen sizes
+- **Multi-language Support**: English and Arabic with RTL support
+
+### Components
+
+#### ChatContext (`/contexts/ChatContext.tsx`)
+
+Global state management for the chat system.
+
+**Methods:**
+
+- `openChatWith(user)`: Start conversation with specific user
+- `openChat()`: Open chat drawer without targeting a user
+- `closeChat()`: Close chat drawer
+
+#### ChatDrawer (`/components/chat/ChatDrawer.tsx`)
+
+Main chat interface component.
+
+**Props:**
+
+- `isOpen` (boolean): Whether the drawer is visible
+- `onClose` (function): Close handler
+- `startConversationWith` (object, optional): Auto-start conversation with user
+
+**Features:**
+
+- Split-view layout (conversations + active chat)
+- Inline user search for starting new conversations
+- Auto-conversation starting when opened with specific user
+- Real-time message updates with 3-second polling
+- Automatic message refresh when new messages arrive
+- Mobile-friendly responsive design
+
+### Product Integration
+
+#### Message Seller Button
+
+Located in `ProductDetailPage.tsx`, allows users to message product sellers.
+
+**Behavior:**
+
+- Only visible to authenticated users
+- Hidden if user is the product seller
+- Opens chat with seller automatically
+- Shows appropriate toast notifications
+- Handles edge cases (login required, self-messaging prevention)
+
+**Translation Keys:**
+
+```json
+{
+  "products.detail.message_seller": "Message Seller",
+  "products.detail.cannot_message_yourself": "You cannot message yourself",
+  "products.detail.chat_opened": "Chat opened with seller"
+}
+```
+
+### API Integration
+
+- **User Search**: `/api/v1/public/users/search` (no auth required)
+- **Conversations**: `/api/v1/messages/conversations` (auth required)
+- **Send Messages**: `/api/v1/messages/send` (auth required)
+- **Message History**: `/api/v1/messages/conversations/:id/messages` (auth required)
+
+### User Search Validation
+
+The user search functionality includes client-side and server-side validation to ensure a smooth user experience:
+
+**Requirements:**
+
+- Minimum 2 characters for search queries
+- Automatic debouncing (300ms delay) to reduce API calls
+- Real-time feedback for incomplete queries
+
+**Client-side Features:**
+
+- Visual indicators when user needs to type more characters
+- Color-coded input states (normal, warning, error)
+- Character counter for queries with 1 character
+- Translation support for all error messages
+
+**Error Handling:**
+
+- "Type at least 2 characters to search" for incomplete queries
+- Network error handling with user-friendly messages
+- Graceful fallback for authentication issues
+
+**Translation Keys:**
+
+```json
+{
+  "chat.search_hint_min_chars": "Type at least 2 characters to search",
+  "chat.search_failed": "Search failed",
+  "chat.user_not_found": "User not found"
+}
+```
+
+### Real-time Updates
+
+The messaging system automatically polls for new messages every 3 seconds when the chat drawer is open:
+
+**Features:**
+
+- Automatic conversation list refresh
+- New message detection and display
+- Optimized polling to prevent unnecessary API calls
+- Automatic cleanup when chat is closed
+
+**Implementation:**
+
+- Uses `setInterval` with 3-second polling
+- Compares message timestamps to detect changes
+- Only updates UI when new content is available
+- Cleans up intervals on component unmount
+
 ## Favorites System
 
 ### Overview

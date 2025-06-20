@@ -91,6 +91,8 @@
     "location": "Location",
     "posted_on": "Posted on",
     "message_seller": "Message Seller",
+    "cannot_message_yourself": "You cannot message yourself",
+    "chat_opened": "Chat opened with seller",
     "product_image": "Product Image",
     "no_image_available": "No image available"
   },

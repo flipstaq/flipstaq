@@ -100,9 +100,7 @@ export class AuthService {
     // Check if user account is deleted
     if (!user.isActive || user.deletedAt) {
       throw new UnauthorizedException('Your account has been deleted and access is denied.');
-    }
-
-    // Verify password
+    } // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -113,6 +111,15 @@ export class AuthService {
 
     // Store refresh token
     await this.storeRefreshToken(user.id, tokens.refreshToken);
+
+    // Update user status to online and lastSeen
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isOnline: true,
+        lastSeen: new Date(),
+      },
+    });
 
     return {
       ...tokens,
@@ -135,7 +142,6 @@ export class AuthService {
 
     return this.mapToUserInfo(user);
   }
-
   async logout(userId: string, refreshToken?: string): Promise<void> {
     if (refreshToken) {
       await this.prisma.refreshToken.delete({
@@ -147,6 +153,15 @@ export class AuthService {
         where: { userId },
       });
     }
+
+    // Set user as offline and update lastSeen
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        isOnline: false,
+        lastSeen: new Date(),
+      },
+    });
   }
 
   async refreshTokens(refreshToken: string): Promise<AuthResponseDto> {

@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Delete,
+  Post,
   Param,
   Body,
   Query,
@@ -263,5 +264,101 @@ export class UserGatewayController {
         error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  } // Note: Public user search has been moved to PublicController
+  // This endpoint remains for authenticated admin-level user management
+  @Get("search")
+  @Roles("OWNER", "HIGHER_STAFF", "STAFF")
+  @ApiOperation({ summary: "Search users for admin management" })
+  @ApiQuery({
+    name: "q",
+    description: "Search query for username, email, first name, or last name",
+    required: true,
+  })
+  @ApiQuery({
+    name: "limit",
+    description: "Maximum number of results to return (max 50)",
+    required: false,
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Users found successfully",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Bad request - search query is required",
+  })
+  async searchUsers(
+    @Query("q") query: string,
+    @Req() req: any,
+    @Query("limit") limit?: string
+  ) {
+    const response = await this.proxyService.forwardRequest(
+      "USER",
+      `users/search?q=${encodeURIComponent(query)}${limit ? `&limit=${limit}` : ""}`,
+      "GET",
+      null,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+      }
+    );
+    return response.data;
+  }
+
+  @Post("heartbeat")
+  @ApiOperation({ summary: "Update user activity timestamp" })
+  @ApiResponse({
+    status: 200,
+    description: "Heartbeat updated successfully",
+  })
+  async heartbeat(@Req() req: any) {
+    const response = await this.proxyService.forwardRequest(
+      "USER",
+      "users/heartbeat",
+      "POST",
+      null,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+      }
+    );
+    return response.data;
+  }
+
+  @Post("offline/:id")
+  @ApiOperation({ summary: "Mark user as offline" })
+  @ApiResponse({
+    status: 200,
+    description: "User marked as offline successfully",
+  })
+  async markOffline(@Param("id") userId: string, @Req() req: any) {
+    const response = await this.proxyService.forwardRequest(
+      "USER",
+      `users/offline/${userId}`,
+      "POST",
+      null,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+      }
+    );
+    return response.data;
+  }
+
+  @Post("cleanup-stale")
+  @ApiOperation({ summary: "Cleanup stale online users" })
+  @ApiResponse({
+    status: 200,
+    description: "Stale users cleaned up successfully",
+  })
+  async cleanupStaleUsers(@Req() req: any) {
+    const response = await this.proxyService.forwardRequest(
+      "USER",
+      "users/cleanup-stale",
+      "POST",
+      null,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+      }
+    );
+    return response.data;
   }
 }

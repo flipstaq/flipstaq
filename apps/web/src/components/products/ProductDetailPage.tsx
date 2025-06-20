@@ -13,7 +13,11 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { useChat } from '@/contexts/ChatContext';
+import { useToast } from '@/components/providers/ToastProvider';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
+import InlineMessageComposer from '@/components/chat/InlineMessageComposer';
 import Link from 'next/link';
 import Head from 'next/head';
 
@@ -45,12 +49,16 @@ export function ProductDetailPage({
   initialProduct,
 }: ProductDetailPageProps) {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
+  const { openChatWith } = useChat();
+  const { info, success } = useToast();
   const [product, setProduct] = useState<ProductDetail | null>(
     initialProduct || null
   );
   const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [showMessageComposer, setShowMessageComposer] = useState(false);
 
   const isRTL = language === 'ar';
 
@@ -104,6 +112,25 @@ export function ProductDetailPage({
       // Fallback to copying to clipboard
       navigator.clipboard.writeText(url);
     }
+  };
+  const handleMessageSeller = () => {
+    if (!product) {
+      return;
+    }
+
+    if (!user) {
+      info(t('auth.loginRequired'));
+      return;
+    }
+
+    // Prevent users from messaging themselves
+    if (product.userId === user.id) {
+      info(t('products.detail.cannot_message_yourself'));
+      return;
+    }
+
+    // Show inline message composer instead of opening full chat
+    setShowMessageComposer(true);
   };
 
   const fetchProductDetails = async () => {
@@ -443,7 +470,6 @@ export function ProductDetailPage({
                     </div>
                   </div>
                 </div>
-
                 {/* Price Section */}
                 <div className="mb-6">
                   <div className="rounded-lg bg-primary-50 p-4 dark:bg-primary-900/20">
@@ -455,7 +481,6 @@ export function ProductDetailPage({
                     </p>
                   </div>
                 </div>
-
                 {/* Description */}
                 {product.description && (
                   <div className="mb-6">
@@ -468,22 +493,61 @@ export function ProductDetailPage({
                       </p>
                     </div>
                   </div>
-                )}
-
+                )}{' '}
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <button className="flex-1 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600">
-                    <div className="flex items-center justify-center">
-                      <MessageCircle
-                        className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`}
-                      />
-                      {t('products.detail.message_seller')}
-                    </div>
-                  </button>
+                  {/* Message Seller - Show input or button based on state */}
+                  {user && product.userId !== user.id && (
+                    <>
+                      {!showMessageComposer ? (
+                        <button
+                          onClick={handleMessageSeller}
+                          className="flex-1 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
+                        >
+                          <div className="flex items-center justify-center">
+                            <MessageCircle
+                              className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                            />
+                            {t('products.detail.message_seller')}
+                          </div>
+                        </button>
+                      ) : (
+                        <div className="flex-1">
+                          {' '}
+                          <InlineMessageComposer
+                            productSeller={{
+                              userId: product.userId,
+                              username: product.username,
+                              firstName: product.username,
+                              lastName: '',
+                            }}
+                            productTitle={product.title}
+                            productCover={{
+                              id: product.id,
+                              title: product.title,
+                              price: product.price,
+                              currency: product.currency,
+                              imageUrl: product.imageUrl,
+                              username: product.username,
+                              location: product.location,
+                              slug: product.slug,
+                            }}
+                            allowFileAttachments={false}
+                            onMessageSent={() => {
+                              // Don't show duplicate success message - InlineMessageComposer already shows it
+                            }}
+                            onClose={() => setShowMessageComposer(false)}
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
 
                   <button
                     onClick={handleShare}
-                    className="rounded-lg border border-secondary-300 px-6 py-3 font-medium text-secondary-700 transition-colors hover:bg-secondary-50 dark:border-secondary-600 dark:text-secondary-300 dark:hover:bg-secondary-700"
+                    className={`rounded-lg border border-secondary-300 px-6 py-3 font-medium text-secondary-700 transition-colors hover:bg-secondary-50 dark:border-secondary-600 dark:text-secondary-300 dark:hover:bg-secondary-700 ${
+                      user && product.userId !== user.id ? '' : 'flex-1'
+                    }`}
                   >
                     <div className="flex items-center justify-center">
                       <Share2

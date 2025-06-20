@@ -132,6 +132,8 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   status: 'status',
   isActive: 'isActive',
+  isOnline: 'isOnline',
+  lastSeen: 'lastSeen',
   deletedAt: 'deletedAt',
   deletedById: 'deletedById',
   createdAt: 'createdAt',
@@ -182,9 +184,40 @@ exports.Prisma.ReviewScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ConversationScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MessageScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  senderId: 'senderId',
+  conversationId: 'conversationId',
+  read: 'read',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MessageAttachmentScalarFieldEnum = {
+  id: 'id',
+  messageId: 'messageId',
+  fileUrl: 'fileUrl',
+  fileName: 'fileName',
+  fileType: 'fileType',
+  fileSize: 'fileSize',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -195,6 +228,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 exports.UserRole = exports.$Enums.UserRole = {
   OWNER: 'OWNER',
@@ -215,7 +254,10 @@ exports.Prisma.ModelName = {
   RefreshToken: 'RefreshToken',
   Product: 'Product',
   Favorite: 'Favorite',
-  Review: 'Review'
+  Review: 'Review',
+  Conversation: 'Conversation',
+  Message: 'Message',
+  MessageAttachment: 'MessageAttachment'
 };
 
 /**

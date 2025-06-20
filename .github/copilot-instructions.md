@@ -151,3 +151,4 @@ module.exports = {
 
 ALWYAYS REFER TO DOCS for microservice-specific guidlines and API details.
 keep in mind to use the custom language provider and not react ii18next
+Update logs without removing other microservices information

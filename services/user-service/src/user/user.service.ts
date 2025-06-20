@@ -1,8 +1,14 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
-import { GetUsersQueryDto, UserRole, UserStatus } from '../dto/get-users-query.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserResponseDto, PaginatedUsersResponseDto } from '../dto/user-response.dto';
+import { GetUsersQueryDto, UserRole, UserStatus } from '../dto/get-users-query.dto';
 
 @Injectable()
 export class UserService {
@@ -61,9 +67,7 @@ export class UserService {
     const skip = (page - 1) * limit;
 
     // Get total count
-    const total = await this.prisma.user.count({ where });
-
-    // Get users
+    const total = await this.prisma.user.count({ where }); // Get users
     const users = await this.prisma.user.findMany({
       where,
       select: {
@@ -76,6 +80,8 @@ export class UserService {
         role: true,
         status: true,
         isActive: true,
+        isOnline: true,
+        lastSeen: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
@@ -112,6 +118,8 @@ export class UserService {
         role: true,
         status: true,
         isActive: true,
+        isOnline: true,
+        lastSeen: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
@@ -150,9 +158,7 @@ export class UserService {
     // Only owners can promote to OWNER role
     if (updateUserDto.role === UserRole.OWNER && currentUser.role !== UserRole.OWNER) {
       throw new ForbiddenException('Only owners can assign owner role');
-    }
-
-    // Update user
+    } // Update user
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: updateUserDto,
@@ -166,6 +172,8 @@ export class UserService {
         role: true,
         status: true,
         isActive: true,
+        isOnline: true,
+        lastSeen: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
@@ -266,6 +274,8 @@ export class UserService {
         role: true,
         status: true,
         isActive: true,
+        isOnline: true,
+        lastSeen: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
@@ -273,5 +283,92 @@ export class UserService {
     });
 
     return restoredUser;
+  }
+
+  async searchForMessaging(
+    query: string,
+    limit: number = 10,
+    currentUserId?: string,
+  ): Promise<UserResponseDto[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        status: 'ACTIVE',
+        deletedAt: null,
+        // Exclude the current user from search results
+        ...(currentUserId && { id: { not: currentUserId } }),
+        OR: [
+          { username: { contains: query, mode: 'insensitive' } },
+          { email: { contains: query, mode: 'insensitive' } },
+          { firstName: { contains: query, mode: 'insensitive' } },
+          { lastName: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        country: true,
+        role: true,
+        status: true,
+        isActive: true,
+        isOnline: true,
+        lastSeen: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+      },
+      take: limit,
+      orderBy: [{ username: 'asc' }, { firstName: 'asc' }],
+    });
+    return users;
+  }
+
+  async updateLastSeen(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { lastSeen: new Date() },
+    });
+  }
+
+  async markUserOffline(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        isOnline: false,
+        lastSeen: new Date(),
+      },
+    });
+  }
+
+  async cleanupStaleUsers(timeoutMinutes: number = 5): Promise<number> {
+    const cutoffTime = new Date(Date.now() - timeoutMinutes * 60 * 1000);
+
+    const result = await this.prisma.user.updateMany({
+      where: {
+        isOnline: true,
+        lastSeen: {
+          lt: cutoffTime,
+        },
+      },
+      data: {
+        isOnline: false,
+      },
+    });
+
+    return result.count;
+  }
+  // Scheduled task to cleanup stale users every 5 minutes
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async handleStaleUserCleanup(): Promise<void> {
+    try {
+      const count = await this.cleanupStaleUsers(5); // 5 minutes timeout
+      if (count > 0) {
+        console.log(`🧹 Marked ${count} stale users as offline`);
+      }
+    } catch (error) {
+      console.error('Error during stale user cleanup:', error);
+    }
   }
 }

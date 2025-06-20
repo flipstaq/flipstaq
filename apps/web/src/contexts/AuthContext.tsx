@@ -1,12 +1,15 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { userService } from '@/lib/userService';
 
 interface User {
   id: string;
   email: string;
   username: string;
   role: string;
+  isOnline?: boolean;
+  lastSeen?: string;
 }
 
 interface AuthContextType {
@@ -24,6 +27,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  // Heartbeat interval for keeping user online status fresh
+  useEffect(() => {
+    if (!isAuthenticated || !token) return;
+
+    // Send heartbeat immediately when authenticated
+    userService.heartbeat();
+
+    // Setup periodic heartbeat (every 30 seconds)
+    const heartbeatInterval = setInterval(() => {
+      userService.heartbeat();
+    }, 30000);
+
+    // Handle browser close/refresh to mark user offline
+    const handleBeforeUnload = () => {
+      userService.markOffline();
+    };
+
+    // Handle page visibility change (tab switching, minimizing)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Page is hidden, reduce heartbeat frequency or stop
+        clearInterval(heartbeatInterval);
+      } else {
+        // Page is visible again, resume heartbeat
+        userService.heartbeat();
+        const newInterval = setInterval(() => {
+          userService.heartbeat();
+        }, 30000);
+        return () => clearInterval(newInterval);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(heartbeatInterval);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAuthenticated, token]);
 
   useEffect(() => {
     // Check for existing token on mount

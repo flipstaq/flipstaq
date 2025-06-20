@@ -41,6 +41,12 @@
       "static/chunks/_pages-dir-browser_packages_locales_ar_auth_json.js"
     ]
   },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/chat.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/chat.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_chat_json.js"
+    ]
+  },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/common.json": {
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/common.json",
     "files": [
@@ -105,6 +111,12 @@
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/auth.json",
     "files": [
       "static/chunks/_pages-dir-browser_packages_locales_en_auth_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/chat.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/chat.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_chat_json.js"
     ]
   },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/common.json": {

@@ -5,7 +5,10 @@ import { PassportModule } from "@nestjs/passport";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthGatewayController } from "./auth/auth-gateway.controller";
 import { UserGatewayController } from "./user/user-gateway.controller";
+import { PublicController } from "./public/public.controller";
 import { ProductModule } from "./product/product.module";
+import { MessageModule } from "./message/message.module";
+import { TenorModule } from "./tenor/tenor.module";
 import { ProxyService } from "./proxy/proxy.service";
 import { JwtStrategy } from "./common/strategies/jwt.strategy";
 
@@ -33,8 +36,10 @@ import { JwtStrategy } from "./common/strategies/jwt.strategy";
       inject: [ConfigService],
     }),
     ProductModule,
+    MessageModule,
+    TenorModule,
   ],
-  controllers: [AuthGatewayController, UserGatewayController],
+  controllers: [AuthGatewayController, UserGatewayController, PublicController],
   providers: [ProxyService, JwtStrategy],
 })
 export class AppModule {}

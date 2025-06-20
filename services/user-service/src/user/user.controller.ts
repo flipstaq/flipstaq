@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Delete,
+  Post,
   Param,
   Query,
   Body,
@@ -10,6 +11,7 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  Headers,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -146,5 +148,81 @@ export class UserController {
   })
   async restore(@Param('id') id: string): Promise<UserResponseDto> {
     return this.userService.restore(id);
+  }
+  @Get('search')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Search users for messaging (accessible to all authenticated users)' })
+  @ApiQuery({
+    name: 'q',
+    description: 'Search query for username, email, first name, or last name',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'limit',
+    description: 'Maximum number of results to return',
+    required: false,
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Users found successfully',
+    type: [UserResponseDto],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - search query is required',
+  })
+  async searchUsers(
+    @Query('q') query: string,
+    @Request() req: any,
+    @Query('limit') limit?: string,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<UserResponseDto[]> {
+    if (!query || query.trim().length < 2) {
+      throw new Error('Search query must be at least 2 characters long');
+    }
+    const searchLimit = limit ? parseInt(limit, 10) : 10;
+    const maxLimit = Math.min(searchLimit, 50); // Cap at 50 results
+
+    return this.userService.searchForMessaging(query.trim(), maxLimit, userId);
+  }
+
+  @Post('heartbeat')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update user last seen timestamp (heartbeat)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Heartbeat updated successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  async heartbeat(@Headers('x-user-id') userId: string): Promise<{ message: string }> {
+    await this.userService.updateLastSeen(userId);
+    return { message: 'Heartbeat updated' };
+  }
+
+  @Post('offline/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Mark user as offline' })
+  @ApiResponse({
+    status: 200,
+    description: 'User marked as offline successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  async markOffline(@Param('id') userId: string): Promise<{ message: string }> {
+    await this.userService.markUserOffline(userId);
+    return { message: 'User marked as offline' };
+  }
+
+  @Post('cleanup-stale')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cleanup stale online users (internal endpoint)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Stale users cleaned up successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  async cleanupStaleUsers(): Promise<{ message: string; count: number }> {
+    const count = await this.userService.cleanupStaleUsers(5); // 5 minutes timeout
+    return { message: 'Stale users cleaned up', count };
   }
 }

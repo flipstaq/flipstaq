@@ -26,25 +26,31 @@ enum UserStatus {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  username      String         @unique
-  firstName     String
-  lastName      String
-  password      String // Hashed password
-  dateOfBirth   DateTime
-  country       String
-  role          UserRole       @default(USER)
-  status        UserStatus     @default(ACTIVE)
-  isActive      Boolean        @default(true)
-  deletedAt     DateTime? // Soft delete timestamp
-  deletedById   String? // ID of admin who deleted this user
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt // Relations
+  id          String     @id @default(cuid())
+  email       String     @unique
+  username    String     @unique
+  firstName   String
+  lastName    String
+  password    String // Hashed password
+  dateOfBirth DateTime
+  country     String
+  role        UserRole   @default(USER)
+  status      UserStatus @default(ACTIVE)
+  isActive    Boolean    @default(true)
+  isOnline    Boolean    @default(false)
+  lastSeen    DateTime?
+  deletedAt   DateTime? // Soft delete timestamp
+  deletedById String? // ID of admin who deleted this user
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
   refreshTokens RefreshToken[]
   products      Product[]
   favorites     Favorite[]
   reviews       Review[]
+  sentMessages  Message[]
+  conversations Conversation[] @relation("ConversationParticipants")
 
   // Self-referential relation for deletion tracking
   deletedBy    User?  @relation("UserDeletions", fields: [deletedById], references: [id])
@@ -119,4 +125,44 @@ model Review {
 
   @@unique([productId, userId]) // One review per user per product
   @@map("reviews")
+}
+
+model Conversation {
+  id           String    @id @default(cuid())
+  participants User[]    @relation("ConversationParticipants")
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  content        String?
+  senderId       String
+  conversationId String
+  read           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  sender       User                @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  attachments  MessageAttachment[]
+
+  @@map("messages")
+}
+
+model MessageAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  fileUrl   String
+  fileName  String
+  fileType  String
+  fileSize  Int
+  metadata  Json? // Store product cover and other metadata as JSON
+  createdAt DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("message_attachments")
 }
