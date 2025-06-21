@@ -443,14 +443,18 @@ export class MessageService {
       message: `Message marked as ${read ? "read" : "unread"}`,
     };
   }
-
   /**
    * Mark all messages in a conversation as read for the current user
    */
   async markConversationAsRead(
     userId: string,
     conversationId: string
-  ): Promise<{ success: boolean; message: string; updatedCount: number }> {
+  ): Promise<{
+    success: boolean;
+    message: string;
+    updatedCount: number;
+    messageIds: string[];
+  }> {
     // Verify user is participant in conversation
     const conversation = await this.prisma.conversation.findFirst({
       where: {
@@ -464,6 +468,16 @@ export class MessageService {
     if (!conversation) {
       throw new NotFoundException("Conversation not found or access denied");
     }
+
+    // First, get the messages that will be marked as read
+    const messagesToUpdate = await this.prisma.message.findMany({
+      where: {
+        conversationId,
+        senderId: { not: userId },
+        read: false,
+      },
+      select: { id: true },
+    });
 
     // Mark all messages from other users as read
     const result = await this.prisma.message.updateMany({
@@ -479,6 +493,7 @@ export class MessageService {
       success: true,
       message: `Marked ${result.count} messages as read`,
       updatedCount: result.count,
+      messageIds: messagesToUpdate.map((msg) => msg.id),
     };
   }
 

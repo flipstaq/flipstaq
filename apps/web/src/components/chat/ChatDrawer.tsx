@@ -146,8 +146,7 @@ export default function ChatDrawer({
         if (newMessage.senderId === user?.id) {
           console.log('🔄 Skipping own message from WebSocket');
           return;
-        }
-        // Add the message to the current conversation if it matches
+        } // Add the message to the current conversation if it matches
         if (selectedConversationRef.current?.id === newMessage.conversationId) {
           setMessages((prevMessages) => {
             // Avoid duplicates by checking if message already exists
@@ -177,7 +176,25 @@ export default function ChatDrawer({
               attachments: newMessage.attachments || [],
             };
             return [...prevMessages, convertedMessage];
-          });
+          }); // Auto-mark the message as read since the conversation is currently active
+          // This ensures the sender sees the blue checkmark immediately
+          // Only auto-mark if the document is visible (user is actively viewing the page)
+          setTimeout(async () => {
+            try {
+              if (!document.hidden) {
+                await messageService.markConversationAsRead(
+                  newMessage.conversationId
+                );
+                console.log(
+                  '✅ Auto-marked new message as read in active conversation'
+                );
+              } else {
+                console.log('📱 Document hidden, not auto-marking as read');
+              }
+            } catch (error) {
+              console.error('Failed to auto-mark message as read:', error);
+            }
+          }, 100); // Small delay to ensure the message is processed
         }
 
         // Update conversation list to reflect new message
@@ -194,9 +211,12 @@ export default function ChatDrawer({
                   isRead: false,
                 },
                 unreadCount:
-                  conv.id === selectedConversationRef.current?.id
-                    ? conv.unreadCount
-                    : conv.unreadCount + 1,
+                  conv.id === selectedConversationRef.current?.id &&
+                  !document.hidden
+                    ? 0 // Auto-marked as read since conversation is active and visible
+                    : conv.id === selectedConversationRef.current?.id
+                      ? conv.unreadCount // Keep current count if document is hidden
+                      : conv.unreadCount + 1, // Increment for inactive conversations
               };
             }
             return conv;
@@ -206,16 +226,20 @@ export default function ChatDrawer({
       const unsubscribeReadStatus = onMessageReadStatusChanged((data) => {
         console.log('👁️ Message read status changed:', data);
 
-        if (selectedConversationRef.current?.id) {
-          setMessages((prevMessages) => {
-            return prevMessages.map((message) => {
-              if (message.id === data.messageId) {
-                return { ...message, isRead: data.read };
-              }
-              return message;
-            });
+        // Update messages in the currently selected conversation
+        setMessages((prevMessages) => {
+          return prevMessages.map((message) => {
+            if (message.id === data.messageId) {
+              // Update the message status to reflect the read state
+              return {
+                ...message,
+                isRead: data.read,
+                status: data.read ? 'read' : message.status,
+              };
+            }
+            return message;
           });
-        }
+        });
       });
 
       // Set up conversation read status change handler
@@ -245,6 +269,42 @@ export default function ChatDrawer({
       };
     }
   }, [isOpen, user?.id, isConnected, connect]);
+
+  // Handle page visibility change to mark messages as read when user returns
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (
+        !document.hidden &&
+        selectedConversation?.id &&
+        selectedConversation.unreadCount > 0
+      ) {
+        // User returned to the page and there's an active conversation with unread messages
+        try {
+          await messageService.markConversationAsRead(selectedConversation.id);
+          console.log('✅ Marked conversation as read after visibility change');
+
+          // Update conversation list to show no unread messages
+          setConversations((prev) =>
+            prev.map((conv) =>
+              conv.id === selectedConversation.id
+                ? { ...conv, unreadCount: 0 }
+                : conv
+            )
+          );
+        } catch (error) {
+          console.error(
+            'Failed to mark conversation as read on visibility change:',
+            error
+          );
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [selectedConversation?.id, selectedConversation?.unreadCount]);
 
   // Join/leave conversation rooms
   useEffect(() => {

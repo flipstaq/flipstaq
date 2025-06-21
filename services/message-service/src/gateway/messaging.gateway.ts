@@ -317,7 +317,6 @@ export class MessagingGateway {
       return this.sendToClient(client, { error: error.message });
     }
   }
-
   async handleMarkConversationAsRead(
     data: { conversationId: string },
     client: AuthenticatedSocket
@@ -331,6 +330,21 @@ export class MessagingGateway {
         client.userId,
         data.conversationId
       );
+
+      // Send individual message read status changes for each message that was marked as read
+      if (result.messageIds && result.messageIds.length > 0) {
+        result.messageIds.forEach((messageId) => {
+          this.sendToConversation(
+            data.conversationId,
+            "messageReadStatusChanged",
+            {
+              messageId,
+              read: true,
+              readBy: client.userId,
+            }
+          );
+        });
+      }
 
       // Notify all participants in the conversation about the read status change
       // This helps update read receipts and unread counts in real-time

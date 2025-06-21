@@ -171,6 +171,50 @@ The messaging system automatically polls for new messages every 3 seconds when t
 - Only updates UI when new content is available
 - Cleans up intervals on component unmount
 
+### Read Receipts and Message Status
+
+The messaging system provides visual feedback about message delivery and read status for senders.
+
+**Features:**
+
+- **Sent Status**: Grey single checkmark when message is sent
+- **Delivered Status**: Grey double checkmark when message is delivered
+- **Read Status**: Blue double checkmark when message is read by recipient
+- **Real-time Updates**: Status changes immediately when recipient reads the message
+
+**Implementation:**
+
+- Message status is tracked per message in the database
+- WebSocket events (`messageReadStatusChanged`) provide real-time updates
+- Status icons are only shown for sent messages (not received messages)
+- Smart filtering prevents status updates for irrelevant events
+
+**Visual Indicators:**
+
+```typescript
+// Status icon colors and types
+'sent': <Check className="h-3 w-3 text-secondary-500" />
+'delivered': <CheckCheck className="h-3 w-3 text-secondary-500" />
+'read': <CheckCheck className="h-3 w-3 text-primary-600 dark:text-primary-400" />
+```
+
+**Event Handling:**
+
+- When a user opens a conversation, all unread messages are marked as read
+- **Real-time Auto-Read**: Messages are automatically marked as read when received in an active conversation (if the page is visible)
+- **Visibility Awareness**: Messages are only auto-marked as read if the browser tab is active
+- **Page Return Handling**: When returning to an active conversation, unread messages are automatically marked as read
+- Individual `messageReadStatusChanged` events are emitted for each message
+- Real-time status updates ensure immediate visual feedback for senders
+- Optimized to prevent unnecessary API calls when the page is hidden
+
+**Auto-Read Behavior:**
+
+- Messages arriving in the currently selected conversation are automatically marked as read
+- Only occurs when the browser tab is visible (`!document.hidden`)
+- Provides immediate blue checkmark feedback to the sender
+- Reduces manual interaction needed for read receipts
+
 ## Favorites System
 
 ### Overview
