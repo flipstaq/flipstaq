@@ -14,18 +14,35 @@ export default async function handler(
 
   const { username, slug } = req.query;
 
+  console.log('🔍 Product API Route - Request headers:', {
+    authorization: req.headers.authorization ? 'Present' : 'Missing',
+    userAgent: req.headers['user-agent'],
+  });
+
   if (!username || !slug) {
     return res.status(400).json({ error: 'Username and slug are required' });
   }
-
   try {
+    // Forward the authorization header if it exists
+    const authHeader = req.headers.authorization;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (authHeader) {
+      headers.Authorization = authHeader;
+    }
+
+    console.log('📤 Product API Route - Forwarding to API Gateway:', {
+      url: `${API_GATEWAY_URL}/api/v1/products/@${username}/${slug}`,
+      hasAuth: !!headers.Authorization,
+    });
+
     const response = await fetch(
       `${API_GATEWAY_URL}/api/v1/products/@${username}/${slug}`,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       }
     );
 

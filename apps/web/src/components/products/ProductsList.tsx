@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { ProductCard } from './ProductCard';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { productsApi, Product as ApiProduct } from '@/lib/api/products';
 import LoadingSpinner, {
   LoadingSpinnerSmall,
 } from '@/components/ui/LoadingSpinner';
@@ -55,13 +56,7 @@ export function ProductsList({ limit, searchQuery }: ProductsListProps) {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/products');
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-
-        const data = await response.json();
+        const data = await productsApi.getAll();
         const productsToShow = limit ? data.slice(0, limit) : data;
         setProducts(productsToShow);
         setFilteredProducts(productsToShow);

@@ -16,8 +16,11 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useChat } from '@/contexts/ChatContext';
 import { useToast } from '@/components/providers/ToastProvider';
+import { productsApi, Product } from '../../lib/api/products';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import InlineMessageComposer from '@/components/chat/InlineMessageComposer';
+import { BlockButton } from '@/components/common/BlockButton';
+import { useBlockStatus } from '@/hooks/useBlockStatus';
 import Link from 'next/link';
 import Head from 'next/head';
 
@@ -59,6 +62,11 @@ export function ProductDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [showMessageComposer, setShowMessageComposer] = useState(false);
+
+  // Block status hook for the product owner
+  const { blockStatus, updateBlockStatus } = useBlockStatus(
+    product?.userId && user?.id !== product.userId ? product.userId : null
+  );
 
   const isRTL = language === 'ar';
 
@@ -132,7 +140,6 @@ export function ProductDetailPage({
     // Show inline message composer instead of opening full chat
     setShowMessageComposer(true);
   };
-
   const fetchProductDetails = async () => {
     if (!username || !slug) return;
 
@@ -140,16 +147,7 @@ export function ProductDetailPage({
     setError(null);
 
     try {
-      const response = await fetch(`/api/users/${username}/products/${slug}`);
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Product not found');
-        }
-        throw new Error('Failed to fetch product details');
-      }
-
-      const data = await response.json();
+      const data = await productsApi.getByUsernameAndSlug(username, slug);
       setProduct(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -403,23 +401,34 @@ export function ProductDetailPage({
                 <div className="mb-6">
                   <h1 className="mb-4 text-2xl font-bold text-secondary-900 dark:text-secondary-100 md:text-3xl">
                     {product.title}
-                  </h1>
-
+                  </h1>{' '}
                   {/* Seller Info */}
-                  <div className="mb-4 flex items-center">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-                      <User className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
+                        <User className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                      </div>
+                      <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
+                        <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                          {t('products.detail.posted_by')}
+                        </p>
+                        <p className="font-semibold text-secondary-900 dark:text-secondary-100">
+                          @{product.username}
+                        </p>
+                      </div>
                     </div>
-                    <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
-                      <p className="text-sm text-secondary-500 dark:text-secondary-400">
-                        {t('products.detail.posted_by')}
-                      </p>
-                      <p className="font-semibold text-secondary-900 dark:text-secondary-100">
-                        @{product.username}
-                      </p>
-                    </div>
-                  </div>
 
+                    {/* Block Button - Only show for other users */}
+                    {user && product.userId !== user.id && (
+                      <BlockButton
+                        targetUserId={product.userId}
+                        targetUsername={product.username}
+                        isBlocked={blockStatus.isBlocked}
+                        onBlockChange={updateBlockStatus}
+                        className="text-xs"
+                      />
+                    )}
+                  </div>
                   {/* Product Meta */}
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {/* Location */}

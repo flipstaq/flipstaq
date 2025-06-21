@@ -15,23 +15,14 @@ export class InternalServiceGuard implements CanActivate {
     const userId = request.headers['x-user-id'];
     const userEmail = request.headers['x-user-email'];
     const userRole = request.headers['x-user-role'];
-
-    console.log('🔐 InternalServiceGuard - Headers received:', {
-      userId,
-      userEmail,
-      userRole,
-      isInternal,
-      isFromGateway,
-    });
-
-    if (userId && userId !== '' && userEmail && userRole) {
+    if (userId && userId !== '' && userId !== 'anonymous') {
       // Use the actual user information from the API Gateway
       request.user = {
         sub: userId,
-        email: userEmail,
-        role: userRole,
+        userId: userId,
+        email: userEmail || 'unknown@flipstaq.com', // Use passed email or fallback
+        role: userRole || 'USER', // Use passed role or default to USER
       };
-      console.log('✅ InternalServiceGuard - User set:', request.user);
     } else {
       // Fallback to mock admin user for internal requests without user context
       request.user = {
@@ -39,7 +30,6 @@ export class InternalServiceGuard implements CanActivate {
         role: 'OWNER',
         email: 'internal@flipstaq.com',
       };
-      console.log('⚠️ InternalServiceGuard - Using fallback user:', request.user);
     }
 
     return true;

@@ -20,6 +20,35 @@ export class MessageService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
+   * Check if user A has blocked user B or vice versa
+   */
+  private async checkBlockStatus(
+    userAId: string,
+    userBId: string
+  ): Promise<{ isBlocked: boolean; blocker?: string }> {
+    const block = await this.prisma.block.findFirst({
+      where: {
+        OR: [
+          { blockerId: userAId, blockedId: userBId },
+          { blockerId: userBId, blockedId: userAId },
+        ],
+      },
+      select: {
+        blockerId: true,
+      },
+    });
+
+    if (block) {
+      return {
+        isBlocked: true,
+        blocker: block.blockerId,
+      };
+    }
+
+    return { isBlocked: false };
+  }
+
+  /**
    * Create a new conversation between two users
    */
   async createConversation(
@@ -56,9 +85,16 @@ export class MessageService {
         `User @${cleanUsername} is not available for messaging`
       );
     }
-
     if (targetUser.id === userId) {
       throw new BadRequestException("Cannot create conversation with yourself");
+    }
+
+    // Check if either user has blocked the other
+    const blockStatus = await this.checkBlockStatus(userId, targetUser.id);
+    if (blockStatus.isBlocked) {
+      throw new ForbiddenException(
+        "Cannot start conversation - user is blocked"
+      );
     }
 
     // Check if conversation already exists between these users
@@ -323,9 +359,7 @@ export class MessageService {
       throw new BadRequestException(
         "Maximum 10 attachments allowed per message"
       );
-    }
-
-    // Verify user is participant in conversation
+    } // Verify user is participant in conversation
     const conversation = await this.prisma.conversation.findFirst({
       where: {
         id: conversationId,
@@ -342,6 +376,20 @@ export class MessageService {
 
     if (!conversation) {
       throw new NotFoundException("Conversation not found or access denied");
+    }
+
+    // Check if either user has blocked the other
+    const otherParticipant = conversation.participants.find(
+      (p) => p.id !== userId
+    );
+    if (otherParticipant) {
+      const blockStatus = await this.checkBlockStatus(
+        userId,
+        otherParticipant.id
+      );
+      if (blockStatus.isBlocked) {
+        throw new ForbiddenException("Cannot send message - user is blocked");
+      }
     } // Create the message with attachments
     const message = await this.prisma.message.create({
       data: {

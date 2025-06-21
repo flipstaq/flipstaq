@@ -31,11 +31,19 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
+      // Forward the authorization header if it exists
+      const authHeader = req.headers.authorization;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (authHeader) {
+        headers.Authorization = authHeader;
+      }
+
       const response = await fetch(`${API_GATEWAY_URL}/api/v1/products`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (!response.ok) {

@@ -26,6 +26,8 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import { userService, User as UserType } from '@/lib/userService';
 import { Conversation, Message } from '@/types/chat';
+import { BlockButton } from '@/components/common/BlockButton';
+import { useBlockStatus } from '@/hooks/useBlockStatus';
 
 interface ChatDrawerProps {
   isOpen: boolean;
@@ -120,6 +122,11 @@ export default function ChatDrawer({
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<Date | null>(
     null
+  );
+
+  // Block status hook for the selected conversation participant
+  const { blockStatus, updateBlockStatus } = useBlockStatus(
+    selectedConversation?.participant?.id || null
   );
 
   // Remove polling interval ref since we're using WebSocket only
@@ -694,7 +701,7 @@ export default function ChatDrawer({
               {selectedConversation
                 ? `${selectedConversation.participant.firstName} ${selectedConversation.participant.lastName}`
                 : t('chat:messages')}
-            </h2>
+            </h2>{' '}
             {selectedConversation && (
               <div className="flex items-center space-x-1 rtl:space-x-reverse">
                 <Circle
@@ -710,6 +717,15 @@ export default function ChatDrawer({
                     : t('common:offline')}
                 </span>
               </div>
+            )}
+            {selectedConversation && (
+              <BlockButton
+                targetUserId={selectedConversation.participant.id}
+                targetUsername={selectedConversation.participant.username}
+                isBlocked={blockStatus.isBlocked}
+                onBlockChange={updateBlockStatus}
+                className="ml-2"
+              />
             )}
           </div>{' '}
           <div className="flex items-center space-x-2 rtl:space-x-reverse">

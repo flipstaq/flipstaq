@@ -26,24 +26,23 @@ enum UserStatus {
 }
 
 model User {
-  id          String     @id @default(cuid())
-  email       String     @unique
-  username    String     @unique
-  firstName   String
-  lastName    String
-  password    String // Hashed password
-  dateOfBirth DateTime
-  country     String
-  role        UserRole   @default(USER)
-  status      UserStatus @default(ACTIVE)
-  isActive    Boolean    @default(true)
-  isOnline    Boolean    @default(false)
-  lastSeen    DateTime?
-  deletedAt   DateTime? // Soft delete timestamp
-  deletedById String? // ID of admin who deleted this user
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
+  id            String         @id @default(cuid())
+  email         String         @unique
+  username      String         @unique
+  firstName     String
+  lastName      String
+  password      String // Hashed password
+  dateOfBirth   DateTime
+  country       String
+  role          UserRole       @default(USER)
+  status        UserStatus     @default(ACTIVE)
+  isActive      Boolean        @default(true)
+  isOnline      Boolean        @default(false)
+  lastSeen      DateTime?
+  deletedAt     DateTime? // Soft delete timestamp
+  deletedById   String? // ID of admin who deleted this user
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   // Relations
   refreshTokens RefreshToken[]
   products      Product[]
@@ -55,6 +54,10 @@ model User {
   // Self-referential relation for deletion tracking
   deletedBy    User?  @relation("UserDeletions", fields: [deletedById], references: [id])
   deletedUsers User[] @relation("UserDeletions")
+
+  // Blocking relations
+  blockedUsers Block[] @relation("Blocker")
+  blockedBy    Block[] @relation("Blocked")
 
   // Indexes for performance
   @@map("users")
@@ -165,4 +168,18 @@ model MessageAttachment {
   message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@map("message_attachments")
+}
+
+model Block {
+  id        String @id @default(cuid())
+  blockerId String
+  blockedId String
+
+  blocker User @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@map("blocks")
 }

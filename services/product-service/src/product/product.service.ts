@@ -91,15 +91,46 @@ export class ProductService {
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     };
-  }
-  /**
+  } /**
    * Get all products (for homepage listing)
-   */ async getAllProducts(): Promise<ProductResponseDto[]> {
+   */
+  async getAllProducts(currentUserId?: string): Promise<ProductResponseDto[]> {
+    // Build where clause to exclude blocked users' products
+    const where: any = {
+      isActive: true,
+      visible: true, // Only show visible products to public
+    };
+
+    // If user is authenticated, exclude products from users who blocked them or they blocked
+    if (currentUserId) {
+      // Get list of users who have blocking relationship with current user
+      const blocks = await this.prisma.block.findMany({
+        where: {
+          OR: [
+            { blockerId: currentUserId }, // Users blocked by current user
+            { blockedId: currentUserId }, // Users who blocked current user
+          ],
+        },
+        select: {
+          blockerId: true,
+          blockedId: true,
+        },
+      });
+
+      if (blocks.length > 0) {
+        // Get list of user IDs to exclude
+        const blockedUserIds = blocks.map((block) =>
+          block.blockerId === currentUserId ? block.blockedId : block.blockerId,
+        );
+
+        where.userId = {
+          notIn: blockedUserIds,
+        };
+      }
+    }
+
     const products = await this.prisma.product.findMany({
-      where: {
-        isActive: true,
-        visible: true, // Only show visible products to public
-      },
+      where,
       include: {
         user: {
           select: {
@@ -149,11 +180,13 @@ export class ProductService {
       };
     });
   }
-
   /**
    * Get a single product by username and slug
-   */
-  async getProductByUsernameAndSlug(username: string, slug: string): Promise<ProductResponseDto> {
+   */ async getProductByUsernameAndSlug(
+    username: string,
+    slug: string,
+    currentUserId?: string,
+  ): Promise<ProductResponseDto> {
     const product = await this.prisma.product.findFirst({
       where: {
         slug,
@@ -165,15 +198,32 @@ export class ProductService {
       include: {
         user: {
           select: {
+            id: true,
             username: true,
           },
         },
       },
     });
+
     if (!product) {
       throw new NotFoundException('Product not found');
     }
 
+    // Check if current user is blocked by the product owner or has blocked the product owner
+    if (currentUserId && currentUserId !== product.userId) {
+      const blockExists = await this.prisma.block.findFirst({
+        where: {
+          OR: [
+            { blockerId: currentUserId, blockedId: product.userId },
+            { blockerId: product.userId, blockedId: currentUserId },
+          ],
+        },
+      });
+
+      if (blockExists) {
+        throw new NotFoundException('Product not found');
+      }
+    }
     return {
       id: product.id,
       title: product.title,

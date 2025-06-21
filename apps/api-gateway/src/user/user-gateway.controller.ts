@@ -361,4 +361,106 @@ export class UserGatewayController {
     );
     return response.data;
   }
+  // Blocking functionality
+  @Post("blocks")
+  @ApiOperation({ summary: "Block a user" })
+  @ApiResponse({
+    status: 201,
+    description: "User blocked successfully",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Bad request - invalid data or cannot block yourself",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "User to block not found",
+  })
+  @ApiResponse({
+    status: 409,
+    description: "User is already blocked",
+  })
+  async blockUser(@Body() createBlockDto: any, @Req() req: any) {
+    const response = await this.proxyService.forwardUserRequest(
+      "blocks",
+      "POST",
+      createBlockDto,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+      }
+    );
+    return response.data;
+  }
+
+  @Delete("blocks/:blockedId")
+  @ApiOperation({ summary: "Unblock a user" })
+  @ApiParam({
+    name: "blockedId",
+    description: "ID of the user to unblock",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "User unblocked successfully",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Block not found",
+  })
+  async unblockUser(@Param("blockedId") blockedId: string, @Req() req: any) {
+    const response = await this.proxyService.forwardUserRequest(
+      `blocks/${blockedId}`,
+      "DELETE",
+      null,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+      }
+    );
+    return response.data;
+  }
+  @Get("blocks")
+  @ApiOperation({ summary: "Get list of blocked users" })
+  @ApiResponse({
+    status: 200,
+    description: "Blocked users retrieved successfully",
+  })
+  async getBlockedUsers(@Req() req: any) {
+    const response = await this.proxyService.forwardRequest(
+      "USER",
+      "users/blocks",
+      "GET",
+      null,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+      }
+    );
+    return response.data;
+  }
+
+  @Get("blocks/status/:targetUserId")
+  @ApiOperation({
+    summary: "Get block status between current user and target user",
+  })
+  @ApiParam({
+    name: "targetUserId",
+    description: "ID of the target user to check block status with",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Block status retrieved successfully",
+  })
+  async getBlockStatus(
+    @Param("targetUserId") targetUserId: string,
+    @Req() req: any
+  ) {
+    const response = await this.proxyService.forwardRequest(
+      "USER",
+      `users/blocks/status/${targetUserId}`,
+      "GET",
+      null,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+      }
+    );
+    return response.data;
+  }
 }

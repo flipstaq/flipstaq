@@ -2,8 +2,9 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/[...params]": "pages/[...params].js",
+  "/404": "pages/404.js",
   "/": "pages/index.js",
-  "/api/products": "pages/api/products.js",
-  "/api/favorites/[productId]": "pages/api/favorites/[productId].js",
-  "/api/favorites": "pages/api/favorites.js"
+  "/api/favorites": "pages/api/favorites.js",
+  "/api/favorites/[productId]": "pages/api/favorites/[productId].js"
 }

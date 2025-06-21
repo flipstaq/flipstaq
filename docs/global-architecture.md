@@ -137,6 +137,7 @@ Each business domain is isolated into its own microservice:
   - Product listing and retrieval
   - Price and currency management
   - Location and category support
+  - User blocking restrictions (blocked users' products are hidden)
   - Internal-only API with security middleware
 
 **Key Features:**
@@ -146,6 +147,52 @@ Each business domain is isolated into its own microservice:
 - Multi-currency support (USD, AED, EUR, GBP, SAR)
 - Location-based product organization
 - Slug uniqueness enforcement per user
+- User blocking integration (products from blocked users are filtered out)
+- Integration with shared Prisma database schema
+
+### User Service (`services/user-service/`)
+
+- **Purpose**: User profile management and user blocking system
+- **Port**: 3002 (Internal only - no direct external access)
+- **Technology**: NestJS 11.1.3 + TypeScript + Prisma
+- **Status**: ✅ **Implemented**
+- **Responsibilities**:
+  - User profile management
+  - User blocking and unblocking functionality
+  - Block status checking
+  - User search for messaging
+  - Online/offline status management
+  - Internal-only API with security middleware
+
+**Key Features:**
+
+- Complete user blocking system
+- Block status checking between users
+- User search functionality for messaging
+- Online status tracking and cleanup
+- Integration with shared Prisma database schema
+
+### Message Service (`services/message-service/`)
+
+- **Purpose**: Real-time messaging system with blocking support
+- **Port**: 3005 (Internal only - no direct external access)
+- **Technology**: NestJS 11.1.3 + WebSocket + TypeScript + Prisma
+- **Status**: ✅ **Implemented**
+- **Responsibilities**:
+  - Direct messaging between users
+  - Conversation management
+  - File attachments support
+  - User blocking enforcement (blocked users cannot message each other)
+  - Real-time message delivery via WebSocket
+  - Internal-only API with security middleware
+
+**Key Features:**
+
+- Real-time messaging with WebSocket support
+- File attachment support
+- User blocking integration (prevents messaging between blocked users)
+- Conversation management
+- Message read status tracking
 - Integration with shared Prisma database schema
 
 ## Currently Implemented Features
@@ -182,12 +229,33 @@ Each business domain is isolated into its own microservice:
 ### ✅ Product Management System
 
 - **Product Creation**: Full product posting with validation
-- **Product Listing**: Homepage and catalog product display
+- **Product Listing**: Homepage and catalog product display with blocking filters
 - **Slug Management**: SEO-friendly URLs (@username/slug format)
 - **Multi-Currency**: Support for USD, AED, EUR, GBP, SAR
 - **Location Support**: Country-based or global product listings
 - **User Association**: Products linked to their owners
+- **Blocking Integration**: Products from blocked users are automatically filtered out
 - **Data Validation**: Comprehensive input validation and error handling
+
+### ✅ User Blocking System
+
+- **Block Users**: Users can block other users to prevent interactions
+- **Unblock Users**: Users can unblock previously blocked users
+- **Block Status Checking**: Real-time checking of block status between users
+- **Messaging Restrictions**: Blocked users cannot send messages to each other
+- **Product Visibility**: Products from blocked users are hidden from view
+- **UI Integration**: Block/Unblock buttons in messaging interface and product pages
+- **Confirmation Modals**: User-friendly confirmation dialogs for blocking actions
+
+### ✅ Real-time Messaging System
+
+- **Direct Messaging**: One-on-one conversations between users
+- **File Attachments**: Support for document and image attachments
+- **Real-time Delivery**: WebSocket-based instant message delivery
+- **Conversation Management**: Persistent conversation history
+- **Read Status**: Message read/unread status tracking
+- **Blocking Integration**: Prevents messaging between blocked users
+- **Online Status**: Real-time user online/offline status tracking
 - **CORS Configuration**: Restricted to specific origins
 - **Password Security**: Industry-standard bcrypt hashing
 - **Request Validation**: DTO validation with class-validator
@@ -276,8 +344,54 @@ model Review {
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@unique([productId, userId]) // One review per user per product
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+
+  blocker   User @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+}
+
+model Conversation {
+  id           String   @id @default(cuid())
+  participants User[]   @relation("ConversationParticipants")
+  messages     Message[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String?
+  senderId       String
+  conversationId String
+  read           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  attachments    MessageAttachment[]
+}
+
+model MessageAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  fileUrl   String
+  fileName  String
+  fileType  String
+  fileSize  Int
+  metadata  Json?    // Store product cover and other metadata as JSON
+  createdAt DateTime @default(now())
+
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

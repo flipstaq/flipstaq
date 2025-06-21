@@ -205,6 +205,39 @@ const serviceUrls = {
 };
 ```
 
+### User Blocking Routes
+
+All blocking routes require authentication and are proxied to the user service:
+
+#### POST `/api/v1/users/blocks`
+
+- **Purpose**: Block a user
+- **Forwards to**: `user-service:3002/internal/users/blocks`
+- **Headers**: Authorization Bearer token required
+- **Body**: CreateBlockDto (`blockedId` or `blockedUsername`)
+- **Response**: Block information with blocked user details
+
+#### DELETE `/api/v1/users/blocks/:blockedId`
+
+- **Purpose**: Unblock a user
+- **Forwards to**: `user-service:3002/internal/users/blocks/:blockedId`
+- **Headers**: Authorization Bearer token required
+- **Response**: Success message
+
+#### GET `/api/v1/users/blocks`
+
+- **Purpose**: Get list of blocked users
+- **Forwards to**: `user-service:3002/internal/users/blocks`
+- **Headers**: Authorization Bearer token required
+- **Response**: Array of blocked users with their information
+
+#### GET `/api/v1/users/blocks/status/:targetUserId`
+
+- **Purpose**: Check block status between current user and target user
+- **Forwards to**: `user-service:3002/internal/users/blocks/status/:targetUserId`
+- **Headers**: Authorization Bearer token required
+- **Response**: Object with `isBlocked` and `isBlockedBy` boolean values
+
 ### Internal Communication
 
 - All internal service calls use `/internal/*` paths

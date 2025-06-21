@@ -119,22 +119,26 @@ export class ProductGatewayController {
     );
     return response.data;
   }
-
   @Get()
   @ApiOperation({ summary: "Get all products" })
   @ApiResponse({ status: 200, description: "List of all active products" })
-  async getAllProducts() {
+  async getAllProducts(@Request() req?: any) {
+    // Get user ID if authenticated (optional for public access)
+    const userId = req?.user?.userId || req?.user?.sub || null;
+
     const response = await this.proxyService.forwardProductRequest(
       "",
       "GET",
       null,
       {
         "x-internal-service": "true",
+        "x-user-id": userId || "anonymous",
+        ...(req?.user?.email && { "x-user-email": req.user.email }),
+        ...(req?.user?.role && { "x-user-role": req.user.role }),
       }
     );
     return response.data;
   }
-
   @Get("@:username/:slug")
   @ApiOperation({ summary: "Get a product by username and slug" })
   @ApiParam({
@@ -151,14 +155,27 @@ export class ProductGatewayController {
   @ApiResponse({ status: 404, description: "Product not found" })
   async getProductByUsernameAndSlug(
     @Param("username") username: string,
-    @Param("slug") slug: string
+    @Param("slug") slug: string,
+    @Request() req?: any
   ) {
+    // Get user ID if authenticated (optional for public access)
+    const userId = req?.user?.userId || req?.user?.sub || null;
+
+    console.log("🔍 API Gateway - Product detail request:", {
+      username,
+      slug,
+      userId: userId || "Anonymous",
+      hasUser: !!req?.user,
+      userObj: req?.user,
+    });
+
     const response = await this.proxyService.forwardProductRequest(
       `@${username}/${slug}`,
       "GET",
       null,
       {
         "x-internal-service": "true",
+        "x-user-id": userId || "anonymous",
       }
     );
     return response.data;

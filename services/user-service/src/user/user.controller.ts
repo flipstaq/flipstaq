@@ -12,6 +12,7 @@ import {
   HttpCode,
   HttpStatus,
   Headers,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,11 +21,13 @@ import {
   ApiParam,
   ApiQuery,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { GetUsersQueryDto } from '../dto/get-users-query.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserResponseDto, PaginatedUsersResponseDto } from '../dto/user-response.dto';
+import { CreateBlockDto, BlockResponseDto, BlockListResponseDto } from '../dto/block.dto';
 import { InternalServiceGuard } from '../common/guards/internal-service.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -224,5 +227,122 @@ export class UserController {
   async cleanupStaleUsers(): Promise<{ message: string; count: number }> {
     const count = await this.userService.cleanupStaleUsers(5); // 5 minutes timeout
     return { message: 'Stale users cleaned up', count };
+  }
+
+  // Blocking endpoints
+  @Post('blocks')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Block a user' })
+  @ApiBody({ type: CreateBlockDto })
+  @ApiResponse({
+    status: 201,
+    description: 'User blocked successfully',
+    type: BlockResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid data or cannot block yourself',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User to block not found',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User is already blocked',
+  })
+  async blockUser(
+    @Headers('x-user-id') userId: string,
+    @Body() createBlockDto: CreateBlockDto,
+  ): Promise<BlockResponseDto> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.userService.blockUser(userId, createBlockDto);
+  }
+
+  @Delete('blocks/:blockedId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Unblock a user' })
+  @ApiParam({
+    name: 'blockedId',
+    description: 'ID of the user to unblock',
+    example: 'clx1y2z3a4b5c6d7e8f9g0h1',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User unblocked successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Block not found',
+  })
+  async unblockUser(
+    @Headers('x-user-id') userId: string,
+    @Param('blockedId') blockedId: string,
+  ): Promise<{ success: boolean; message: string }> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.userService.unblockUser(userId, blockedId);
+  }
+
+  @Get('blocks')
+  @ApiOperation({ summary: 'Get list of blocked users' })
+  @ApiResponse({
+    status: 200,
+    description: 'Blocked users retrieved successfully',
+    type: BlockListResponseDto,
+  })
+  async getBlockedUsers(@Headers('x-user-id') userId: string): Promise<BlockListResponseDto> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.userService.getBlockedUsers(userId);
+  }
+
+  @Get('blocks/status/:targetUserId')
+  @ApiOperation({ summary: 'Get block status between current user and target user' })
+  @ApiParam({
+    name: 'targetUserId',
+    description: 'ID of the target user to check block status with',
+    example: 'clx1y2z3a4b5c6d7e8f9g0h1',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Block status retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        isBlocked: {
+          type: 'boolean',
+          description: 'Whether current user has blocked the target user',
+        },
+        isBlockedBy: {
+          type: 'boolean',
+          description: 'Whether current user is blocked by the target user',
+        },
+      },
+    },
+  })
+  async getBlockStatus(
+    @Headers('x-user-id') userId: string,
+    @Param('targetUserId') targetUserId: string,
+  ): Promise<{ isBlocked: boolean; isBlockedBy: boolean }> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.userService.getBlockStatus(userId, targetUserId);
   }
 }

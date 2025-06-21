@@ -87,5 +87,16 @@
       "two": "{{username1}} and {{username2}} are typing...",
       "multiple": "{{count}} people are typing..."
     }
-  }
+  },
+  "block": "Block",
+  "unblock": "Unblock",
+  "confirmBlock": "Block @{{username}}?",
+  "confirmUnblock": "Unblock @{{username}}?",
+  "blockDescription": "You will no longer see products from @{{username}} and they won't be able to message you.",
+  "unblockDescription": "You will be able to see products from @{{username}} and they will be able to message you again.",
+  "userBlockedSuccessfully": "@{{username}} has been blocked",
+  "userUnblockedSuccessfully": "@{{username}} has been unblocked",
+  "blockedUsers": "Blocked Users",
+  "noBlockedUsers": "You haven't blocked any users",
+  "noBlockedUsersDescription": "Blocked users will appear here"
 }

@@ -12,6 +12,7 @@ import {
   Put,
   Delete,
   Patch,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import { ProductService } from './product.service';
@@ -53,7 +54,6 @@ export class ProductController {
 
     return this.productService.createProduct(userId, createProductDto);
   }
-
   @Get()
   @ApiOperation({ summary: 'Get all active products' })
   @ApiResponse({
@@ -61,10 +61,18 @@ export class ProductController {
     description: 'List of all active products',
     type: [ProductResponseDto],
   })
-  async getAllProducts(): Promise<ProductResponseDto[]> {
-    return this.productService.getAllProducts();
-  }
+  async getAllProducts(
+    @Headers('x-user-id') headerUserId?: string,
+    @Req() req?: any,
+  ): Promise<ProductResponseDto[]> {
+    // Get user ID from the request object set by InternalServiceGuard, with fallback to header
+    const userId = req?.user?.id || req?.user?.sub || headerUserId;
 
+    // Pass userId to service for blocking filtering (can be null for anonymous users)
+    return this.productService.getAllProducts(
+      userId && userId !== 'anonymous' && userId !== 'internal-service' ? userId : null,
+    );
+  }
   @Get('@:username/:slug')
   @ApiOperation({ summary: 'Get a product by username and slug' })
   @ApiParam({
@@ -89,8 +97,19 @@ export class ProductController {
   async getProductByUsernameAndSlug(
     @Param('username') username: string,
     @Param('slug') slug: string,
+    @Headers('x-user-id') headerUserId?: string,
+    @Req() req?: any,
   ): Promise<ProductResponseDto> {
-    return this.productService.getProductByUsernameAndSlug(username, slug);
+    // Get user ID from the request object set by InternalServiceGuard, with fallback to header
+    const currentUserId = req?.user?.id || req?.user?.sub || headerUserId;
+
+    return this.productService.getProductByUsernameAndSlug(
+      username,
+      slug,
+      currentUserId && currentUserId !== 'anonymous' && currentUserId !== 'internal-service'
+        ? currentUserId
+        : null,
+    );
   }
 
   @Get('user/:userId')
@@ -346,7 +365,6 @@ export class ProductController {
     if (!userId || userId.trim() === '') {
       throw new BadRequestException('User ID is required and cannot be empty');
     }
-
     await this.productService.deleteProductPermanently(productId);
     return { message: 'Product deleted permanently' };
   }

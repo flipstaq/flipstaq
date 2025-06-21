@@ -87,5 +87,16 @@
       "two": "{{username1}} و {{username2}} يكتبان...",
       "multiple": "{{count}} أشخاص يكتبون..."
     }
-  }
+  },
+  "block": "حظر",
+  "unblock": "إلغاء الحظر",
+  "confirmBlock": "حظر @{{username}}؟",
+  "confirmUnblock": "إلغاء حظر @{{username}}؟",
+  "blockDescription": "لن تتمكن من رؤية منتجات @{{username}} ولن يتمكن من مراسلتك.",
+  "unblockDescription": "ستتمكن من رؤية منتجات @{{username}} وسيتمكن من مراسلتك مرة أخرى.",
+  "userBlockedSuccessfully": "تم حظر @{{username}}",
+  "userUnblockedSuccessfully": "تم إلغاء حظر @{{username}}",
+  "blockedUsers": "المستخدمون المحظورون",
+  "noBlockedUsers": "لم تحظر أي مستخدمين",
+  "noBlockedUsersDescription": "المستخدمون المحظورون سيظهرون هنا"
 }
