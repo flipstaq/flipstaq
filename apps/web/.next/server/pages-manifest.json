@@ -2,6 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/[...params]": "pages/[...params].js",
   "/": "pages/index.js",
-  "/[...params]": "pages/[...params].js"
+  "/api/favorites": "pages/api/favorites.js",
+  "/api/favorites/[productId]": "pages/api/favorites/[productId].js"
 }
