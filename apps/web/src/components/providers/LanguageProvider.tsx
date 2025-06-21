@@ -59,10 +59,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           profile,
           dashboard,
           chat,
+          report,
           adminCommon,
           adminUsers,
           adminProducts,
           adminReviews,
+          adminReports,
         ] = await Promise.all([
           import('../../../../../packages/locales/en/common.json'),
           import('../../../../../packages/locales/en/auth.json'),
@@ -72,10 +74,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           import('../../../../../packages/locales/en/profile.json'),
           import('../../../../../packages/locales/en/dashboard.json'),
           import('../../../../../packages/locales/en/chat.json'),
+          import('../../../../../packages/locales/en/report.json'),
           import('../../../../../packages/locales/en/admin/common.json'),
           import('../../../../../packages/locales/en/admin/users.json'),
           import('../../../../../packages/locales/en/admin/products.json'),
           import('../../../../../packages/locales/en/admin/reviews.json'),
+          import('../../../../../packages/locales/en/admin/reports.json'),
         ]);
         translationData = {
           common: common.default,
@@ -86,10 +90,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           profile: profile.default,
           dashboard: dashboard.default,
           chat: chat.default,
+          report: report.default,
           'admin-common': adminCommon.default,
           'admin-users': adminUsers.default,
           'admin-products': adminProducts.default,
           'admin-reviews': adminReviews.default,
+          'admin-reports': adminReports.default,
         };
       } else if (lang === 'ar') {
         // Import all Arabic translations
@@ -102,10 +108,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           profile,
           dashboard,
           chat,
+          report,
           adminCommon,
           adminUsers,
           adminProducts,
           adminReviews,
+          adminReports,
         ] = await Promise.all([
           import('../../../../../packages/locales/ar/common.json'),
           import('../../../../../packages/locales/ar/auth.json'),
@@ -115,10 +123,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           import('../../../../../packages/locales/ar/profile.json'),
           import('../../../../../packages/locales/ar/dashboard.json'),
           import('../../../../../packages/locales/ar/chat.json'),
+          import('../../../../../packages/locales/ar/report.json'),
           import('../../../../../packages/locales/ar/admin/common.json'),
           import('../../../../../packages/locales/ar/admin/users.json'),
           import('../../../../../packages/locales/ar/admin/products.json'),
           import('../../../../../packages/locales/ar/admin/reviews.json'),
+          import('../../../../../packages/locales/ar/admin/reports.json'),
         ]);
         translationData = {
           common: common.default,
@@ -129,10 +139,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           profile: profile.default,
           dashboard: dashboard.default,
           chat: chat.default,
+          report: report.default,
           'admin-common': adminCommon.default,
           'admin-users': adminUsers.default,
           'admin-products': adminProducts.default,
           'admin-reviews': adminReviews.default,
+          'admin-reports': adminReports.default,
         };
       }
 

@@ -21,6 +21,7 @@ import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import InlineMessageComposer from '@/components/chat/InlineMessageComposer';
 import { BlockButton } from '@/components/common/BlockButton';
 import { useBlockStatus } from '@/hooks/useBlockStatus';
+import ReportModal from '@/components/report/ReportModal';
 import Link from 'next/link';
 import Head from 'next/head';
 
@@ -62,6 +63,7 @@ export function ProductDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [showMessageComposer, setShowMessageComposer] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Block status hook for the product owner
   const { blockStatus, updateBlockStatus } = useBlockStatus(
@@ -416,17 +418,26 @@ export function ProductDetailPage({
                           @{product.username}
                         </p>
                       </div>
-                    </div>
-
-                    {/* Block Button - Only show for other users */}
+                    </div>{' '}
+                    {/* Block Button and Report Button - Only show for other users */}
                     {user && product.userId !== user.id && (
-                      <BlockButton
-                        targetUserId={product.userId}
-                        targetUsername={product.username}
-                        isBlocked={blockStatus.isBlocked}
-                        onBlockChange={updateBlockStatus}
-                        className="text-xs"
-                      />
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                        <BlockButton
+                          targetUserId={product.userId}
+                          targetUsername={product.username}
+                          isBlocked={blockStatus.isBlocked}
+                          onBlockChange={updateBlockStatus}
+                          className="text-xs"
+                        />
+
+                        <button
+                          onClick={() => setIsReportModalOpen(true)}
+                          className="rounded-md border border-red-300 px-3 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20"
+                          title={t('report:report_product')}
+                        >
+                          {t('report:report')}
+                        </button>
+                      </div>
                     )}
                   </div>
                   {/* Product Meta */}
@@ -596,8 +607,7 @@ export function ProductDetailPage({
                 </div>
               </div>
             )}
-          </div>
-
+          </div>{' '}
           {/* Reviews Section */}
           <div className="mt-8 border-t border-secondary-200 pt-8 dark:border-secondary-700">
             <ReviewsSection
@@ -608,6 +618,18 @@ export function ProductDetailPage({
           </div>
         </div>
       </div>
+      {/* Report Modal */}
+      {product && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          type="PRODUCT"
+          targetId={product.id}
+          targetData={{
+            productTitle: product.title,
+          }}
+        />
+      )}
     </>
   );
 }

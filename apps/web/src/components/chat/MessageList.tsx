@@ -15,6 +15,7 @@ import {
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { Message } from '@/types/chat';
 import ProductCoverAttachment from './ProductCoverAttachment';
+import MessageContextMenu from './MessageContextMenu';
 
 interface MessageListProps {
   messages: Message[];
@@ -380,13 +381,22 @@ export default function MessageList({
                             </div>
                           ))}
                       </div>
-                    )}
+                    )}{' '}
                     {/* Text content */}
                     {message.content && (
                       <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
                         {message.content}
                       </p>
                     )}
+                    {/* Context Menu */}
+                    <div className="absolute right-1 top-1">
+                      <MessageContextMenu
+                        messageId={message.id}
+                        senderId={message.senderId}
+                        content={message.content}
+                        isOwnMessage={isOwnMessage}
+                      />
+                    </div>
                     {/* Hover timestamp for grouped messages */}
                     {isPreviousMessageFromSameSender && (
                       <div className="absolute -top-6 right-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">

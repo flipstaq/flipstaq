@@ -27,6 +27,7 @@ import MessageInput from './MessageInput';
 import { userService, User as UserType } from '@/lib/userService';
 import { Conversation, Message } from '@/types/chat';
 import { BlockButton } from '@/components/common/BlockButton';
+import ReportModal from '@/components/report/ReportModal';
 import { useBlockStatus } from '@/hooks/useBlockStatus';
 
 interface ChatDrawerProps {
@@ -123,6 +124,7 @@ export default function ChatDrawer({
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<Date | null>(
     null
   );
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Block status hook for the selected conversation participant
   const { blockStatus, updateBlockStatus } = useBlockStatus(
@@ -719,13 +721,23 @@ export default function ChatDrawer({
               </div>
             )}
             {selectedConversation && (
-              <BlockButton
-                targetUserId={selectedConversation.participant.id}
-                targetUsername={selectedConversation.participant.username}
-                isBlocked={blockStatus.isBlocked}
-                onBlockChange={updateBlockStatus}
-                className="ml-2"
-              />
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <BlockButton
+                  targetUserId={selectedConversation.participant.id}
+                  targetUsername={selectedConversation.participant.username}
+                  isBlocked={blockStatus.isBlocked}
+                  onBlockChange={updateBlockStatus}
+                  className=""
+                />
+
+                <button
+                  onClick={() => setIsReportModalOpen(true)}
+                  className="rounded border border-red-300 px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20"
+                  title={t('report:report_user')}
+                >
+                  {t('report:report')}
+                </button>
+              </div>
             )}
           </div>{' '}
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -961,12 +973,24 @@ export default function ChatDrawer({
                 </h3>
                 <p className="text-sm text-secondary-500">
                   {t('chat:select_conversation_description')}
-                </p>
+                </p>{' '}
               </div>{' '}
             </div>
           )}
         </div>
       </div>
+      {/* Report Modal */}
+      {selectedConversation && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          type="USER"
+          targetId={selectedConversation.participant.id}
+          targetData={{
+            username: selectedConversation.participant.username,
+          }}
+        />
+      )}
     </>
   );
 }

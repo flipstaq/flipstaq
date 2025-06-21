@@ -3,7 +3,12 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 import { AdminRouteGuard } from '@/components/providers/AdminRouteGuard';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { userApi } from '@/lib/api/users';
-import { adminApi, ProductForAdmin, ReviewForAdmin } from '@/lib/api/admin';
+import {
+  adminApi,
+  ProductForAdmin,
+  ReviewForAdmin,
+  ReportForAdmin,
+} from '@/lib/api/admin';
 import { UserInfo, User, PaginatedUsersResponse, UserRole } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
@@ -551,18 +556,16 @@ export default function AdminPanel() {
   const [newRole, setNewRole] = useState<UserRole>('USER');
   const [actionLoading, setActionLoading] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
-
   // Tab management
-  const [activeTab, setActiveTab] = useState<'users' | 'products' | 'reviews'>(
-    'users'
-  ); // Products state
+  const [activeTab, setActiveTab] = useState<
+    'users' | 'products' | 'reviews' | 'reports'
+  >('users'); // Products state
   const [products, setProducts] = useState<ProductForAdmin[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] =
     useState<ProductForAdmin | null>(null);
   const [showProductModal, setShowProductModal] = useState(false);
   const [showDeleteProductModal, setShowDeleteProductModal] = useState(false);
-
   // Reviews state
   const [reviews, setReviews] = useState<ReviewForAdmin[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -571,6 +574,28 @@ export default function AdminPanel() {
   );
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showDeleteReviewModal, setShowDeleteReviewModal] = useState(false);
+  // Reports state
+  const [reports, setReports] = useState<ReportForAdmin[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<ReportForAdmin | null>(
+    null
+  );
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showReportFilters, setShowReportFilters] = useState(false);
+  const [reportFilters, setReportFilters] = useState({
+    status: '',
+    type: '',
+    reporterUsername: '',
+    reporterId: '',
+    targetUsername: '',
+    targetId: '',
+    reason: '',
+    dateFrom: '',
+    dateTo: '',
+    ipAddress: '',
+    resolvedBy: '',
+  });
+  const [exportLoading, setExportLoading] = useState(false);
 
   // Toast helper functions
   const addToast = (type: 'success' | 'error' | 'info', message: string) => {
@@ -939,18 +964,223 @@ export default function AdminPanel() {
       setActionLoading(false);
     }
   };
-
   const openDeleteReviewModal = (review: ReviewForAdmin) => {
     setSelectedReview(review);
     setShowDeleteReviewModal(true);
+  }; // Reports management functions
+  const fetchReports = async (filters?: any) => {
+    try {
+      setReportsLoading(true);
+      const response = await adminApi.getAllReports(filters);
+      console.log('Reports API response:', response);
+
+      // The getAllReports method now handles extracting the reports array
+      if (Array.isArray(response)) {
+        setReports(response);
+      } else {
+        console.error('Reports API returned non-array:', response);
+        setReports([]);
+        addToast('error', 'Invalid reports data format received');
+      }
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+      setReports([]); // Ensure reports is always an array
+      addToast(
+        'error',
+        `Failed to fetch reports: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    } finally {
+      setReportsLoading(false);
+    }
   };
 
+  const applyReportFilters = () => {
+    // Clean up empty filter values
+    const cleanFilters = Object.fromEntries(
+      Object.entries(reportFilters).filter(([_, value]) => value !== '')
+    );
+    fetchReports(cleanFilters);
+  };
+
+  const clearReportFilters = () => {
+    setReportFilters({
+      status: '',
+      type: '',
+      reporterUsername: '',
+      reporterId: '',
+      targetUsername: '',
+      targetId: '',
+      reason: '',
+      dateFrom: '',
+      dateTo: '',
+      ipAddress: '',
+      resolvedBy: '',
+    });
+    fetchReports();
+  };
+
+  const exportReportsAsJson = async () => {
+    try {
+      setExportLoading(true);
+      const cleanFilters = Object.fromEntries(
+        Object.entries(reportFilters).filter(([_, value]) => value !== '')
+      );
+      const response = await adminApi.exportReportsJson(cleanFilters);
+
+      // Create and download the file
+      const blob = new Blob([JSON.stringify(response.data, null, 2)], {
+        type: 'application/json',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `flipstaq-reports-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      addToast('success', t('admin-reports:search.export_success'));
+    } catch (error) {
+      console.error('Error exporting reports as JSON:', error);
+      addToast('error', t('admin-reports:search.export_error'));
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const exportReportsAsHtml = async () => {
+    try {
+      setExportLoading(true);
+      const cleanFilters = Object.fromEntries(
+        Object.entries(reportFilters).filter(([_, value]) => value !== '')
+      );
+      const response = await adminApi.exportReportsHtml(cleanFilters);
+
+      // Create and download the file
+      const blob = new Blob([response.html], {
+        type: 'text/html',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `flipstaq-reports-${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      addToast('success', t('admin-reports:search.export_success'));
+    } catch (error) {
+      console.error('Error exporting reports as HTML:', error);
+      addToast('error', t('admin-reports:search.export_error'));
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const exportSingleReportAsJson = async (reportId: string) => {
+    try {
+      setExportLoading(true);
+      const response = await adminApi.exportSingleReportJson(reportId);
+
+      // Create and download the file
+      const blob = new Blob([JSON.stringify(response.data, null, 2)], {
+        type: 'application/json',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `flipstaq-report-${reportId}-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      addToast('success', t('admin-reports:search.export_success'));
+    } catch (error) {
+      console.error('Error exporting single report as JSON:', error);
+      addToast('error', t('admin-reports:search.export_error'));
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const exportSingleReportAsHtml = async (reportId: string) => {
+    try {
+      setExportLoading(true);
+      const response = await adminApi.exportSingleReportHtml(reportId);
+
+      // Create and download the file
+      const blob = new Blob([response.html], {
+        type: 'text/html',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `flipstaq-report-${reportId}-${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      addToast('success', t('admin-reports:search.export_success'));
+    } catch (error) {
+      console.error('Error exporting single report as HTML:', error);
+      addToast('error', t('admin-reports:search.export_error'));
+    } finally {
+      setExportLoading(false);
+    }
+  };
+  const handleResolveReport = async (reportId: string) => {
+    try {
+      setActionLoading(true);
+      await adminApi.resolveReport(reportId);
+      addToast('success', 'Report resolved successfully');
+      await fetchReports();
+    } catch (error) {
+      console.error('Error resolving report:', error);
+      addToast('error', 'Failed to resolve report');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSetUnderReview = async (reportId: string) => {
+    try {
+      setActionLoading(true);
+      await adminApi.setReportUnderReview(reportId);
+      addToast('success', 'Report set to under review');
+      await fetchReports();
+    } catch (error) {
+      console.error('Error setting report under review:', error);
+      addToast('error', 'Failed to set report under review');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDismissReport = async (reportId: string) => {
+    try {
+      setActionLoading(true);
+      await adminApi.dismissReport(reportId);
+      addToast('success', 'Report dismissed successfully');
+      await fetchReports();
+    } catch (error) {
+      console.error('Error dismissing report:', error);
+      addToast('error', 'Failed to dismiss report');
+    } finally {
+      setActionLoading(false);
+    }
+  };
   // Fetch data based on active tab
   useEffect(() => {
     if (activeTab === 'products') {
       fetchProducts();
     } else if (activeTab === 'reviews') {
       fetchReviews();
+    } else if (activeTab === 'reports') {
+      fetchReports();
     }
   }, [activeTab]);
 
@@ -1046,8 +1276,7 @@ export default function AdminPanel() {
                       />
                     </svg>
                     {t('admin-common:tabs.products')}
-                  </button>
-
+                  </button>{' '}
                   <button
                     onClick={() => setActiveTab('reviews')}
                     className={`${
@@ -1070,6 +1299,29 @@ export default function AdminPanel() {
                       />
                     </svg>
                     {t('admin-common:tabs.reviews')}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('reports')}
+                    className={`${
+                      activeTab === 'reports'
+                        ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
+                    } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
+                  >
+                    <svg
+                      className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"
+                      />
+                    </svg>
+                    {t('admin-common:tabs.reports')}
                   </button>
                 </>
               )}
@@ -2084,6 +2336,924 @@ export default function AdminPanel() {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}{' '}
+          {/* Reports Tab Content */}
+          {activeTab === 'reports' && (
+            <div className={`space-y-6 ${isRTL ? 'mt-8' : 'mt-6'}`}>
+              <div
+                className={`rounded-lg bg-white shadow dark:bg-gray-800 ${isRTL ? 'p-8' : 'p-6'}`}
+              >
+                <div className="mb-6 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                      {t('admin-reports:title')}
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {t('admin-reports:description')}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    {/* Search Toggle Button */}
+                    <button
+                      onClick={() => setShowReportFilters(!showReportFilters)}
+                      className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                      <svg
+                        className="-ml-1 mr-2 h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"
+                        />
+                      </svg>
+                      {showReportFilters
+                        ? t('admin-reports:search.hide_filters')
+                        : t('admin-reports:search.show_filters')}
+                    </button>
+
+                    {/* Export Dropdown */}
+                    <div className="relative">
+                      <button
+                        onClick={() => {
+                          // Toggle export dropdown
+                          const dropdown =
+                            document.getElementById('export-dropdown');
+                          if (dropdown) {
+                            dropdown.classList.toggle('hidden');
+                          }
+                        }}
+                        disabled={exportLoading}
+                        className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <svg
+                          className="-ml-1 mr-2 h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                        {exportLoading
+                          ? t('admin-reports:search.exporting')
+                          : t('admin-reports:search.export')}
+                      </button>
+
+                      {/* Export Dropdown Menu */}
+                      <div
+                        id="export-dropdown"
+                        className="absolute right-0 mt-2 hidden w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                      >
+                        <div className="py-1">
+                          <button
+                            onClick={() => {
+                              exportReportsAsJson();
+                              document
+                                .getElementById('export-dropdown')
+                                ?.classList.add('hidden');
+                            }}
+                            disabled={exportLoading}
+                            className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                          >
+                            {t('admin-reports:search.export_json')}
+                          </button>
+                          <button
+                            onClick={() => {
+                              exportReportsAsHtml();
+                              document
+                                .getElementById('export-dropdown')
+                                ?.classList.add('hidden');
+                            }}
+                            disabled={exportLoading}
+                            className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                          >
+                            {t('admin-reports:search.export_html')}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Advanced Search Filters */}
+                {showReportFilters && (
+                  <div className="mb-6 rounded-lg border bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-900">
+                    <h3 className="mb-4 text-sm font-medium text-gray-900 dark:text-white">
+                      {t('admin-reports:search.title')}
+                    </h3>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {/* Status Filter */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.status')}
+                        </label>
+                        <select
+                          value={reportFilters.status}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              status: e.target.value,
+                            })
+                          }
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        >
+                          {' '}
+                          <option value="">
+                            {t('admin-reports:search.all_statuses')}
+                          </option>
+                          <option value="PENDING">
+                            {t('admin-reports:status.pending')}
+                          </option>
+                          <option value="UNDER_REVIEW">
+                            {t('admin-reports:status.under_review')}
+                          </option>
+                          <option value="RESOLVED">
+                            {t('admin-reports:status.resolved')}
+                          </option>
+                          <option value="DISMISSED">
+                            {t('admin-reports:status.dismissed')}
+                          </option>
+                        </select>
+                      </div>
+
+                      {/* Type Filter */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.type')}
+                        </label>
+                        <select
+                          value={reportFilters.type}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              type: e.target.value,
+                            })
+                          }
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        >
+                          <option value="">
+                            {t('admin-reports:search.all_types')}
+                          </option>
+                          <option value="USER">
+                            {t('admin-reports:types.user')}
+                          </option>
+                          <option value="PRODUCT">
+                            {t('admin-reports:types.product')}
+                          </option>
+                          <option value="MESSAGE">
+                            {t('admin-reports:types.message')}
+                          </option>
+                        </select>
+                      </div>
+
+                      {/* Reporter Username */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.reporter_username')}
+                        </label>
+                        <input
+                          type="text"
+                          value={reportFilters.reporterUsername}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              reporterUsername: e.target.value,
+                            })
+                          }
+                          placeholder={t(
+                            'admin-reports:search.placeholder.reporter_username'
+                          )}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                      </div>
+
+                      {/* Reporter ID */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.reporter_id')}
+                        </label>
+                        <input
+                          type="text"
+                          value={reportFilters.reporterId}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              reporterId: e.target.value,
+                            })
+                          }
+                          placeholder={t(
+                            'admin-reports:search.placeholder.reporter_id'
+                          )}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                      </div>
+
+                      {/* Target Username */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.target_username')}
+                        </label>
+                        <input
+                          type="text"
+                          value={reportFilters.targetUsername}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              targetUsername: e.target.value,
+                            })
+                          }
+                          placeholder={t(
+                            'admin-reports:search.placeholder.target_username'
+                          )}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                      </div>
+
+                      {/* Target ID */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.target_id')}
+                        </label>
+                        <input
+                          type="text"
+                          value={reportFilters.targetId}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              targetId: e.target.value,
+                            })
+                          }
+                          placeholder={t(
+                            'admin-reports:search.placeholder.target_id'
+                          )}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                      </div>
+
+                      {/* Reason */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.reason')}
+                        </label>
+                        <input
+                          type="text"
+                          value={reportFilters.reason}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              reason: e.target.value,
+                            })
+                          }
+                          placeholder={t(
+                            'admin-reports:search.placeholder.reason'
+                          )}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                      </div>
+
+                      {/* IP Address */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.ip_address')}
+                        </label>
+                        <input
+                          type="text"
+                          value={reportFilters.ipAddress}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              ipAddress: e.target.value,
+                            })
+                          }
+                          placeholder={t(
+                            'admin-reports:search.placeholder.ip_address'
+                          )}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                      </div>
+
+                      {/* Date From */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.date_from')}
+                        </label>
+                        <input
+                          type="date"
+                          value={reportFilters.dateFrom}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              dateFrom: e.target.value,
+                            })
+                          }
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                      </div>
+
+                      {/* Date To */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.date_to')}
+                        </label>
+                        <input
+                          type="date"
+                          value={reportFilters.dateTo}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              dateTo: e.target.value,
+                            })
+                          }
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                      </div>
+
+                      {/* Resolved By */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-reports:search.resolved_by')}
+                        </label>
+                        <input
+                          type="text"
+                          value={reportFilters.resolvedBy}
+                          onChange={(e) =>
+                            setReportFilters({
+                              ...reportFilters,
+                              resolvedBy: e.target.value,
+                            })
+                          }
+                          placeholder={t(
+                            'admin-reports:search.placeholder.resolved_by'
+                          )}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Filter Action Buttons */}
+                    <div className="mt-4 flex justify-end space-x-3">
+                      <button
+                        onClick={clearReportFilters}
+                        className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                      >
+                        {t('admin-reports:search.clear_filters')}
+                      </button>
+                      <button
+                        onClick={applyReportFilters}
+                        disabled={reportsLoading}
+                        className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {reportsLoading ? (
+                          <>
+                            <svg
+                              className="-ml-1 mr-2 h-4 w-4 animate-spin"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            {t('admin-reports:loading')}
+                          </>
+                        ) : (
+                          t('admin-reports:search.apply_filters')
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {reportsLoading ? (
+                  <LoadingSpinner text={t('admin-reports:loading')} />
+                ) : reports.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"
+                      />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                      {t('admin-reports:empty.title')}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      {t('admin-reports:empty.description')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {Array.isArray(reports) &&
+                      reports
+                        .sort((a, b) => {
+                          // Sort by status: PENDING first, then UNDER_REVIEW, then RESOLVED, then DISMISSED
+                          const statusOrder = {
+                            PENDING: 0,
+                            UNDER_REVIEW: 1,
+                            RESOLVED: 2,
+                            DISMISSED: 3,
+                          };
+                          const statusComparison =
+                            statusOrder[a.status] - statusOrder[b.status];
+                          if (statusComparison !== 0) return statusComparison;
+
+                          // Within same status, sort by creation date (newest first)
+                          return (
+                            new Date(b.createdAt).getTime() -
+                            new Date(a.createdAt).getTime()
+                          );
+                        })
+                        .map((report) => (
+                          <div
+                            key={report.id}
+                            className="rounded-lg border bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-900"
+                          >
+                            {/* Header with basic info */}
+                            <div className="mb-4 flex items-start justify-between">
+                              <div className="flex items-start space-x-4">
+                                <div className="flex-shrink-0">
+                                  <span
+                                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                                      report.type === 'USER'
+                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100'
+                                        : report.type === 'PRODUCT'
+                                          ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                                          : 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100'
+                                    }`}
+                                  >
+                                    {report.type}
+                                  </span>
+                                </div>
+                                <div>
+                                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                                    {t('admin-reports:reason')}: {report.reason}
+                                  </h3>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    {t('admin-reports:report_id')}: {report.id}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-3">
+                                {' '}
+                                <span
+                                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                    report.status === 'PENDING'
+                                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
+                                      : report.status === 'UNDER_REVIEW'
+                                        ? 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100'
+                                        : report.status === 'RESOLVED'
+                                          ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                                          : report.status === 'DISMISSED'
+                                            ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+                                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                  }`}
+                                >
+                                  {t(
+                                    `admin-reports:status.${report.status.toLowerCase()}`
+                                  )}
+                                </span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
+                                  {new Date(report.createdAt).toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                            {/* Reporter Information */}
+                            <div className="mb-4 rounded-lg border bg-white p-4 dark:border-gray-600 dark:bg-gray-800">
+                              <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                {t('admin-reports:reporter_info')}
+                              </h4>
+                              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div>
+                                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                                    {t('admin-reports:reporter_name')}:
+                                  </span>
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {report.reporterData.firstName}{' '}
+                                    {report.reporterData.lastName}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                                    {t('admin-reports:username')}:
+                                  </span>
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    @{report.reporterData.username}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                                    {t('admin-reports:email')}:
+                                  </span>
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {report.reporterData.email}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                                    {t('admin-reports:role')}:
+                                  </span>
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {report.reporterData.role}
+                                  </p>
+                                </div>
+                                {report.ipAddress && (
+                                  <div>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                      {t('admin-reports:ip_address')}:
+                                    </span>
+                                    <p className="font-mono text-sm text-gray-900 dark:text-white">
+                                      {report.ipAddress}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            {/* Target Information */}
+                            <div className="mb-4 rounded-lg border bg-white p-4 dark:border-gray-600 dark:bg-gray-800">
+                              <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                {t('admin-reports:target_info')}
+                              </h4>
+
+                              {/* User Target */}
+                              {report.targetData?.user && (
+                                <div className="space-y-2">
+                                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:target_name')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {report.targetData.user.firstName}{' '}
+                                        {report.targetData.user.lastName}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:username')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        @{report.targetData.user.username}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:email')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {report.targetData.user.email}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:account_status')}:
+                                      </span>
+                                      <p
+                                        className={`text-sm font-medium ${
+                                          report.targetData.user.isActive
+                                            ? 'text-green-600 dark:text-green-400'
+                                            : 'text-red-600 dark:text-red-400'
+                                        }`}
+                                      >
+                                        {report.targetData.user.isActive
+                                          ? t('admin-reports:active')
+                                          : t('admin-reports:inactive')}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Product Target */}
+                              {report.targetData?.product && (
+                                <div className="space-y-2">
+                                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:product_title')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {report.targetData.product.title}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:price')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {report.targetData.product.price}{' '}
+                                        {report.targetData.product.currency}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:product_owner')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {
+                                          report.targetData.product.owner
+                                            .firstName
+                                        }{' '}
+                                        {
+                                          report.targetData.product.owner
+                                            .lastName
+                                        }{' '}
+                                        (@
+                                        {
+                                          report.targetData.product.owner
+                                            .username
+                                        }
+                                        )
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:product_status')}:
+                                      </span>
+                                      <p
+                                        className={`text-sm font-medium ${
+                                          report.targetData.product.isActive &&
+                                          report.targetData.product.visible
+                                            ? 'text-green-600 dark:text-green-400'
+                                            : 'text-red-600 dark:text-red-400'
+                                        }`}
+                                      >
+                                        {report.targetData.product.isActive &&
+                                        report.targetData.product.visible
+                                          ? t('admin-reports:visible')
+                                          : t('admin-reports:hidden')}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  {report.targetData.product.description && (
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:product_description')}
+                                        :
+                                      </span>
+                                      <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                                        {report.targetData.product.description}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Message Target */}
+                              {report.targetData?.message && (
+                                <div className="space-y-2">
+                                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:message_sender')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {
+                                          report.targetData.message.sender
+                                            .firstName
+                                        }{' '}
+                                        {
+                                          report.targetData.message.sender
+                                            .lastName
+                                        }{' '}
+                                        (@
+                                        {
+                                          report.targetData.message.sender
+                                            .username
+                                        }
+                                        )
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:message_date')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {new Date(
+                                          report.targetData.message.createdAt
+                                        ).toLocaleString()}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                      {t('admin-reports:message_content')}:
+                                    </span>
+                                    <div className="mt-1 rounded border bg-gray-100 p-3 dark:bg-gray-700">
+                                      <p className="text-sm text-gray-900 dark:text-white">
+                                        "{report.targetData.message.content}"
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                      {t(
+                                        'admin-reports:conversation_participants'
+                                      )}
+                                      :
+                                    </span>
+                                    <p className="text-sm text-gray-900 dark:text-white">
+                                      {report.targetData.message.conversationParticipants
+                                        .map(
+                                          (p) =>
+                                            `${p.firstName} ${p.lastName} (@${p.username})`
+                                        )
+                                        .join(', ')}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            {/* Comment */}
+                            {report.comment && (
+                              <div className="mb-4 rounded-lg border bg-white p-4 dark:border-gray-600 dark:bg-gray-800">
+                                <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                  {t('admin-reports:additional_comment')}
+                                </h4>
+                                <p className="text-sm text-gray-900 dark:text-white">
+                                  "{report.comment}"
+                                </p>
+                              </div>
+                            )}
+                            {/* Resolution Info */}
+                            {(report.resolvedAt || report.resolvedByData) && (
+                              <div className="mb-4 rounded-lg border bg-white p-4 dark:border-gray-600 dark:bg-gray-800">
+                                <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                  {t('admin-reports:resolution_info')}
+                                </h4>
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                  {report.resolvedAt && (
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:resolved_at')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {new Date(
+                                          report.resolvedAt
+                                        ).toLocaleString()}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {report.resolvedByData && (
+                                    <div>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {t('admin-reports:resolved_by')}:
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {report.resolvedByData.firstName}{' '}
+                                        {report.resolvedByData.lastName} (@
+                                        {report.resolvedByData.username})
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}{' '}
+                            {/* Actions */}
+                            <div className="mt-4 flex justify-between">
+                              <div className="flex space-x-2">
+                                {/* Individual Export Options */}
+                                <div className="relative">
+                                  <button
+                                    onClick={() => {
+                                      // Toggle individual export dropdown
+                                      const dropdown = document.getElementById(
+                                        `export-single-dropdown-${report.id}`
+                                      );
+                                      if (dropdown) {
+                                        dropdown.classList.toggle('hidden');
+                                      }
+                                    }}
+                                    disabled={exportLoading}
+                                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                  >
+                                    {' '}
+                                    <svg
+                                      className="-ml-1 mr-1 h-4 w-4"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                      />
+                                    </svg>
+                                    {t('admin-reports:search.export_single')}
+                                  </button>
+
+                                  {/* Individual Export Dropdown Menu */}
+                                  <div
+                                    id={`export-single-dropdown-${report.id}`}
+                                    className="absolute left-0 z-10 mt-2 hidden w-40 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                                  >
+                                    <div className="py-1">
+                                      <button
+                                        onClick={() => {
+                                          exportSingleReportAsJson(report.id);
+                                          document
+                                            .getElementById(
+                                              `export-single-dropdown-${report.id}`
+                                            )
+                                            ?.classList.add('hidden');
+                                        }}
+                                        disabled={exportLoading}
+                                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                                      >
+                                        {t(
+                                          'admin-reports:search.export_single_json'
+                                        )}
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          exportSingleReportAsHtml(report.id);
+                                          document
+                                            .getElementById(
+                                              `export-single-dropdown-${report.id}`
+                                            )
+                                            ?.classList.add('hidden');
+                                        }}
+                                        disabled={exportLoading}
+                                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                                      >
+                                        {t(
+                                          'admin-reports:search.export_single_html'
+                                        )}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>{' '}
+                              {/* Report Status Actions */}
+                              {(report.status === 'PENDING' ||
+                                report.status === 'UNDER_REVIEW') && (
+                                <div className="flex space-x-3">
+                                  {report.status === 'PENDING' && (
+                                    <button
+                                      onClick={() =>
+                                        handleSetUnderReview(report.id)
+                                      }
+                                      disabled={actionLoading}
+                                      className="inline-flex items-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                      {t('admin-reports:actions.under_review')}
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() =>
+                                      handleResolveReport(report.id)
+                                    }
+                                    disabled={actionLoading}
+                                    className="inline-flex items-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {t('admin-reports:actions.resolve')}
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleDismissReport(report.id)
+                                    }
+                                    disabled={actionLoading}
+                                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                  >
+                                    {t('admin-reports:actions.dismiss')}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                   </div>
                 )}
               </div>

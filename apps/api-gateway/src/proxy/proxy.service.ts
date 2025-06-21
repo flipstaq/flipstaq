@@ -191,4 +191,20 @@ export class ProxyService {
       headers
     );
   }
+  async forwardReportRequest(
+    endpoint: string,
+    method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
+    data?: any,
+    headers?: Record<string, string>,
+    params?: Record<string, any>
+  ): Promise<AxiosResponse> {
+    return this.forwardRequest(
+      "REPORT",
+      `reports${endpoint ? `/${endpoint}` : ""}`,
+      method,
+      data,
+      headers,
+      params
+    );
+  }
 }

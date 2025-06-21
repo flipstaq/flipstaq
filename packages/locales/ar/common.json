@@ -98,5 +98,9 @@
   "userUnblockedSuccessfully": "تم إلغاء حظر @{{username}}",
   "blockedUsers": "المستخدمون المحظورون",
   "noBlockedUsers": "لم تحظر أي مستخدمين",
-  "noBlockedUsersDescription": "المستخدمون المحظورون سيظهرون هنا"
+  "noBlockedUsersDescription": "المستخدمون المحظورون سيظهرون هنا",
+  "copy": "نسخ",
+  "copied": "تم النسخ!",
+  "more_options": "خيارات أكثر",
+  "delete": "حذف"
 }

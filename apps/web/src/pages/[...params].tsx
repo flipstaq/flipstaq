@@ -11,6 +11,7 @@ interface ProductDetail {
   category: string | null;
   slug: string;
   username: string;
+  userId: string;
   imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -48,6 +49,7 @@ export const getServerSideProps: GetServerSideProps = async (
 ) => {
   const { params } = context;
 
+  // Only handle routes with exactly 2 segments that match @username/slug pattern
   if (!params || !Array.isArray(params.params) || params.params.length !== 2) {
     return {
       notFound: true,

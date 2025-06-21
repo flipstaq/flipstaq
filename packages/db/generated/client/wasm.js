@@ -217,6 +217,23 @@ exports.Prisma.BlockScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ReportScalarFieldEnum = {
+  id: 'id',
+  reporterId: 'reporterId',
+  type: 'type',
+  targetUserId: 'targetUserId',
+  targetProductId: 'targetProductId',
+  targetMessageId: 'targetMessageId',
+  reason: 'reason',
+  comment: 'comment',
+  ipAddress: 'ipAddress',
+  status: 'status',
+  resolvedAt: 'resolvedAt',
+  resolvedById: 'resolvedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -256,6 +273,19 @@ exports.UserStatus = exports.$Enums.UserStatus = {
   PENDING_VERIFICATION: 'PENDING_VERIFICATION'
 };
 
+exports.ReportType = exports.$Enums.ReportType = {
+  USER: 'USER',
+  PRODUCT: 'PRODUCT',
+  MESSAGE: 'MESSAGE'
+};
+
+exports.ReportStatus = exports.$Enums.ReportStatus = {
+  PENDING: 'PENDING',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  RESOLVED: 'RESOLVED',
+  DISMISSED: 'DISMISSED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   RefreshToken: 'RefreshToken',
@@ -265,7 +295,8 @@ exports.Prisma.ModelName = {
   Conversation: 'Conversation',
   Message: 'Message',
   MessageAttachment: 'MessageAttachment',
-  Block: 'Block'
+  Block: 'Block',
+  Report: 'Report'
 };
 
 /**

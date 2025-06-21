@@ -1,4 +1,10 @@
 {
+  "..\\..\\..\\node_modules\\next\\dist\\client\\components\\react-dev-overlay\\utils\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts": {
+    "id": "..\\..\\..\\node_modules\\next\\dist\\client\\components\\react-dev-overlay\\utils\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_next_dist_client_dev_noop-turbopack-hmr_js.js"
+    ]
+  },
   "..\\..\\..\\node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {
     "id": "..\\..\\..\\node_modules\\next\\dist\\client\\index.js -> ../pages/_app",
     "files": [
@@ -21,6 +27,12 @@
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/products.json",
     "files": [
       "static/chunks/_pages-dir-browser_packages_locales_ar_admin_products_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/reports.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/reports.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_admin_reports_json.js"
     ]
   },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/admin/reviews.json": {
@@ -83,6 +95,12 @@
       "static/chunks/_pages-dir-browser_packages_locales_ar_profile_json.js"
     ]
   },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/report.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/ar/report.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_ar_report_json.js"
+    ]
+  },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/common.json": {
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/common.json",
     "files": [
@@ -93,6 +111,12 @@
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/products.json",
     "files": [
       "static/chunks/_pages-dir-browser_packages_locales_en_admin_products_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/reports.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/reports.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_admin_reports_json.js"
     ]
   },
   "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/admin/reviews.json": {
@@ -153,6 +177,12 @@
     "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/profile.json",
     "files": [
       "static/chunks/_pages-dir-browser_packages_locales_en_profile_json.js"
+    ]
+  },
+  "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/report.json": {
+    "id": "components\\providers\\LanguageProvider.tsx -> ../../../../../packages/locales/en/report.json",
+    "files": [
+      "static/chunks/_pages-dir-browser_packages_locales_en_report_json.js"
     ]
   }
 }

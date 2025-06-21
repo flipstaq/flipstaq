@@ -25,6 +25,19 @@ enum UserStatus {
   PENDING_VERIFICATION
 }
 
+enum ReportType {
+  USER
+  PRODUCT
+  MESSAGE
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
 model User {
   id          String     @id @default(cuid())
   email       String     @unique
@@ -54,10 +67,12 @@ model User {
   // Self-referential relation for deletion tracking
   deletedBy     User?  @relation("UserDeletions", fields: [deletedById], references: [id])
   deletedUsers  User[] @relation("UserDeletions")
-  
-  // Blocking relations
+    // Blocking relations
   blockedUsers  Block[] @relation("Blocker")
   blockedBy     Block[] @relation("Blocked")
+  
+  // Reporting relations
+  submittedReports Report[] @relation("ReportSubmitter")
 
   // Indexes for performance
   @@map("users")
@@ -181,4 +196,27 @@ model Block {
 
   @@unique([blockerId, blockedId])
   @@map("blocks")
+}
+
+model Report {
+  id              String      @id @default(cuid())
+  reporterId      String
+  type            ReportType
+  targetUserId    String?
+  targetProductId String?
+  targetMessageId String?
+  reason          String
+  comment         String?
+  ipAddress       String
+  status          ReportStatus @default(PENDING)
+  resolvedAt      DateTime?
+  resolvedById    String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  reporter        User        @relation("ReportSubmitter", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  // Ensure only one report per user per target (except messages which allow multiple)
+  @@unique([reporterId, type, targetUserId])
+  @@unique([reporterId, type, targetProductId])  
+  @@map("reports")
 }

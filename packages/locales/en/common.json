@@ -98,5 +98,9 @@
   "userUnblockedSuccessfully": "@{{username}} has been unblocked",
   "blockedUsers": "Blocked Users",
   "noBlockedUsers": "You haven't blocked any users",
-  "noBlockedUsersDescription": "Blocked users will appear here"
+  "noBlockedUsersDescription": "Blocked users will appear here",
+  "copy": "Copy",
+  "copied": "Copied!",
+  "more_options": "More options",
+  "delete": "Delete"
 }
