@@ -73,10 +73,21 @@ const convertApiConversation = (
 };
 
 // Convert API message to local format
-const convertApiMessage = (apiMsg: ApiMessage): Message => ({
+const convertApiMessage = (
+  apiMsg: ApiMessage,
+  currentUserId?: string
+): Message => ({
   ...apiMsg,
   createdAt: new Date(apiMsg.createdAt),
-  status: apiMsg.isRead ? 'read' : 'delivered',
+  // Status logic:
+  // - For own messages: show 'read' if read by recipient, otherwise 'delivered'
+  // - For received messages: status doesn't matter as recipients don't see status icons
+  status:
+    apiMsg.senderId === currentUserId
+      ? apiMsg.isRead
+        ? 'read'
+        : 'delivered'
+      : 'delivered',
 });
 
 export default function ChatDrawer({
@@ -421,7 +432,9 @@ export default function ChatDrawer({
     try {
       setIsLoading(true);
       const apiMessages = await messageService.getMessages(conversation.id);
-      const messages = apiMessages.map(convertApiMessage);
+      const messages = apiMessages.map((msg) =>
+        convertApiMessage(msg, user?.id)
+      );
       setMessages(messages);
 
       // Mark all messages in this conversation as read when opening it
@@ -489,7 +502,7 @@ export default function ChatDrawer({
         selectedConversation.id,
         attachments
       );
-      const message = convertApiMessage(sentMessage);
+      const message = convertApiMessage(sentMessage, user?.id);
 
       // Replace the temporary message with the actual sent message
       setMessages((prev) =>
@@ -551,7 +564,7 @@ export default function ChatDrawer({
         selectedConversation.id,
         failedMessage.attachments
       );
-      const message = convertApiMessage(sentMessage);
+      const message = convertApiMessage(sentMessage, user?.id);
 
       // Replace the failed message with the newly sent message
       setMessages((prev) =>

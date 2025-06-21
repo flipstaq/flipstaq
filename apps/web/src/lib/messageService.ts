@@ -107,17 +107,33 @@ class MessageService {
       throw error;
     }
   }
-
   async getConversations(): Promise<Conversation[]> {
     try {
       const response = await this.makeRequest('conversations', 'GET');
-      return response.data || response; // Handle different response formats
+      const rawConversations = response.data || response;
+
+      // Map backend response to frontend Conversation interface
+      return rawConversations.map((conv: any) => ({
+        id: conv.id,
+        participants: conv.participants,
+        lastMessage: conv.lastMessage
+          ? {
+              id: conv.lastMessage.id,
+              content: conv.lastMessage.content,
+              senderId: conv.lastMessage.senderId,
+              createdAt: conv.lastMessage.createdAt,
+              isRead: conv.lastMessage.read, // Map backend 'read' to frontend 'isRead'
+            }
+          : undefined,
+        unreadCount: conv.unreadCount,
+        createdAt: conv.createdAt,
+        updatedAt: conv.updatedAt,
+      }));
     } catch (error) {
       console.error('Error fetching conversations:', error);
       throw error;
     }
   }
-
   async createConversation(username: string): Promise<Conversation> {
     try {
       // Ensure username starts with @
@@ -129,13 +145,30 @@ class MessageService {
         username: formattedUsername,
       });
 
-      return response.data || response;
+      const rawConversation = response.data || response;
+
+      // Map backend response to frontend Conversation interface
+      return {
+        id: rawConversation.id,
+        participants: rawConversation.participants,
+        lastMessage: rawConversation.lastMessage
+          ? {
+              id: rawConversation.lastMessage.id,
+              content: rawConversation.lastMessage.content,
+              senderId: rawConversation.lastMessage.senderId,
+              createdAt: rawConversation.lastMessage.createdAt,
+              isRead: rawConversation.lastMessage.read, // Map backend 'read' to frontend 'isRead'
+            }
+          : undefined,
+        unreadCount: rawConversation.unreadCount || 0,
+        createdAt: rawConversation.createdAt,
+        updatedAt: rawConversation.updatedAt,
+      };
     } catch (error) {
       console.error('Error creating conversation:', error);
       throw error;
     }
   }
-
   async getMessages(
     conversationId: string,
     page: number = 1,
@@ -151,7 +184,20 @@ class MessageService {
         'GET'
       );
 
-      return response.data || response.messages || response; // Handle different response formats
+      const rawMessages = response.data || response.messages || response;
+
+      // Map backend response to frontend Message interface
+      return rawMessages.map((msg: any) => ({
+        id: msg.id,
+        content: msg.content,
+        senderId: msg.senderId,
+        conversationId: msg.conversationId,
+        createdAt: msg.createdAt,
+        isRead: msg.read, // Map backend 'read' to frontend 'isRead'
+        status: 'delivered' as const, // Will be properly set by convertApiMessage
+        attachments: msg.attachments || [],
+        sender: msg.sender,
+      }));
     } catch (error) {
       console.error('Error fetching messages:', error);
       throw error;

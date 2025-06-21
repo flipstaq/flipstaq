@@ -215,6 +215,20 @@ The messaging system provides visual feedback about message delivery and read st
 - Provides immediate blue checkmark feedback to the sender
 - Reduces manual interaction needed for read receipts
 
+**Persistence & Reliability:**
+
+- **Database Mapping**: Proper mapping between backend `read` field and frontend `isRead` field
+- **Page Reload Support**: Read status persists correctly after page reload/refresh
+- **Status Accuracy**: Message status is determined based on sender and read state
+- **Cross-Session Consistency**: Read receipts remain accurate across browser sessions
+
+**Technical Implementation:**
+
+- Backend stores read status in `message.read` boolean field
+- Frontend maps backend response (`read`) to expected interface (`isRead`)
+- Message status logic considers current user as sender vs. recipient
+- Automatic field mapping in `messageService` for all API endpoints
+
 ## Favorites System
 
 ### Overview
