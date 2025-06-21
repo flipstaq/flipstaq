@@ -288,6 +288,52 @@ class MessageService {
       throw error;
     }
   }
+  /**
+   * Mark all messages in a conversation as read for the current user
+   * This should be called when the user opens a conversation
+   */
+  async markConversationAsRead(conversationId: string): Promise<void> {
+    try {
+      // First try to use WebSocket for real-time updates
+      if (webSocketService.isConnected) {
+        webSocketService.markConversationAsRead(conversationId);
+      } else {
+        // Fallback to HTTP if WebSocket is not connected
+        const token = this.getAuthToken();
+        if (!token) {
+          throw new Error('Authentication required');
+        }
+
+        const response = await fetch(
+          `${this.baseUrl}/api/v1/messages/conversations/${conversationId}/read`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Authentication required');
+          }
+          if (response.status === 404) {
+            throw new Error('Conversation not found');
+          }
+          throw new Error(
+            `Failed to mark conversation as read: ${response.statusText}`
+          );
+        }
+      }
+
+      console.log('✅ Conversation marked as read:', conversationId);
+    } catch (error) {
+      console.error('Error marking conversation as read:', error);
+      throw error;
+    }
+  }
 }
 
 export const messageService = new MessageService();

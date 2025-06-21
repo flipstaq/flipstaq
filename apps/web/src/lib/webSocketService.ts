@@ -195,6 +195,9 @@ class WebSocketService {
       case 'messageReadStatusChanged':
         this.emit('messageReadStatusChanged', eventData);
         break;
+      case 'conversationReadStatusChanged':
+        this.emit('conversationReadStatusChanged', eventData);
+        break;
       case 'userOnline':
         this.emit('userOnline', eventData);
         break;
@@ -262,9 +265,12 @@ class WebSocketService {
   }): void {
     this.send('sendMessage', data);
   }
-
   markAsRead(data: { messageId: string; read?: boolean }): void {
     this.send('markAsRead', data);
+  }
+
+  markConversationAsRead(conversationId: string): void {
+    this.send('markConversationAsRead', { conversationId });
   }
 
   joinConversation(conversationId: string): void {

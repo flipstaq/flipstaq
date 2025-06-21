@@ -56,5 +56,10 @@
   "conversation_error": "Failed to start conversation",
   "product_shared": "Product Shared",
   "untitled_product": "Untitled Product",
-  "view_product": "View Product"
+  "view_product": "View Product",
+  "unread_messages": "Unread Messages",
+  "mark_all_read": "Mark All as Read",
+  "no_new_messages": "No new messages",
+  "total_unread": "{{count}} unread",
+  "messages_with_count": "Messages ({{count}})"
 }

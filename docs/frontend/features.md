@@ -111,6 +111,48 @@ The user search functionality includes client-side and server-side validation to
 }
 ```
 
+### Unread Message Tracking
+
+**Hook**: `useUnreadCount()` in `apps/web/src/hooks/useUnreadCount.ts`
+
+Provides real-time tracking of total unread messages across all conversations.
+
+**Features:**
+
+- Real-time total unread count across all conversations
+- Automatic updates when new messages arrive
+- Automatic updates when conversations are marked as read
+- Authentication-aware (resets count on logout)
+- Optimistic UI updates for better user experience
+
+**Usage:**
+
+```typescript
+import { useUnreadCount } from '@/hooks/useUnreadCount';
+
+function HeaderComponent() {
+  const { totalUnreadCount, isLoading } = useUnreadCount();
+
+  return (
+    <button>
+      Messages
+      {totalUnreadCount > 0 && (
+        <span className="unread-badge">
+          {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+        </span>
+      )}
+    </button>
+  );
+}
+```
+
+**Implementation Details:**
+
+- Uses WebSocket events for real-time updates
+- Integrates with authentication system
+- Handles edge cases (user logout, connection loss)
+- Optimized for performance with minimal API calls
+
 ### Real-time Updates
 
 The messaging system automatically polls for new messages every 3 seconds when the chat drawer is open:

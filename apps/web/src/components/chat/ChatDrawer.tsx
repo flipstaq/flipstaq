@@ -93,6 +93,7 @@ export default function ChatDrawer({
     leaveConversation,
     onNewMessage,
     onMessageReadStatusChanged,
+    onConversationReadStatusChanged,
     typingUsers,
   } = useWebSocket();
 
@@ -201,9 +202,7 @@ export default function ChatDrawer({
             return conv;
           });
         });
-      });
-
-      // Set up read status change handler
+      }); // Set up read status change handler
       const unsubscribeReadStatus = onMessageReadStatusChanged((data) => {
         console.log('👁️ Message read status changed:', data);
 
@@ -219,9 +218,30 @@ export default function ChatDrawer({
         }
       });
 
+      // Set up conversation read status change handler
+      const unsubscribeConversationReadStatus = onConversationReadStatusChanged(
+        (data) => {
+          console.log('👁️ Conversation read status changed:', data);
+
+          // Update the conversation list to reflect the change in unread count
+          setConversations((prevConversations) => {
+            return prevConversations.map((conv) => {
+              if (conv.id === data.conversationId) {
+                // If someone else marked this conversation as read, update our view
+                return {
+                  ...conv,
+                  unreadCount: data.userId === user?.id ? 0 : conv.unreadCount,
+                };
+              }
+              return conv;
+            });
+          });
+        }
+      );
       return () => {
         unsubscribeNewMessage();
         unsubscribeReadStatus();
+        unsubscribeConversationReadStatus();
       };
     }
   }, [isOpen, user?.id, isConnected, connect]);
@@ -343,6 +363,26 @@ export default function ChatDrawer({
       const apiMessages = await messageService.getMessages(conversation.id);
       const messages = apiMessages.map(convertApiMessage);
       setMessages(messages);
+
+      // Mark all messages in this conversation as read when opening it
+      // Only if there are unread messages to avoid unnecessary API calls
+      if (conversation.unreadCount > 0) {
+        try {
+          await messageService.markConversationAsRead(conversation.id);
+
+          // Optimistically update the UI to show no unread messages
+          setConversations((prevConversations) =>
+            prevConversations.map((conv) =>
+              conv.id === conversation.id ? { ...conv, unreadCount: 0 } : conv
+            )
+          );
+
+          console.log('✅ Conversation marked as read:', conversation.id);
+        } catch (error) {
+          console.error('Failed to mark conversation as read:', error);
+          // Don't show error to user as this is a background operation
+        }
+      }
     } catch (error) {
       console.error('Error loading messages:', error);
       setMessages([]);

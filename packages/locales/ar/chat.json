@@ -56,5 +56,10 @@
   "conversation_error": "فشل في بدء المحادثة",
   "product_shared": "تم مشاركة المنتج",
   "untitled_product": "منتج بدون عنوان",
-  "view_product": "عرض المنتج"
+  "view_product": "عرض المنتج",
+  "unread_messages": "الرسائل غير المقروءة",
+  "mark_all_read": "تمييز الكل كمقروء",
+  "no_new_messages": "لا توجد رسائل جديدة",
+  "total_unread": "{{count}} غير مقروءة",
+  "messages_with_count": "الرسائل ({{count}})"
 }

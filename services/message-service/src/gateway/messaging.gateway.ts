@@ -222,6 +222,9 @@ export class MessagingGateway {
         case "markAsRead":
           this.handleMarkAsRead(payload, client);
           break;
+        case "markConversationAsRead":
+          this.handleMarkConversationAsRead(payload, client);
+          break;
         case "joinConversation":
           this.handleJoinConversation(payload, client);
           break;
@@ -311,6 +314,39 @@ export class MessagingGateway {
       return this.sendToClient(client, { success: true, result });
     } catch (error) {
       this.logger.error("Mark as read error:", error);
+      return this.sendToClient(client, { error: error.message });
+    }
+  }
+
+  async handleMarkConversationAsRead(
+    data: { conversationId: string },
+    client: AuthenticatedSocket
+  ) {
+    try {
+      if (!client.userId) {
+        return this.sendToClient(client, { error: "Authentication required" });
+      }
+
+      const result = await this.messageService.markConversationAsRead(
+        client.userId,
+        data.conversationId
+      );
+
+      // Notify all participants in the conversation about the read status change
+      // This helps update read receipts and unread counts in real-time
+      this.sendToConversation(
+        data.conversationId,
+        "conversationReadStatusChanged",
+        {
+          conversationId: data.conversationId,
+          userId: client.userId,
+          updatedCount: result.updatedCount,
+        }
+      );
+
+      return this.sendToClient(client, { success: true, result });
+    } catch (error) {
+      this.logger.error("Mark conversation as read error:", error);
       return this.sendToClient(client, { error: error.message });
     }
   }

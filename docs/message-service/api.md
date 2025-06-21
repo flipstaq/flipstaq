@@ -347,7 +347,7 @@ curl -X POST \
 
 ---
 
-## WebSocket Events (Future Implementation)
+## WebSocket Events (Current Implementation)
 
 ### Client → Server Events
 
@@ -366,6 +366,14 @@ curl -X POST \
 {
   "messageId": "clx1y2z3a4b5c6d7e8f9g0h5",
   "read": true
+}
+```
+
+#### `markConversationAsRead`
+
+```json
+{
+  "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1"
 }
 ```
 
@@ -395,6 +403,14 @@ Emitted when a new message is received in any conversation the user participates
 #### `messageReadStatusChanged`
 
 Emitted when message read status changes.
+
+#### `conversationReadStatusChanged`
+
+Emitted when a conversation's read status changes, includes:
+
+- `conversationId`: The conversation that was marked as read
+- `userId`: The user who marked it as read
+- `updatedCount`: Number of messages that were marked as read
 
 #### `userOnline` / `userOffline`
 

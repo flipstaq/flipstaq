@@ -188,6 +188,9 @@ export class StandaloneWebSocketServer {
         case "markAsRead":
           this.handleMarkAsRead(payload, client);
           break;
+        case "markConversationAsRead":
+          this.handleMarkConversationAsRead(payload, client);
+          break;
         case "joinConversation":
           this.handleJoinConversation(payload, client);
           break;
@@ -253,7 +256,6 @@ export class StandaloneWebSocketServer {
       return this.sendToClient(client, { error: error.message });
     }
   }
-
   async handleMarkAsRead(
     data: { messageId: string; read?: boolean },
     client: AuthenticatedSocket
@@ -278,6 +280,38 @@ export class StandaloneWebSocketServer {
       return this.sendToClient(client, { success: true, result });
     } catch (error) {
       this.logger.error("Mark as read error:", error);
+      return this.sendToClient(client, { error: error.message });
+    }
+  }
+
+  async handleMarkConversationAsRead(
+    data: { conversationId: string },
+    client: AuthenticatedSocket
+  ) {
+    try {
+      if (!client.userId) {
+        return this.sendToClient(client, { error: "Authentication required" });
+      }
+
+      const result = await this.messageService.markConversationAsRead(
+        client.userId,
+        data.conversationId
+      );
+
+      // Notify all participants in the conversation about the read status change
+      this.sendToConversation(
+        data.conversationId,
+        "conversationReadStatusChanged",
+        {
+          conversationId: data.conversationId,
+          userId: client.userId,
+          updatedCount: result.updatedCount,
+        }
+      );
+
+      return this.sendToClient(client, { success: true, result });
+    } catch (error) {
+      this.logger.error("Mark conversation as read error:", error);
       return this.sendToClient(client, { error: error.message });
     }
   }

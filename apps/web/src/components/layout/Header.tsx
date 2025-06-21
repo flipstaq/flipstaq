@@ -22,12 +22,14 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { useState, useRef, useEffect } from 'react';
 import ChatDrawer from '@/components/chat/ChatDrawer';
 import { useChat } from '@/contexts/ChatContext';
+import { useUnreadCount } from '@/hooks/useUnreadCount';
 
 export function Header() {
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
   const { isChatOpen, startConversationWith, openChat, closeChat } = useChat();
+  const { totalUnreadCount } = useUnreadCount();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -106,11 +108,14 @@ export function Header() {
                     className="relative rounded-lg bg-secondary-100 p-2 text-secondary-700 transition-colors duration-200 hover:bg-secondary-200 dark:bg-secondary-800 dark:text-secondary-300 dark:hover:bg-secondary-700"
                     title={t('chat:messages')}
                   >
+                    {' '}
                     <MessageCircle className="h-5 w-5" />
-                    {/* Unread indicator - you can replace with actual unread count */}
-                    <div className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center rounded-full bg-red-500">
-                      <span className="text-xs font-bold text-white">2</span>
-                    </div>
+                    {/* Total unread count indicator */}
+                    {totalUnreadCount > 0 && (
+                      <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                        {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                      </div>
+                    )}
                   </button>
 
                   {/* Profile Dropdown */}
@@ -236,16 +241,21 @@ export function Header() {
                     >
                       <User className="mr-1 inline h-4 w-4" />
                       {t('common:myProfile')}
-                    </Link>
+                    </Link>{' '}
                     <button
                       onClick={() => {
                         openChat();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="btn-secondary block w-full text-center"
+                      className="btn-secondary relative block w-full text-center"
                     >
                       <MessageCircle className="mr-1 inline h-4 w-4" />
                       {t('chat:messages')}
+                      {totalUnreadCount > 0 && (
+                        <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                          {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                        </span>
+                      )}
                     </button>
                     <button
                       onClick={() => {

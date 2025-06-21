@@ -23,11 +23,13 @@ interface WebSocketContextType {
   disconnect: () => void;
   sendMessage: (data: any) => void;
   markAsRead: (messageId: string, read?: boolean) => void;
+  markConversationAsRead: (conversationId: string) => void;
   joinConversation: (conversationId: string) => void;
   leaveConversation: (conversationId: string) => void;
   sendTyping: (conversationId: string, isTyping: boolean) => void;
   onNewMessage: (handler: (message: MessageEvent) => void) => () => void;
   onMessageReadStatusChanged: (handler: (data: any) => void) => () => void;
+  onConversationReadStatusChanged: (handler: (data: any) => void) => () => void;
   onUserStatusChanged: (handler: (status: UserStatus) => void) => () => void;
 }
 
@@ -58,9 +60,12 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const sendMessage = useCallback((data: any) => {
     webSocketService.sendMessage(data);
   }, []);
-
   const markAsRead = useCallback((messageId: string, read = true) => {
     webSocketService.markAsRead({ messageId, read });
+  }, []);
+
+  const markConversationAsRead = useCallback((conversationId: string) => {
+    webSocketService.markConversationAsRead(conversationId);
   }, []);
 
   const joinConversation = useCallback((conversationId: string) => {
@@ -86,11 +91,19 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     },
     []
   );
-
   const onMessageReadStatusChanged = useCallback(
     (handler: (data: any) => void) => {
       webSocketService.on('messageReadStatusChanged', handler);
       return () => webSocketService.off('messageReadStatusChanged', handler);
+    },
+    []
+  );
+
+  const onConversationReadStatusChanged = useCallback(
+    (handler: (data: any) => void) => {
+      webSocketService.on('conversationReadStatusChanged', handler);
+      return () =>
+        webSocketService.off('conversationReadStatusChanged', handler);
     },
     []
   );
@@ -232,7 +245,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       disconnect();
     };
   }, [disconnect]);
-
   const value: WebSocketContextType = {
     isConnected,
     connectionState,
@@ -242,11 +254,13 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     disconnect,
     sendMessage,
     markAsRead,
+    markConversationAsRead,
     joinConversation,
     leaveConversation,
     sendTyping,
     onNewMessage,
     onMessageReadStatusChanged,
+    onConversationReadStatusChanged,
     onUserStatusChanged,
   };
 
