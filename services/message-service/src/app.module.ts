@@ -2,7 +2,6 @@ import { Module, MiddlewareConsumer } from "@nestjs/common";
 import { MessageModule } from "./message/message.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
-import { WebSocketModule } from "./websocket/websocket.module";
 import { InternalServiceMiddleware } from "./common/middleware/internal-service.middleware";
 import { JwtModule } from "@nestjs/jwt";
 import { HttpModule } from "@nestjs/axios";
@@ -15,7 +14,6 @@ import { MessagingGateway } from "./gateway/messaging.gateway";
     PrismaModule,
     RedisModule,
     MessageModule,
-    WebSocketModule,
     HttpModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || "supersupersecretCEMal",
@@ -24,7 +22,7 @@ import { MessagingGateway } from "./gateway/messaging.gateway";
       },
     }),
   ],
-  providers: [MessagingGateway], // Make MessagingGateway available at app level
+  providers: [MessagingGateway], // Your custom WebSocket implementation
   exports: [MessagingGateway],
 })
 export class AppModule {
