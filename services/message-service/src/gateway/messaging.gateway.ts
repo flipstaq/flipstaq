@@ -213,11 +213,12 @@ export class MessagingGateway {
   private handleMessage(client: AuthenticatedSocket, data: Buffer) {
     try {
       const message = JSON.parse(data.toString());
-      const { event, payload } = message;
-
-      switch (event) {
+      const { event, payload } = message;      switch (event) {
         case "sendMessage":
           this.handleSendMessage(payload, client);
+          break;
+        case "deleteMessage":
+          this.handleDeleteMessage(payload, client);
           break;
         case "markAsRead":
           this.handleMarkAsRead(payload, client);
@@ -286,10 +287,55 @@ export class MessagingGateway {
 
       return this.sendToClient(client, { success: true, message });
     } catch (error) {
-      this.logger.error("Send message error:", error);
+      this.logger.error("Send message error:", error);      return this.sendToClient(client, { error: error.message });
+    }
+  }
+
+  async handleDeleteMessage(
+    data: { messageId: string; conversationId: string },
+    client: AuthenticatedSocket
+  ) {
+    try {
+      if (!client.userId) {
+        return this.sendToClient(client, { error: "Authentication required" });
+      }
+
+      // Delete message through service
+      await this.messageService.deleteMessage(data.messageId, client.userId);
+
+      // Get conversation participants to notify about deletion
+      const participants =
+        await this.messageService.getConversationParticipants(
+          data.conversationId
+        );
+
+      // Emit deletion event to all conversation participants
+      for (const participant of participants) {
+        this.sendToUser(participant.id, "messageDeleted", {
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          deletedBy: client.userId,
+        });
+      }
+
+      // Publish to Redis for potential cross-service notifications
+      await this.redisService.publish(
+        "message-deleted",
+        JSON.stringify({
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          deletedBy: client.userId,
+          participants: participants.map((p) => p.id),
+        })
+      );
+
+      return this.sendToClient(client, { success: true });
+    } catch (error) {
+      this.logger.error("Delete message error:", error);
       return this.sendToClient(client, { error: error.message });
     }
   }
+
   async handleMarkAsRead(
     data: { messageId: string; read?: boolean },
     client: AuthenticatedSocket

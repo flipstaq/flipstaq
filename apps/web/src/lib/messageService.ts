@@ -373,10 +373,26 @@ class MessageService {
           );
         }
       }
-
       console.log('✅ Conversation marked as read:', conversationId);
     } catch (error) {
       console.error('Error marking conversation as read:', error);
+      throw error;
+    }
+  }
+  async deleteMessage(messageId: string, conversationId: string): Promise<void> {
+    try {
+      console.log('🗑️ Deleting message via WebSocket:', messageId);
+
+      if (!webSocketService.isConnected) {
+        throw new Error('WebSocket not connected');
+      }
+
+      // Send delete message via WebSocket
+      webSocketService.deleteMessage(messageId, conversationId);
+
+      console.log('✅ Message delete request sent via WebSocket');
+    } catch (error) {
+      console.error('Error deleting message:', error);
       throw error;
     }
   }

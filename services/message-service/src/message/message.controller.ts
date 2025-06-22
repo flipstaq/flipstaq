@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   Headers,
@@ -295,7 +296,37 @@ export class MessageController {
     }
 
     const searchLimit = limit ? Math.min(parseInt(limit, 10), 50) : 10;
-
     return this.messageService.searchUsers(query.trim(), searchLimit, userId);
+  }
+
+  @Patch("messages/:id/delete")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete a message (soft delete)" })
+  @ApiParam({
+    name: "id",
+    description: "The ID of the message to delete",
+    type: "string",
+  })
+  @ApiResponse({
+    status: 204,
+    description: "Message deleted successfully",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Message not found",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Cannot delete message - not the sender",
+  })
+  async deleteMessage(
+    @Headers("x-user-id") userId: string,
+    @Param("id") messageId: string
+  ) {
+    if (!userId || userId.trim() === "") {
+      throw new BadRequestException("User ID is required and cannot be empty");
+    }
+
+    await this.messageService.deleteMessage(messageId, userId);
   }
 }

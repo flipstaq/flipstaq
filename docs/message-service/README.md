@@ -90,6 +90,7 @@ The Message Service is a NestJS-based microservice responsible for direct messag
 - **Start Conversation**: Create new conversation with any user
 - **List Conversations**: Get all conversations for authenticated user
 - **Message History**: Paginated message retrieval
+- **Message Deletion**: Soft delete own messages with instant UI updates
 - **Read Status**: Individual and bulk message read tracking
 - **Real-time Updates**: WebSocket integration for live messaging
 
@@ -360,6 +361,7 @@ npm run prisma:generate
 ### ✅ Completed Features
 
 - **Pure WebSocket Messaging**: 100% real-time messaging without HTTP polling
+- **Message Management**: Complete CRUD operations including soft delete for own messages via WebSocket
 - **File Attachments**: Image and document sharing with metadata support (including GIF files)
 - **GIF Integration**: Complete GIF support with dual sources:
   - **Upload GIFs**: Direct `.gif` file uploads (max 10MB) stored locally

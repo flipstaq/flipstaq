@@ -61,5 +61,9 @@
   "mark_all_read": "تمييز الكل كمقروء",
   "no_new_messages": "لا توجد رسائل جديدة",
   "total_unread": "{{count}} غير مقروءة",
-  "messages_with_count": "الرسائل ({{count}})"
+  "messages_with_count": "الرسائل ({{count}})",
+  "delete_message": "حذف الرسالة",
+  "message_deleted": "تم حذف الرسالة",
+  "delete_message_confirm": "هل أنت متأكد من أنك تريد حذف هذه الرسالة؟",
+  "delete_failed": "فشل في حذف الرسالة"
 }

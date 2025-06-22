@@ -22,6 +22,7 @@ interface MessageListProps {
   currentUserId: string;
   isLoading: boolean;
   onRetryMessage?: (message: Message) => void;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
 export default function MessageList({
@@ -29,6 +30,7 @@ export default function MessageList({
   currentUserId,
   isLoading,
   onRetryMessage,
+  onDeleteMessage,
 }: MessageListProps) {
   const { t } = useLanguage();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -388,13 +390,14 @@ export default function MessageList({
                         {message.content}
                       </p>
                     )}
-                    {/* Context Menu */}
+                    {/* Context Menu */}{' '}
                     <div className="absolute right-1 top-1">
                       <MessageContextMenu
                         messageId={message.id}
                         senderId={message.senderId}
                         content={message.content}
                         isOwnMessage={isOwnMessage}
+                        onDelete={() => onDeleteMessage?.(message.id)}
                       />
                     </div>
                     {/* Hover timestamp for grouped messages */}

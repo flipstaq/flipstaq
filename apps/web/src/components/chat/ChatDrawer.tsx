@@ -99,13 +99,13 @@ export default function ChatDrawer({
   startConversationWith,
 }: ChatDrawerProps) {
   const { t, language } = useLanguage();
-  const { user } = useAuth();
-  const {
+  const { user } = useAuth();  const {
     connect,
     isConnected,
     joinConversation,
     leaveConversation,
     onNewMessage,
+    onMessageDeleted,
     onMessageReadStatusChanged,
     onConversationReadStatusChanged,
     typingUsers,
@@ -279,13 +279,56 @@ export default function ChatDrawer({
               }
               return conv;
             });
-          });
-        }
+          });        }
       );
+
+      // Set up message deleted handler
+      const unsubscribeMessageDeleted = onMessageDeleted((data) => {
+        console.log('🗑️ Message deleted via WebSocket:', data);
+
+        // Remove the message from the current conversation
+        setMessages((prevMessages) => {
+          const updatedMessages = prevMessages.filter(msg => msg.id !== data.messageId);
+          
+          // If this was in the selected conversation, also update the conversation's last message
+          if (selectedConversationRef.current?.id === data.conversationId) {
+            const lastMessage = updatedMessages[updatedMessages.length - 1];
+            
+            setConversations((prevConversations) => {
+              return prevConversations.map((conv) => {
+                if (conv.id === data.conversationId) {
+                  return {
+                    ...conv,
+                    lastMessage: lastMessage
+                      ? {
+                          id: lastMessage.id,
+                          content: lastMessage.attachments?.length
+                            ? lastMessage.content
+                              ? lastMessage.content
+                              : `📎 ${lastMessage.attachments.length} ${lastMessage.attachments.length === 1 ? 'file' : 'files'}`
+                            : lastMessage.content || undefined,
+                          senderId: lastMessage.senderId,
+                          createdAt: lastMessage.createdAt,
+                          isRead: lastMessage.isRead,
+                        }
+                      : undefined,
+                    updatedAt: new Date(),
+                  };
+                }
+                return conv;
+              });
+            });
+          }
+          
+          return updatedMessages;
+        });
+      });
+
       return () => {
         unsubscribeNewMessage();
         unsubscribeReadStatus();
         unsubscribeConversationReadStatus();
+        unsubscribeMessageDeleted();
       };
     }
   }, [isOpen, user?.id, isConnected, connect]);
@@ -617,6 +660,22 @@ export default function ChatDrawer({
       );
     }
   };
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      if (!selectedConversation) {
+        throw new Error('No conversation selected');
+      }
+
+      await messageService.deleteMessage(messageId, selectedConversation.id);
+
+      // Note: The UI will be updated via WebSocket 'messageDeleted' event
+      // No need to manually update state here as WebSocket will handle it
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      // TODO: Show error toast/notification
+    }
+  };
+
   const handleClose = () => {
     setIsNewChatMode(false);
     setSearchQuery('');
@@ -912,6 +971,7 @@ export default function ChatDrawer({
                   currentUserId={user?.id || ''}
                   isLoading={isLoading}
                   onRetryMessage={handleRetryMessage}
+                  onDeleteMessage={handleDeleteMessage}
                 />
               </div>{' '}
               {/* Typing indicator positioned below message input */}

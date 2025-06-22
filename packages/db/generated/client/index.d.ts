@@ -9103,6 +9103,7 @@ export namespace Prisma {
     senderId: string | null
     conversationId: string | null
     read: boolean | null
+    deletedAt: Date | null
     createdAt: Date | null
   }
 
@@ -9112,6 +9113,7 @@ export namespace Prisma {
     senderId: string | null
     conversationId: string | null
     read: boolean | null
+    deletedAt: Date | null
     createdAt: Date | null
   }
 
@@ -9121,6 +9123,7 @@ export namespace Prisma {
     senderId: number
     conversationId: number
     read: number
+    deletedAt: number
     createdAt: number
     _all: number
   }
@@ -9132,6 +9135,7 @@ export namespace Prisma {
     senderId?: true
     conversationId?: true
     read?: true
+    deletedAt?: true
     createdAt?: true
   }
 
@@ -9141,6 +9145,7 @@ export namespace Prisma {
     senderId?: true
     conversationId?: true
     read?: true
+    deletedAt?: true
     createdAt?: true
   }
 
@@ -9150,6 +9155,7 @@ export namespace Prisma {
     senderId?: true
     conversationId?: true
     read?: true
+    deletedAt?: true
     createdAt?: true
     _all?: true
   }
@@ -9232,6 +9238,7 @@ export namespace Prisma {
     senderId: string
     conversationId: string
     read: boolean
+    deletedAt: Date | null
     createdAt: Date
     _count: MessageCountAggregateOutputType | null
     _min: MessageMinAggregateOutputType | null
@@ -9258,6 +9265,7 @@ export namespace Prisma {
     senderId?: boolean
     conversationId?: boolean
     read?: boolean
+    deletedAt?: boolean
     createdAt?: boolean
     sender?: boolean | UserDefaultArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
@@ -9271,6 +9279,7 @@ export namespace Prisma {
     senderId?: boolean
     conversationId?: boolean
     read?: boolean
+    deletedAt?: boolean
     createdAt?: boolean
     sender?: boolean | UserDefaultArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
@@ -9282,6 +9291,7 @@ export namespace Prisma {
     senderId?: boolean
     conversationId?: boolean
     read?: boolean
+    deletedAt?: boolean
     createdAt?: boolean
     sender?: boolean | UserDefaultArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
@@ -9293,10 +9303,11 @@ export namespace Prisma {
     senderId?: boolean
     conversationId?: boolean
     read?: boolean
+    deletedAt?: boolean
     createdAt?: boolean
   }
 
-  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "content" | "senderId" | "conversationId" | "read" | "createdAt", ExtArgs["result"]["message"]>
+  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "content" | "senderId" | "conversationId" | "read" | "deletedAt" | "createdAt", ExtArgs["result"]["message"]>
   export type MessageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sender?: boolean | UserDefaultArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
@@ -9325,6 +9336,7 @@ export namespace Prisma {
       senderId: string
       conversationId: string
       read: boolean
+      deletedAt: Date | null
       createdAt: Date
     }, ExtArgs["result"]["message"]>
     composites: {}
@@ -9757,6 +9769,7 @@ export namespace Prisma {
     readonly senderId: FieldRef<"Message", 'String'>
     readonly conversationId: FieldRef<"Message", 'String'>
     readonly read: FieldRef<"Message", 'Boolean'>
+    readonly deletedAt: FieldRef<"Message", 'DateTime'>
     readonly createdAt: FieldRef<"Message", 'DateTime'>
   }
     
@@ -13659,6 +13672,7 @@ export namespace Prisma {
     senderId: 'senderId',
     conversationId: 'conversationId',
     read: 'read',
+    deletedAt: 'deletedAt',
     createdAt: 'createdAt'
   };
 
@@ -14392,6 +14406,7 @@ export namespace Prisma {
     senderId?: StringFilter<"Message"> | string
     conversationId?: StringFilter<"Message"> | string
     read?: BoolFilter<"Message"> | boolean
+    deletedAt?: DateTimeNullableFilter<"Message"> | Date | string | null
     createdAt?: DateTimeFilter<"Message"> | Date | string
     sender?: XOR<UserScalarRelationFilter, UserWhereInput>
     conversation?: XOR<ConversationScalarRelationFilter, ConversationWhereInput>
@@ -14404,6 +14419,7 @@ export namespace Prisma {
     senderId?: SortOrder
     conversationId?: SortOrder
     read?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     sender?: UserOrderByWithRelationInput
     conversation?: ConversationOrderByWithRelationInput
@@ -14419,6 +14435,7 @@ export namespace Prisma {
     senderId?: StringFilter<"Message"> | string
     conversationId?: StringFilter<"Message"> | string
     read?: BoolFilter<"Message"> | boolean
+    deletedAt?: DateTimeNullableFilter<"Message"> | Date | string | null
     createdAt?: DateTimeFilter<"Message"> | Date | string
     sender?: XOR<UserScalarRelationFilter, UserWhereInput>
     conversation?: XOR<ConversationScalarRelationFilter, ConversationWhereInput>
@@ -14431,6 +14448,7 @@ export namespace Prisma {
     senderId?: SortOrder
     conversationId?: SortOrder
     read?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: MessageCountOrderByAggregateInput
     _max?: MessageMaxOrderByAggregateInput
@@ -14446,6 +14464,7 @@ export namespace Prisma {
     senderId?: StringWithAggregatesFilter<"Message"> | string
     conversationId?: StringWithAggregatesFilter<"Message"> | string
     read?: BoolWithAggregatesFilter<"Message"> | boolean
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Message"> | Date | string
   }
 
@@ -15221,6 +15240,7 @@ export namespace Prisma {
     id?: string
     content?: string | null
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     sender: UserCreateNestedOneWithoutSentMessagesInput
     conversation: ConversationCreateNestedOneWithoutMessagesInput
@@ -15233,6 +15253,7 @@ export namespace Prisma {
     senderId: string
     conversationId: string
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     attachments?: MessageAttachmentUncheckedCreateNestedManyWithoutMessageInput
   }
@@ -15241,6 +15262,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sender?: UserUpdateOneRequiredWithoutSentMessagesNestedInput
     conversation?: ConversationUpdateOneRequiredWithoutMessagesNestedInput
@@ -15253,6 +15275,7 @@ export namespace Prisma {
     senderId?: StringFieldUpdateOperationsInput | string
     conversationId?: StringFieldUpdateOperationsInput | string
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attachments?: MessageAttachmentUncheckedUpdateManyWithoutMessageNestedInput
   }
@@ -15263,6 +15286,7 @@ export namespace Prisma {
     senderId: string
     conversationId: string
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -15270,6 +15294,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15279,6 +15304,7 @@ export namespace Prisma {
     senderId?: StringFieldUpdateOperationsInput | string
     conversationId?: StringFieldUpdateOperationsInput | string
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -16112,6 +16138,7 @@ export namespace Prisma {
     senderId?: SortOrder
     conversationId?: SortOrder
     read?: SortOrder
+    deletedAt?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -16121,6 +16148,7 @@ export namespace Prisma {
     senderId?: SortOrder
     conversationId?: SortOrder
     read?: SortOrder
+    deletedAt?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -16130,6 +16158,7 @@ export namespace Prisma {
     senderId?: SortOrder
     conversationId?: SortOrder
     read?: SortOrder
+    deletedAt?: SortOrder
     createdAt?: SortOrder
   }
   export type JsonNullableFilter<$PrismaModel = never> =
@@ -17622,6 +17651,7 @@ export namespace Prisma {
     id?: string
     content?: string | null
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     conversation: ConversationCreateNestedOneWithoutMessagesInput
     attachments?: MessageAttachmentCreateNestedManyWithoutMessageInput
@@ -17632,6 +17662,7 @@ export namespace Prisma {
     content?: string | null
     conversationId: string
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     attachments?: MessageAttachmentUncheckedCreateNestedManyWithoutMessageInput
   }
@@ -18027,6 +18058,7 @@ export namespace Prisma {
     senderId?: StringFilter<"Message"> | string
     conversationId?: StringFilter<"Message"> | string
     read?: BoolFilter<"Message"> | boolean
+    deletedAt?: DateTimeNullableFilter<"Message"> | Date | string | null
     createdAt?: DateTimeFilter<"Message"> | Date | string
   }
 
@@ -19104,6 +19136,7 @@ export namespace Prisma {
     id?: string
     content?: string | null
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     sender: UserCreateNestedOneWithoutSentMessagesInput
     attachments?: MessageAttachmentCreateNestedManyWithoutMessageInput
@@ -19114,6 +19147,7 @@ export namespace Prisma {
     content?: string | null
     senderId: string
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     attachments?: MessageAttachmentUncheckedCreateNestedManyWithoutMessageInput
   }
@@ -19400,6 +19434,7 @@ export namespace Prisma {
     id?: string
     content?: string | null
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     sender: UserCreateNestedOneWithoutSentMessagesInput
     conversation: ConversationCreateNestedOneWithoutMessagesInput
@@ -19411,6 +19446,7 @@ export namespace Prisma {
     senderId: string
     conversationId: string
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -19434,6 +19470,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sender?: UserUpdateOneRequiredWithoutSentMessagesNestedInput
     conversation?: ConversationUpdateOneRequiredWithoutMessagesNestedInput
@@ -19445,6 +19482,7 @@ export namespace Prisma {
     senderId?: StringFieldUpdateOperationsInput | string
     conversationId?: StringFieldUpdateOperationsInput | string
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -19889,6 +19927,7 @@ export namespace Prisma {
     content?: string | null
     conversationId: string
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -20067,6 +20106,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     conversation?: ConversationUpdateOneRequiredWithoutMessagesNestedInput
     attachments?: MessageAttachmentUpdateManyWithoutMessageNestedInput
@@ -20077,6 +20117,7 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     conversationId?: StringFieldUpdateOperationsInput | string
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attachments?: MessageAttachmentUncheckedUpdateManyWithoutMessageNestedInput
   }
@@ -20086,6 +20127,7 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     conversationId?: StringFieldUpdateOperationsInput | string
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -20339,6 +20381,7 @@ export namespace Prisma {
     content?: string | null
     senderId: string
     read?: boolean
+    deletedAt?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -20424,6 +20467,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sender?: UserUpdateOneRequiredWithoutSentMessagesNestedInput
     attachments?: MessageAttachmentUpdateManyWithoutMessageNestedInput
@@ -20434,6 +20478,7 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     senderId?: StringFieldUpdateOperationsInput | string
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attachments?: MessageAttachmentUncheckedUpdateManyWithoutMessageNestedInput
   }
@@ -20443,6 +20488,7 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     senderId?: StringFieldUpdateOperationsInput | string
     read?: BoolFieldUpdateOperationsInput | boolean
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

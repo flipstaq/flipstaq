@@ -188,9 +188,11 @@ class WebSocketService {
       return;
     }
 
-    switch (event) {
-      case 'newMessage':
+    switch (event) {      case 'newMessage':
         this.emit('newMessage', eventData);
+        break;
+      case 'messageDeleted':
+        this.emit('messageDeleted', eventData);
         break;
       case 'messageReadStatusChanged':
         this.emit('messageReadStatusChanged', eventData);
@@ -280,9 +282,12 @@ class WebSocketService {
   leaveConversation(conversationId: string): void {
     this.send('leaveConversation', { conversationId });
   }
-
   sendTyping(conversationId: string, isTyping: boolean): void {
     this.send('typing', { conversationId, isTyping });
+  }
+
+  deleteMessage(messageId: string, conversationId: string): void {
+    this.send('deleteMessage', { messageId, conversationId });
   }
 
   private send(event: string, payload: any): void {

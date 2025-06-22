@@ -546,4 +546,39 @@ export class MessageGatewayController {
     );
     return response.data;
   }
+
+  @Patch("messages/:id/delete")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete a message" })
+  @ApiParam({
+    name: "id",
+    description: "The ID of the message to delete",
+    type: "string",
+  })
+  @ApiResponse({
+    status: 204,
+    description: "Message deleted successfully",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Message not found",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Cannot delete message - not the sender",
+  })
+  async deleteMessage(
+    @Param("id") messageId: string,
+    @Request() req: AuthenticatedRequest
+  ) {
+    await this.proxyService.forwardRequest(
+      "MESSAGE",
+      `messages/messages/${messageId}/delete`,
+      "PATCH",
+      null,
+      {
+        "x-user-id": req.user.sub,
+      }
+    );
+  }
 }

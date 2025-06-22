@@ -283,11 +283,13 @@ export class MessageService {
     if (!conversation) {
       throw new NotFoundException("Conversation not found or access denied");
     }
-
     const skip = (page - 1) * limit;
     const [messages, total] = await Promise.all([
       this.prisma.message.findMany({
-        where: { conversationId },
+        where: {
+          conversationId,
+          deletedAt: null, // Exclude deleted messages
+        },
         include: {
           sender: {
             select: {
@@ -313,7 +315,10 @@ export class MessageService {
         skip,
       }),
       this.prisma.message.count({
-        where: { conversationId },
+        where: {
+          conversationId,
+          deletedAt: null, // Exclude deleted messages from count
+        },
       }),
     ]);
     return {
@@ -628,7 +633,39 @@ export class MessageService {
       take: limit,
       orderBy: [{ username: "asc" }, { firstName: "asc" }],
     });
-
     return users;
+  }
+
+  /**
+   * Delete a message (soft delete)
+   */
+  async deleteMessage(messageId: string, userId: string): Promise<void> {
+    // Find the message and verify ownership
+    const message = await this.prisma.message.findUnique({
+      where: { id: messageId },
+      select: {
+        id: true,
+        senderId: true,
+        deletedAt: true,
+      },
+    });
+
+    if (!message) {
+      throw new NotFoundException("Message not found");
+    }
+
+    if (message.deletedAt) {
+      throw new BadRequestException("Message is already deleted");
+    }
+
+    if (message.senderId !== userId) {
+      throw new ForbiddenException("You can only delete your own messages");
+    }
+
+    // Soft delete the message
+    await this.prisma.message.update({
+      where: { id: messageId },
+      data: { deletedAt: new Date() },
+    });
   }
 }
