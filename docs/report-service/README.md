@@ -131,9 +131,12 @@ enum ReportStatus {
 
 1. **Anti-Abuse Measures**:
 
-   - One report per user per target item
-   - IP address logging for tracking
-   - Rate limiting on report submissions
+   - **Unique Constraints**: One report per user per target item (enforced at database level)
+     - Users cannot report the same user, product, or message multiple times
+     - Database unique constraints prevent duplicate reports even in race conditions
+   - **Rate Limiting**: Maximum 10 reports per user per day
+   - **IP Address Logging**: All reports tracked with IP addresses for abuse monitoring
+   - **Self-Report Prevention**: Users cannot report themselves
 
 2. **Privacy Protection**:
 

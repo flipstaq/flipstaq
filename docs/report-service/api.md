@@ -49,8 +49,9 @@ Submit a new report for moderation review.
 
 **Error Responses:**
 
-- `400` - Invalid input or duplicate report
+- `400` - Invalid input or daily limit exceeded
 - `401` - Unauthorized
+- `409` - Duplicate report (user has already reported this item)
 - `429` - Rate limit exceeded
 
 ### List Reports (Admin)
@@ -289,6 +290,36 @@ Standard reason codes:
 - `RATE_LIMIT_EXCEEDED` - Too many requests
 - `INSUFFICIENT_PERMISSIONS` - Admin access required
 - `REPORT_NOT_FOUND` - Report ID not found
+
+## Error Responses
+
+### Common Error Codes
+
+- **400 Bad Request**: Invalid input data or daily report limit exceeded
+- **401 Unauthorized**: Authentication required or invalid token
+- **403 Forbidden**: Insufficient permissions (admin required for certain endpoints)
+- **404 Not Found**: Report or target entity not found
+- **409 Conflict**: Duplicate report - user has already reported this item
+- **429 Too Many Requests**: Rate limiting active
+
+### Error Response Format
+
+```json
+{
+  "error": "Error message",
+  "message": "Detailed error description",
+  "statusCode": 400
+}
+```
+
+### Specific Error Messages
+
+- **"You have already reported this item"** (409): User attempted to create a duplicate report
+- **"Daily report limit exceeded"** (400): User has reached the 10 reports per day limit
+- **"You cannot report yourself"** (400): User attempted to report their own account
+- **"Exactly one target must be provided"** (400): Invalid target specification in request
+- **"Authentication required"** (401): Missing or invalid auth token
+- **"Admin access required"** (403): Non-admin user attempted to access admin endpoint
 
 ## Status Transitions
 

@@ -111,6 +111,13 @@
       "resolved_by": "Enter resolver username..."
     }
   },
+  "errors": {
+    "already_reported": "You have already reported this item",
+    "duplicate_report": "This item has already been reported by you",
+    "report_limit_exceeded": "Daily report limit exceeded. Please try again tomorrow.",
+    "invalid_target": "Invalid target for report",
+    "cannot_report_self": "You cannot report yourself"
+  },
   "common": {
     "loading": "Loading reports..."
   }

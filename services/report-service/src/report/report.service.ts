@@ -47,41 +47,16 @@ export class ReportService {
     // Prevent self-reporting for users
     if (type === ReportType.USER && targetUserId === reporterId) {
       throw new BadRequestException("You cannot report yourself");
-    } // Check for existing report
-    if (type === ReportType.PRODUCT || type === ReportType.USER) {
-      // For products and users, only allow one report per user
-      const existingReport = await this.findExistingReport(
-        reporterId,
-        type,
-        targetUserId,
-        targetProductId,
-        targetMessageId
-      );
-      if (existingReport) {
-        throw new ConflictException("You have already reported this item");
-      }
-    } else if (type === ReportType.MESSAGE) {
-      // For messages, prevent spam by checking recent reports (last 24 hours)
-      const oneDayAgo = new Date();
-      oneDayAgo.setHours(oneDayAgo.getHours() - 24);
-
-      const recentMessageReports = await this.prisma.report.count({
-        where: {
-          reporterId,
-          type: ReportType.MESSAGE,
-          targetMessageId,
-          createdAt: {
-            gte: oneDayAgo,
-          },
-        },
-      });
-
-      // Allow max 3 reports per message per user per 24 hours
-      if (recentMessageReports >= 3) {
-        throw new ConflictException(
-          "You have reached the limit for reporting this message. Please wait 24 hours before reporting again."
-        );
-      }
+    } // Check for existing report - now all types have unique constraints
+    const existingReport = await this.findExistingReport(
+      reporterId,
+      type,
+      targetUserId,
+      targetProductId,
+      targetMessageId
+    );
+    if (existingReport) {
+      throw new ConflictException("You have already reported this item");
     }
 
     // Check daily report limit (anti-spam)
@@ -105,24 +80,30 @@ export class ReportService {
       throw new BadRequestException(
         "Daily report limit exceeded. Please try again tomorrow."
       );
+    } // Create the report
+    try {
+      const report = await this.prisma.report.create({
+        data: {
+          reporterId,
+          type,
+          targetUserId,
+          targetProductId,
+          targetMessageId,
+          reason,
+          comment,
+          ipAddress,
+          status: ReportStatus.PENDING,
+        },
+      });
+
+      return this.mapToResponseDto(report);
+    } catch (error) {
+      // Handle unique constraint violation as a fallback
+      if (error.code === "P2002") {
+        throw new ConflictException("You have already reported this item");
+      }
+      throw error;
     }
-
-    // Create the report
-    const report = await this.prisma.report.create({
-      data: {
-        reporterId,
-        type,
-        targetUserId,
-        targetProductId,
-        targetMessageId,
-        reason,
-        comment,
-        ipAddress,
-        status: ReportStatus.PENDING,
-      },
-    });
-
-    return this.mapToResponseDto(report);
   }
   async getReports(
     page: number = 1,

@@ -10,5 +10,12 @@
   "contact_us": "contact us",
   "contact_support": "contact support",
   "if_mistake": "If you think this is a mistake, please",
-  "if_persists": "If this error persists, please"
+  "if_persists": "If this error persists, please",
+  "reports": {
+    "already_reported": "You have already reported this item",
+    "duplicate_report": "This item has already been reported by you",
+    "report_limit_exceeded": "Daily report limit exceeded. Please try again tomorrow.",
+    "invalid_target": "Invalid target for report",
+    "cannot_report_self": "You cannot report yourself"
+  }
 }

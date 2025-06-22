@@ -14618,6 +14618,7 @@ export namespace Prisma {
     id?: string
     reporterId_type_targetUserId?: ReportReporterIdTypeTargetUserIdCompoundUniqueInput
     reporterId_type_targetProductId?: ReportReporterIdTypeTargetProductIdCompoundUniqueInput
+    reporterId_type_targetMessageId?: ReportReporterIdTypeTargetMessageIdCompoundUniqueInput
     AND?: ReportWhereInput | ReportWhereInput[]
     OR?: ReportWhereInput[]
     NOT?: ReportWhereInput | ReportWhereInput[]
@@ -14635,7 +14636,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Report"> | Date | string
     updatedAt?: DateTimeFilter<"Report"> | Date | string
     reporter?: XOR<UserScalarRelationFilter, UserWhereInput>
-  }, "id" | "reporterId_type_targetUserId" | "reporterId_type_targetProductId">
+  }, "id" | "reporterId_type_targetUserId" | "reporterId_type_targetProductId" | "reporterId_type_targetMessageId">
 
   export type ReportOrderByWithAggregationInput = {
     id?: SortOrder
@@ -16275,6 +16276,12 @@ export namespace Prisma {
     reporterId: string
     type: $Enums.ReportType
     targetProductId: string
+  }
+
+  export type ReportReporterIdTypeTargetMessageIdCompoundUniqueInput = {
+    reporterId: string
+    type: $Enums.ReportType
+    targetMessageId: string
   }
 
   export type ReportCountOrderByAggregateInput = {

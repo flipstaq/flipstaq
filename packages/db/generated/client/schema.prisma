@@ -216,8 +216,9 @@ model Report {
   updatedAt       DateTime     @updatedAt
   reporter        User         @relation("ReportSubmitter", fields: [reporterId], references: [id], onDelete: Cascade)
 
-  // Ensure only one report per user per target (except messages which allow multiple)
+  // Ensure only one report per user per target
   @@unique([reporterId, type, targetUserId])
   @@unique([reporterId, type, targetProductId])
+  @@unique([reporterId, type, targetMessageId])
   @@map("reports")
 }
