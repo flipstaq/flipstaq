@@ -213,7 +213,8 @@ export class MessagingGateway {
   private handleMessage(client: AuthenticatedSocket, data: Buffer) {
     try {
       const message = JSON.parse(data.toString());
-      const { event, payload } = message;      switch (event) {
+      const { event, payload } = message;
+      switch (event) {
         case "sendMessage":
           this.handleSendMessage(payload, client);
           break;
@@ -287,7 +288,8 @@ export class MessagingGateway {
 
       return this.sendToClient(client, { success: true, message });
     } catch (error) {
-      this.logger.error("Send message error:", error);      return this.sendToClient(client, { error: error.message });
+      this.logger.error("Send message error:", error);
+      return this.sendToClient(client, { error: error.message });
     }
   }
 

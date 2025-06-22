@@ -188,7 +188,8 @@ class WebSocketService {
       return;
     }
 
-    switch (event) {      case 'newMessage':
+    switch (event) {
+      case 'newMessage':
         this.emit('newMessage', eventData);
         break;
       case 'messageDeleted':

@@ -28,7 +28,13 @@ interface WebSocketContextType {
   leaveConversation: (conversationId: string) => void;
   sendTyping: (conversationId: string, isTyping: boolean) => void;
   onNewMessage: (handler: (message: MessageEvent) => void) => () => void;
-  onMessageDeleted: (handler: (data: { messageId: string; conversationId: string; deletedBy: string }) => void) => () => void;
+  onMessageDeleted: (
+    handler: (data: {
+      messageId: string;
+      conversationId: string;
+      deletedBy: string;
+    }) => void
+  ) => () => void;
   onMessageReadStatusChanged: (handler: (data: any) => void) => () => void;
   onConversationReadStatusChanged: (handler: (data: any) => void) => () => void;
   onUserStatusChanged: (handler: (status: UserStatus) => void) => () => void;
@@ -93,7 +99,13 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   );
 
   const onMessageDeleted = useCallback(
-    (handler: (data: { messageId: string; conversationId: string; deletedBy: string }) => void) => {
+    (
+      handler: (data: {
+        messageId: string;
+        conversationId: string;
+        deletedBy: string;
+      }) => void
+    ) => {
       webSocketService.on('messageDeleted', handler);
       return () => webSocketService.off('messageDeleted', handler);
     },
@@ -264,7 +276,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     sendMessage,
     markAsRead,
     markConversationAsRead,
-    joinConversation,    leaveConversation,
+    joinConversation,
+    leaveConversation,
     sendTyping,
     onNewMessage,
     onMessageDeleted,

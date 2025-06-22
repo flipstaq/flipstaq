@@ -99,7 +99,8 @@ export default function ChatDrawer({
   startConversationWith,
 }: ChatDrawerProps) {
   const { t, language } = useLanguage();
-  const { user } = useAuth();  const {
+  const { user } = useAuth();
+  const {
     connect,
     isConnected,
     joinConversation,
@@ -279,7 +280,8 @@ export default function ChatDrawer({
               }
               return conv;
             });
-          });        }
+          });
+        }
       );
 
       // Set up message deleted handler
@@ -288,12 +290,14 @@ export default function ChatDrawer({
 
         // Remove the message from the current conversation
         setMessages((prevMessages) => {
-          const updatedMessages = prevMessages.filter(msg => msg.id !== data.messageId);
-          
+          const updatedMessages = prevMessages.filter(
+            (msg) => msg.id !== data.messageId
+          );
+
           // If this was in the selected conversation, also update the conversation's last message
           if (selectedConversationRef.current?.id === data.conversationId) {
             const lastMessage = updatedMessages[updatedMessages.length - 1];
-            
+
             setConversations((prevConversations) => {
               return prevConversations.map((conv) => {
                 if (conv.id === data.conversationId) {
@@ -319,7 +323,7 @@ export default function ChatDrawer({
               });
             });
           }
-          
+
           return updatedMessages;
         });
       });

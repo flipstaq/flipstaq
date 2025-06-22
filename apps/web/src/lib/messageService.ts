@@ -379,7 +379,10 @@ class MessageService {
       throw error;
     }
   }
-  async deleteMessage(messageId: string, conversationId: string): Promise<void> {
+  async deleteMessage(
+    messageId: string,
+    conversationId: string
+  ): Promise<void> {
     try {
       console.log('🗑️ Deleting message via WebSocket:', messageId);
 
