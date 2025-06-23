@@ -372,4 +372,289 @@ export class EmailService {
     </html>
     `;
   }
+
+  async sendPasswordResetEmail(
+    email: string,
+    firstName: string,
+    resetToken: string,
+    userCountry?: string,
+  ): Promise<boolean> {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    const resetLink = `${frontendUrl}/auth/reset-password?token=${resetToken}`;
+
+    // Define Arabic countries
+    const arabicCountries = ['SA', 'AE', 'EG', 'JO', 'LB', 'KW', 'QA', 'BH', 'OM'];
+    const isArabicCountry = userCountry && arabicCountries.includes(userCountry);
+
+    const html = isArabicCountry
+      ? this.generatePasswordResetEmailTemplateArabic(firstName, resetLink)
+      : this.generatePasswordResetEmailTemplateEnglish(firstName, resetLink);
+
+    const subject = isArabicCountry
+      ? `إعادة تعيين كلمة المرور - Flipstaq`
+      : 'Reset your password - Flipstaq';
+
+    return this.sendEmail({
+      to: email,
+      subject,
+      html,
+    });
+  }
+
+  private generatePasswordResetEmailTemplateEnglish(firstName: string, resetLink: string): string {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset your password</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 0;
+                background-color: #f9fafb;
+            }
+            .container {
+                background-color: #ffffff;
+                margin: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px 20px;
+                text-align: center;
+            }
+            .header h1 {
+                color: #ffffff;
+                margin: 0;
+                font-size: 28px;
+                font-weight: bold;
+            }
+            .content {
+                padding: 40px 30px;
+            }
+            .greeting {
+                color: #1f2937;
+                margin: 0 0 20px;
+                font-size: 24px;
+                font-weight: 600;
+            }
+            .text {
+                color: #4b5563;
+                margin: 0 0 20px;
+                font-size: 16px;
+                line-height: 1.6;
+            }
+            .button-container {
+                text-align: center;
+                margin: 30px 0;
+            }
+            .reset-button {
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #ffffff;
+                padding: 16px 32px;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 16px;
+                box-shadow: 0 4px 14px 0 rgba(102, 126, 234, 0.39);
+            }
+            .warning {
+                background-color: #f3f4f6;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 30px 0;
+                border-left: 4px solid #fbbf24;
+            }
+            .warning p {
+                color: #6b7280;
+                margin: 0;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            .footer {
+                border-top: 1px solid #e5e7eb;
+                padding-top: 20px;
+                margin-top: 30px;
+            }
+            .footer p {
+                color: #9ca3af;
+                margin: 0;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Flipstaq</h1>
+            </div>
+            
+            <div class="content">
+                <h2 class="greeting">Hello ${firstName}</h2>
+                
+                <p class="text">
+                    You have requested to reset your password for your Flipstaq account.
+                </p>
+                
+                <p class="text">
+                    Click the button below to reset your password:
+                </p>
+                
+                <div class="button-container">
+                    <a href="${resetLink}" class="reset-button">Reset Password</a>
+                </div>
+                
+                <div class="warning">
+                    <p>⏰ <strong>This link is valid for 30 minutes only.</strong></p>
+                    <p>🔒 If you did not request a password reset, please ignore this email.</p>
+                </div>
+                
+                <div class="footer">
+                    <p><strong>Thank you,</strong><br>The Flipstaq Team</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+  }
+
+  private generatePasswordResetEmailTemplateArabic(firstName: string, resetLink: string): string {
+    return `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>إعادة تعيين كلمة المرور</title>
+        <style>
+            body {
+                font-family: 'Tahoma', 'Arial', sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 0;
+                background-color: #f9fafb;
+                direction: rtl;
+            }
+            .container {
+                background-color: #ffffff;
+                margin: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px 20px;
+                text-align: center;
+            }
+            .header h1 {
+                color: #ffffff;
+                margin: 0;
+                font-size: 28px;
+                font-weight: bold;
+            }
+            .content {
+                padding: 40px 30px;
+            }
+            .greeting {
+                color: #1f2937;
+                margin: 0 0 20px;
+                font-size: 24px;
+                font-weight: 600;
+            }
+            .text {
+                color: #4b5563;
+                margin: 0 0 20px;
+                font-size: 16px;
+                line-height: 1.6;
+            }
+            .button-container {
+                text-align: center;
+                margin: 30px 0;
+            }
+            .reset-button {
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #ffffff;
+                padding: 16px 32px;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 16px;
+                box-shadow: 0 4px 14px 0 rgba(102, 126, 234, 0.39);
+            }
+            .warning {
+                background-color: #f3f4f6;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 30px 0;
+                border-right: 4px solid #fbbf24;
+            }
+            .warning p {
+                color: #6b7280;
+                margin: 0;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            .footer {
+                border-top: 1px solid #e5e7eb;
+                padding-top: 20px;
+                margin-top: 30px;
+            }
+            .footer p {
+                color: #9ca3af;
+                margin: 0;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Flipstaq</h1>
+            </div>
+            
+            <div class="content">
+                <h2 class="greeting">مرحباً ${firstName}</h2>
+                
+                <p class="text">
+                    لقد طلبت إعادة تعيين كلمة المرور لحسابك على Flipstaq.
+                </p>
+                
+                <p class="text">
+                    انقر على الزر أدناه لإعادة تعيين كلمة المرور:
+                </p>
+                
+                <div class="button-container">
+                    <a href="${resetLink}" class="reset-button">إعادة تعيين كلمة المرور</a>
+                </div>
+                
+                <div class="warning">
+                    <p>⏰ <strong>هذا الرابط صالح لمدة 30 دقيقة فقط.</strong></p>
+                    <p>🔒 إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذا الإيميل.</p>
+                </div>
+                
+                <div class="footer">
+                    <p><strong>شكراً لك،</strong><br>فريق Flipstaq</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+  }
 }

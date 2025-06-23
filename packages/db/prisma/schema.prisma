@@ -53,10 +53,12 @@ model User {
   isOnline          Boolean    @default(false)
   lastSeen          DateTime?
   deletedAt         DateTime?  // Soft delete timestamp
-  deletedById       String?    // ID of admin who deleted this user
+  deletedById       String?    // ID of admin who deleted this user  
   emailVerified     Boolean    @default(false)
   verificationToken String?    @unique
   tokenExpiresAt    DateTime?
+  resetPasswordToken   String?   @unique
+  resetTokenExpiresAt  DateTime?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
     // Relations

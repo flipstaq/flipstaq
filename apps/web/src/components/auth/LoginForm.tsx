@@ -197,16 +197,16 @@ export function LoginForm() {
                 t('auth:signIn')
               )}
             </button>
-          </div>
+          </div>{' '}
           {/* Additional options */}
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <a
-                href="#"
+              <Link
+                href="/auth/forgot-password"
                 className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
               >
                 {t('auth:forgotPassword')}
-              </a>
+              </Link>
             </div>
           </div>
         </form>

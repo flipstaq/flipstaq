@@ -355,4 +355,197 @@ export class AuthService {
       createdAt: user.createdAt,
     };
   }
+
+  async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    // Always return success for security (don't leak if email exists)
+    // But only send email if user exists
+    if (user) {
+      // Generate secure reset token
+      const resetToken = randomUUID();
+      const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+      // Save token to database
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          resetPasswordToken: resetToken,
+          resetTokenExpiresAt: expiresAt,
+        },
+      });
+
+      // Send password reset email
+      try {
+        await this.emailService.sendPasswordResetEmail(
+          email,
+          user.firstName,
+          resetToken,
+          user.country,
+        );
+        console.log(`Password reset email sent to: ${email}`);
+      } catch (error) {
+        console.error('Failed to send password reset email:', error);
+        // Don't reveal email sending failure for security
+      }
+    }
+
+    // Always return the same success response
+    return {
+      success: true,
+      message: 'If an account with that email exists, a password reset link has been sent.',
+    };
+  }
+
+  async validateResetToken(token: string): Promise<{ valid: boolean; message: string }> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+      },
+      select: {
+        id: true,
+        resetTokenExpiresAt: true,
+      },
+    });
+
+    if (!user || !user.resetTokenExpiresAt) {
+      return {
+        valid: false,
+        message: 'Invalid or expired reset token',
+      };
+    }
+
+    // Check if token has expired
+    if (new Date() > user.resetTokenExpiresAt) {
+      // Clean up expired token
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          resetPasswordToken: null,
+          resetTokenExpiresAt: null,
+        },
+      });
+
+      return {
+        valid: false,
+        message: 'Reset token has expired',
+      };
+    }
+
+    // Token is valid
+    return {
+      valid: true,
+      message: 'Token is valid',
+    };
+  }
+
+  async resetPassword(
+    token: string,
+    password: string,
+  ): Promise<{ success: boolean; message: string }> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+      },
+      select: {
+        id: true,
+        email: true,
+        resetTokenExpiresAt: true,
+      },
+    });
+
+    if (!user || !user.resetTokenExpiresAt) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    // Check if token has expired
+    if (new Date() > user.resetTokenExpiresAt) {
+      // Clean up expired token
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          resetPasswordToken: null,
+          resetTokenExpiresAt: null,
+        },
+      });
+
+      throw new BadRequestException('Reset token has expired');
+    }
+
+    // Hash the new password
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Update user password and clear reset token
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetTokenExpiresAt: null,
+        updatedAt: new Date(),
+      },
+    });
+
+    console.log(`Password reset successful for user: ${user.email}`);
+
+    return {
+      success: true,
+      message: 'Password has been reset successfully',
+    };
+  }
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{ success: boolean; message: string }> {
+    // Find the user
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    // Check if new password is different from current password
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      throw new BadRequestException('New password must be different from current password');
+    }
+
+    // Hash the new password
+    const saltRounds = 12;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update user password
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        password: hashedNewPassword,
+        updatedAt: new Date(),
+      },
+    });
+
+    console.log(`Password changed successfully for user: ${user.email}`);
+
+    return {
+      success: true,
+      message: 'Password has been changed successfully',
+    };
+  }
 }

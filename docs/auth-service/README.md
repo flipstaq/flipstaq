@@ -16,6 +16,8 @@ API Gateway → Auth Service (Port 3001) → PostgreSQL Database
 - **JWT Authentication**: Access and refresh token management
 - **User Registration**: Account creation with validation
 - **Email Verification**: Secure token-based email verification using Resend
+- **Password Reset**: Secure token-based password reset via email
+- **Password Management**: Change password with current password verification
 - **Password Security**: bcrypt hashing and validation
 - **Database Integration**: Prisma ORM with PostgreSQL
 - **Security Middleware**: Internal service protection
@@ -31,6 +33,18 @@ The service includes a comprehensive email verification system:
 - Multi-language support (English/Arabic)
 
 See [Email Verification Documentation](./email-verification.md) for detailed implementation.
+
+## Password Reset & Management
+
+The service includes a secure password reset and change system:
+
+- **Password Reset via Email**: Token-based reset with 30-minute expiry
+- **Password Change**: Authenticated password change with current password verification
+- **Security Features**: Rate limiting, token validation, strong hashing (bcrypt)
+- **Email Integration**: Localized reset emails via Resend
+- **Frontend Integration**: Next.js pages for reset and change workflows
+
+See [Password Reset Documentation](./password-reset.md) for detailed implementation.
 
 ## Configuration
 

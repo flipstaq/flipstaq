@@ -201,10 +201,14 @@ Each business domain is isolated into its own microservice:
 
 - **User Registration**: Full signup flow with validation
 - **User Login**: Email/username authentication
+- **Password Reset**: Secure token-based password reset via email (30-min expiry)
+- **Password Change**: Authenticated password change with current password verification
 - **JWT Tokens**: Access tokens (2h) and refresh tokens (7 days) with automatic refresh
-- **Password Security**: bcrypt hashing with salt
+- **Password Security**: bcrypt hashing with salt (12 rounds)
 - **Age Verification**: Minimum 13 years old requirement
 - **Role Management**: Four-tier role system
+- **Email Integration**: Resend integration for verification and password reset emails
+- **Rate Limiting**: Protection against abuse for password operations
 
 ### ✅ API Gateway Architecture
 

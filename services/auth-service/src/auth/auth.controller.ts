@@ -152,4 +152,71 @@ export class AuthController {
   async resendVerificationEmail(@Body() body: { email: string }) {
     return this.authService.resendVerificationEmail(body.email);
   }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiBody({ schema: { properties: { email: { type: 'string' } } } })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent',
+  })
+  async forgotPassword(@Body() body: { email: string }) {
+    return this.authService.requestPasswordReset(body.email);
+  }
+
+  @Post('validate-reset-token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Validate password reset token' })
+  @ApiBody({ schema: { properties: { token: { type: 'string' } } } })
+  @ApiResponse({
+    status: 200,
+    description: 'Token validation result',
+  })
+  async validateResetToken(@Body() body: { token: string }) {
+    return this.authService.validateResetToken(body.token);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password with token' })
+  @ApiBody({
+    schema: {
+      properties: {
+        token: { type: 'string' },
+        password: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset successfully',
+  })
+  async resetPassword(@Body() body: { token: string; password: string }) {
+    return this.authService.resetPassword(body.token, body.password);
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiBody({
+    schema: {
+      properties: {
+        currentPassword: { type: 'string' },
+        newPassword: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password changed successfully',
+  })
+  async changePassword(
+    @Request() req: any,
+    @Body() body: { currentPassword: string; newPassword: string },
+  ) {
+    return this.authService.changePassword(req.user.sub, body.currentPassword, body.newPassword);
+  }
 }

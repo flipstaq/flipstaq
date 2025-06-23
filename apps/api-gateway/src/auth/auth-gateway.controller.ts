@@ -134,6 +134,35 @@ export class AuthGatewayController {
     return response.data;
   }
 
+  @Post("validate-reset-token")
+  @ApiOperation({ summary: "Validate password reset token" })
+  @ApiResponse({ status: 200, description: "Token validation result" })
+  async validateResetToken(@Body() tokenData: any) {
+    const response = await this.proxyService.forwardAuthRequest(
+      "validate-reset-token",
+      "POST",
+      tokenData
+    );
+    return response.data;
+  }
+
+  @Post("change-password")
+  @ApiOperation({ summary: "Change user password" })
+  @ApiResponse({ status: 200, description: "Password changed successfully" })
+  @ApiBearerAuth()
+  async changePassword(
+    @Body() changePasswordData: any,
+    @Headers("authorization") authorization: string
+  ) {
+    const response = await this.proxyService.forwardAuthRequest(
+      "change-password",
+      "POST",
+      changePasswordData,
+      { Authorization: authorization }
+    );
+    return response.data;
+  }
+
   @Get("verify-email")
   @ApiOperation({ summary: "Verify user email with token" })
   @ApiResponse({ status: 200, description: "Email verification result" })
