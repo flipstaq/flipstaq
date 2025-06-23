@@ -1996,6 +1996,9 @@ export namespace Prisma {
     lastSeen: Date | null
     deletedAt: Date | null
     deletedById: string | null
+    emailVerified: boolean | null
+    verificationToken: string | null
+    tokenExpiresAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2016,6 +2019,9 @@ export namespace Prisma {
     lastSeen: Date | null
     deletedAt: Date | null
     deletedById: string | null
+    emailVerified: boolean | null
+    verificationToken: string | null
+    tokenExpiresAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2036,6 +2042,9 @@ export namespace Prisma {
     lastSeen: number
     deletedAt: number
     deletedById: number
+    emailVerified: number
+    verificationToken: number
+    tokenExpiresAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -2058,6 +2067,9 @@ export namespace Prisma {
     lastSeen?: true
     deletedAt?: true
     deletedById?: true
+    emailVerified?: true
+    verificationToken?: true
+    tokenExpiresAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2078,6 +2090,9 @@ export namespace Prisma {
     lastSeen?: true
     deletedAt?: true
     deletedById?: true
+    emailVerified?: true
+    verificationToken?: true
+    tokenExpiresAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2098,6 +2113,9 @@ export namespace Prisma {
     lastSeen?: true
     deletedAt?: true
     deletedById?: true
+    emailVerified?: true
+    verificationToken?: true
+    tokenExpiresAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2191,6 +2209,9 @@ export namespace Prisma {
     lastSeen: Date | null
     deletedAt: Date | null
     deletedById: string | null
+    emailVerified: boolean
+    verificationToken: string | null
+    tokenExpiresAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -2228,6 +2249,9 @@ export namespace Prisma {
     lastSeen?: boolean
     deletedAt?: boolean
     deletedById?: boolean
+    emailVerified?: boolean
+    verificationToken?: boolean
+    tokenExpiresAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
@@ -2260,6 +2284,9 @@ export namespace Prisma {
     lastSeen?: boolean
     deletedAt?: boolean
     deletedById?: boolean
+    emailVerified?: boolean
+    verificationToken?: boolean
+    tokenExpiresAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedBy?: boolean | User$deletedByArgs<ExtArgs>
@@ -2281,6 +2308,9 @@ export namespace Prisma {
     lastSeen?: boolean
     deletedAt?: boolean
     deletedById?: boolean
+    emailVerified?: boolean
+    verificationToken?: boolean
+    tokenExpiresAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedBy?: boolean | User$deletedByArgs<ExtArgs>
@@ -2302,11 +2332,14 @@ export namespace Prisma {
     lastSeen?: boolean
     deletedAt?: boolean
     deletedById?: boolean
+    emailVerified?: boolean
+    verificationToken?: boolean
+    tokenExpiresAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "username" | "firstName" | "lastName" | "password" | "dateOfBirth" | "country" | "role" | "status" | "isActive" | "isOnline" | "lastSeen" | "deletedAt" | "deletedById" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "username" | "firstName" | "lastName" | "password" | "dateOfBirth" | "country" | "role" | "status" | "isActive" | "isOnline" | "lastSeen" | "deletedAt" | "deletedById" | "emailVerified" | "verificationToken" | "tokenExpiresAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
     products?: boolean | User$productsArgs<ExtArgs>
@@ -2359,6 +2392,9 @@ export namespace Prisma {
       lastSeen: Date | null
       deletedAt: Date | null
       deletedById: string | null
+      emailVerified: boolean
+      verificationToken: string | null
+      tokenExpiresAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -2810,6 +2846,9 @@ export namespace Prisma {
     readonly lastSeen: FieldRef<"User", 'DateTime'>
     readonly deletedAt: FieldRef<"User", 'DateTime'>
     readonly deletedById: FieldRef<"User", 'String'>
+    readonly emailVerified: FieldRef<"User", 'Boolean'>
+    readonly verificationToken: FieldRef<"User", 'String'>
+    readonly tokenExpiresAt: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -13594,6 +13633,9 @@ export namespace Prisma {
     lastSeen: 'lastSeen',
     deletedAt: 'deletedAt',
     deletedById: 'deletedById',
+    emailVerified: 'emailVerified',
+    verificationToken: 'verificationToken',
+    tokenExpiresAt: 'tokenExpiresAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13924,6 +13966,9 @@ export namespace Prisma {
     lastSeen?: DateTimeNullableFilter<"User"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     deletedById?: StringNullableFilter<"User"> | string | null
+    emailVerified?: BoolFilter<"User"> | boolean
+    verificationToken?: StringNullableFilter<"User"> | string | null
+    tokenExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     refreshTokens?: RefreshTokenListRelationFilter
@@ -13955,6 +14000,9 @@ export namespace Prisma {
     lastSeen?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     deletedById?: SortOrderInput | SortOrder
+    emailVerified?: SortOrder
+    verificationToken?: SortOrderInput | SortOrder
+    tokenExpiresAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     refreshTokens?: RefreshTokenOrderByRelationAggregateInput
@@ -13974,6 +14022,7 @@ export namespace Prisma {
     id?: string
     email?: string
     username?: string
+    verificationToken?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
@@ -13989,6 +14038,8 @@ export namespace Prisma {
     lastSeen?: DateTimeNullableFilter<"User"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     deletedById?: StringNullableFilter<"User"> | string | null
+    emailVerified?: BoolFilter<"User"> | boolean
+    tokenExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     refreshTokens?: RefreshTokenListRelationFilter
@@ -14002,7 +14053,7 @@ export namespace Prisma {
     blockedUsers?: BlockListRelationFilter
     blockedBy?: BlockListRelationFilter
     submittedReports?: ReportListRelationFilter
-  }, "id" | "email" | "username">
+  }, "id" | "email" | "username" | "verificationToken">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
@@ -14020,6 +14071,9 @@ export namespace Prisma {
     lastSeen?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     deletedById?: SortOrderInput | SortOrder
+    emailVerified?: SortOrder
+    verificationToken?: SortOrderInput | SortOrder
+    tokenExpiresAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -14046,6 +14100,9 @@ export namespace Prisma {
     lastSeen?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     deletedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     deletedById?: StringNullableWithAggregatesFilter<"User"> | string | null
+    emailVerified?: BoolWithAggregatesFilter<"User"> | boolean
+    verificationToken?: StringNullableWithAggregatesFilter<"User"> | string | null
+    tokenExpiresAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -14712,6 +14769,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -14743,6 +14803,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -14772,6 +14835,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -14803,6 +14869,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -14833,6 +14902,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14852,6 +14924,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14872,6 +14947,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15736,6 +15814,9 @@ export namespace Prisma {
     lastSeen?: SortOrder
     deletedAt?: SortOrder
     deletedById?: SortOrder
+    emailVerified?: SortOrder
+    verificationToken?: SortOrder
+    tokenExpiresAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15756,6 +15837,9 @@ export namespace Prisma {
     lastSeen?: SortOrder
     deletedAt?: SortOrder
     deletedById?: SortOrder
+    emailVerified?: SortOrder
+    verificationToken?: SortOrder
+    tokenExpiresAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15776,6 +15860,9 @@ export namespace Prisma {
     lastSeen?: SortOrder
     deletedAt?: SortOrder
     deletedById?: SortOrder
+    emailVerified?: SortOrder
+    verificationToken?: SortOrder
+    tokenExpiresAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16552,6 +16639,10 @@ export namespace Prisma {
     set?: Date | string | null
   }
 
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
   export type RefreshTokenUpdateManyWithoutUserNestedInput = {
     create?: XOR<RefreshTokenCreateWithoutUserInput, RefreshTokenUncheckedCreateWithoutUserInput> | RefreshTokenCreateWithoutUserInput[] | RefreshTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: RefreshTokenCreateOrConnectWithoutUserInput | RefreshTokenCreateOrConnectWithoutUserInput[]
@@ -16699,10 +16790,6 @@ export namespace Prisma {
     update?: ReportUpdateWithWhereUniqueWithoutReporterInput | ReportUpdateWithWhereUniqueWithoutReporterInput[]
     updateMany?: ReportUpdateManyWithWhereWithoutReporterInput | ReportUpdateManyWithWhereWithoutReporterInput[]
     deleteMany?: ReportScalarWhereInput | ReportScalarWhereInput[]
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
   }
 
   export type RefreshTokenUncheckedUpdateManyWithoutUserNestedInput = {
@@ -17711,6 +17798,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -17741,6 +17831,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -17774,6 +17867,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -17803,6 +17899,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -18113,6 +18212,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -18143,6 +18245,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -18191,6 +18296,9 @@ export namespace Prisma {
     lastSeen?: DateTimeNullableFilter<"User"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     deletedById?: StringNullableFilter<"User"> | string | null
+    emailVerified?: BoolFilter<"User"> | boolean
+    verificationToken?: StringNullableFilter<"User"> | string | null
+    tokenExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
   }
@@ -18288,6 +18396,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     products?: ProductCreateNestedManyWithoutUserInput
@@ -18318,6 +18429,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
@@ -18362,6 +18476,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     products?: ProductUpdateManyWithoutUserNestedInput
@@ -18392,6 +18509,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
@@ -18420,6 +18540,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -18450,6 +18573,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -18546,6 +18672,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -18576,6 +18705,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -18636,6 +18768,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -18666,6 +18801,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -18753,6 +18891,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -18783,6 +18924,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -18903,6 +19047,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -18933,6 +19080,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -19026,6 +19176,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -19056,6 +19209,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -19084,6 +19240,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -19114,6 +19273,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -19209,6 +19371,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -19239,6 +19404,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -19332,6 +19500,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -19362,6 +19533,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -19501,6 +19675,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -19531,6 +19708,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -19564,6 +19744,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -19594,6 +19777,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -19638,6 +19824,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -19668,6 +19857,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -19707,6 +19899,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -19737,6 +19932,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -19765,6 +19963,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
@@ -19795,6 +19996,9 @@ export namespace Prisma {
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
     deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -19839,6 +20043,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -19869,6 +20076,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -19946,6 +20156,9 @@ export namespace Prisma {
     isOnline?: boolean
     lastSeen?: Date | string | null
     deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20166,6 +20379,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -20195,6 +20411,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -20224,6 +20443,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20400,6 +20622,9 @@ export namespace Prisma {
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
@@ -20430,6 +20655,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -20459,6 +20687,9 @@ export namespace Prisma {
     lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

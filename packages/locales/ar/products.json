@@ -113,5 +113,6 @@
     "upload_failed": "فشل في رفع الصورة. يرجى المحاولة مرة أخرى."
   },
   "product": "منتج",
-  "products": "منتجات"
+  "products": "منتجات",
+  "creating_products": "إنشاء المنتجات"
 }

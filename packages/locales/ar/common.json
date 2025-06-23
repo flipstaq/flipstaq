@@ -79,7 +79,8 @@
     "edit_review": "تعديل التقييم",
     "delete_review": "حذف التقييم",
     "confirm_delete": "هل أنت متأكد من حذف هذا التقييم؟",
-    "edited": "تم التعديل"
+    "edited": "تم التعديل",
+    "writing_reviews": "كتابة التقييمات"
   },
   "chat": {
     "typing": {
@@ -102,5 +103,6 @@
   "copy": "نسخ",
   "copied": "تم النسخ!",
   "more_options": "خيارات أكثر",
-  "delete": "حذف"
+  "delete": "حذف",
+  "close": "إغلاق"
 }

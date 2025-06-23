@@ -28,6 +28,7 @@ export interface AuthResponse {
     lastName: string;
     role: UserRole;
     country: string;
+    emailVerified: boolean;
     createdAt: string;
   };
 }
@@ -40,6 +41,7 @@ export interface UserInfo {
   lastName: string;
   role: UserRole;
   country: string;
+  emailVerified: boolean;
   createdAt: string;
 }
 

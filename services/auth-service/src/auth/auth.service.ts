@@ -3,11 +3,14 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { SignupDto, UserRole } from '../dto/signup.dto';
 import { LoginDto } from '../dto/login.dto';
 import { AuthResponseDto, UserInfoDto } from '../dto/auth-response.dto';
@@ -18,8 +21,8 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private emailService: EmailService,
   ) {}
-
   async signup(signupDto: SignupDto): Promise<AuthResponseDto> {
     const {
       firstName,
@@ -58,7 +61,11 @@ export class AuthService {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
+    // Generate verification token
+    const verificationToken = randomUUID();
+    const tokenExpiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+
+    // Create user with email verification fields
     const user = await this.prisma.user.create({
       data: {
         firstName,
@@ -69,8 +76,17 @@ export class AuthService {
         dateOfBirth: new Date(dateOfBirth),
         country,
         role,
+        emailVerified: false,
+        verificationToken,
+        tokenExpiresAt,
       },
-    });
+    }); // Send verification email
+    try {
+      await this.emailService.sendVerificationEmail(email, firstName, verificationToken, country);
+    } catch (error) {
+      console.error('Failed to send verification email:', error);
+      // Don't fail signup if email fails, but log the error
+    }
 
     // Generate tokens
     const tokens = await this.generateTokens(user.id, user.email, user.role);
@@ -207,6 +223,75 @@ export class AuthService {
     };
   }
 
+  async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { verificationToken: token },
+    });
+
+    if (!user) {
+      return { success: false, message: 'Invalid verification token' };
+    }
+
+    if (!user.tokenExpiresAt || user.tokenExpiresAt < new Date()) {
+      return { success: false, message: 'Verification token has expired' };
+    }
+
+    if (user.emailVerified) {
+      return { success: true, message: 'Email already verified' };
+    }
+
+    // Update user to mark email as verified and clear verification token
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        verificationToken: null,
+        tokenExpiresAt: null,
+      },
+    });
+
+    return { success: true, message: 'Email verified successfully' };
+  }
+
+  async resendVerificationEmail(email: string): Promise<{ success: boolean; message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return { success: false, message: 'User not found' };
+    }
+
+    if (user.emailVerified) {
+      return { success: false, message: 'Email already verified' };
+    }
+
+    // Generate new verification token
+    const verificationToken = randomUUID();
+    const tokenExpiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+
+    // Update user with new token
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verificationToken,
+        tokenExpiresAt,
+      },
+    }); // Send verification email
+    try {
+      await this.emailService.sendVerificationEmail(
+        email,
+        user.firstName,
+        verificationToken,
+        user.country,
+      );
+      return { success: true, message: 'Verification email sent successfully' };
+    } catch (error) {
+      console.error('Failed to send verification email:', error);
+      return { success: false, message: 'Failed to send verification email' };
+    }
+  }
+
   private async generateTokens(
     userId: string,
     email: string,
@@ -257,7 +342,6 @@ export class AuthService {
 
     return age;
   }
-
   private mapToUserInfo(user: any): UserInfoDto {
     return {
       id: user.id,
@@ -267,6 +351,7 @@ export class AuthService {
       lastName: user.lastName,
       role: user.role,
       country: user.country,
+      emailVerified: user.emailVerified || false,
       createdAt: user.createdAt,
     };
   }

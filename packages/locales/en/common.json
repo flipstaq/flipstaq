@@ -79,7 +79,8 @@
     "edit_review": "Edit Review",
     "delete_review": "Delete Review",
     "confirm_delete": "Are you sure you want to delete this review?",
-    "edited": "Edited"
+    "edited": "Edited",
+    "writing_reviews": "writing reviews"
   },
   "chat": {
     "typing": {
@@ -102,5 +103,6 @@
   "copy": "Copy",
   "copied": "Copied!",
   "more_options": "More options",
-  "delete": "Delete"
+  "delete": "Delete",
+  "close": "Close"
 }

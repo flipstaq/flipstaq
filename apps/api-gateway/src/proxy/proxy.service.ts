@@ -24,11 +24,11 @@ export class ProxyService {
   ): Promise<AxiosResponse> {
     try {
       const serviceUrl = getServiceUrl(service);
-      const url = `${serviceUrl}/internal/${endpoint}`;
-
-      console.log(
-        `🔄 Forwarding ${method} request to: ${url} (with internal headers)`
-      );
+      const url = `${serviceUrl}/internal/${endpoint}`; // Only log non-validation requests to reduce noise
+      const isValidationRequest = endpoint.includes("validate");
+      if (!isValidationRequest || process.env.DEBUG_REQUESTS === "true") {
+        console.log(`Forwarding ${method} request to: ${url}`);
+      }
       const config = {
         method,
         url,
@@ -45,10 +45,7 @@ export class ProxyService {
       const response = await firstValueFrom(this.httpService.request(config));
       return response;
     } catch (error) {
-      console.error(
-        `❌ Error forwarding to ${service} service:`,
-        error.message
-      );
+      console.error(`Error forwarding to ${service} service:`, error.message);
 
       if (error.response) {
         // Forward the error response from the microservice
@@ -68,12 +65,14 @@ export class ProxyService {
   ): Promise<AxiosResponse> {
     try {
       const serviceUrl = getServiceUrl("AUTH");
-      const url = `${serviceUrl}/internal/auth/${endpoint}`;
-      console.log(`🔄 Forwarding ${method} auth request to: ${url}`);
-      console.log(
-        `🔑 Headers being forwarded:`,
-        JSON.stringify(headers, null, 2)
-      );
+      const url = `${serviceUrl}/internal/auth/${endpoint}`; // Debug logs - only log in development
+      if (process.env.NODE_ENV === "development") {
+        console.log(`Forwarding ${method} auth request to: ${url}`);
+        console.log(
+          `Headers being forwarded:`,
+          JSON.stringify(headers, null, 2)
+        );
+      }
       const config = {
         method,
         url,
@@ -89,7 +88,7 @@ export class ProxyService {
       return response;
     } catch (error) {
       console.error(
-        `❌ Error forwarding auth request to auth-service:`,
+        `Error forwarding auth request to auth-service:`,
         error.response?.data || error.message
       );
 

@@ -194,12 +194,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    let result = typeof value === 'string' ? value : key;
-
-    // Handle variable interpolation
+    let result = typeof value === 'string' ? value : key; // Handle variable interpolation
     if (variables && typeof result === 'string') {
       Object.keys(variables).forEach((varKey) => {
         const varValue = variables[varKey] ?? '';
+        // Only handle {{variable}} syntax to avoid conflicts
         result = result.replace(new RegExp(`{{${varKey}}}`, 'g'), varValue);
       });
     }

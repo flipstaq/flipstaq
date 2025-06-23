@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { StarRating } from '../ui/StarRating';
 import { useLanguage } from '../providers/LanguageProvider';
 import { useToast } from '../providers/ToastProvider';
+import { useVerificationCheck } from '@/hooks/useVerificationCheck';
+import VerificationPrompt from '@/components/auth/VerificationPrompt';
 import {
   useReviews,
   type CreateReviewData,
@@ -27,11 +29,22 @@ export function ReviewForm({
   const { t } = useLanguage();
   const { success, error } = useToast();
   const { createReview, updateReview, loading } = useReviews();
+  const {
+    checkVerification,
+    showVerificationPrompt,
+    blockedFeature,
+    closePrompt,
+  } = useVerificationCheck();
 
   const [rating, setRating] = useState(existingReview?.rating || 0);
   const [comment, setComment] = useState(existingReview?.comment || '');
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check if user is verified before allowing review submission
+    if (!checkVerification('reviews:writing_reviews')) {
+      return;
+    }
 
     if (rating === 0) {
       error(t('reviews.rating_required'));
@@ -125,10 +138,17 @@ export function ReviewForm({
             onClick={onCancel}
             className="rounded-md border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           >
+            {' '}
             {t('cancel')}
           </button>
         )}
       </div>
+
+      <VerificationPrompt
+        isOpen={showVerificationPrompt}
+        onClose={closePrompt}
+        feature={blockedFeature}
+      />
     </form>
   );
 }

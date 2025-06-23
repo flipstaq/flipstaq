@@ -136,6 +136,9 @@ exports.Prisma.UserScalarFieldEnum = {
   lastSeen: 'lastSeen',
   deletedAt: 'deletedAt',
   deletedById: 'deletedById',
+  emailVerified: 'emailVerified',
+  verificationToken: 'verificationToken',
+  tokenExpiresAt: 'tokenExpiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

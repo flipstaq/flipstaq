@@ -42,24 +42,42 @@ class AuthService {
     return authApi.logout();
   }
   async validateToken(): Promise<UserInfo> {
-    // First check if we have a stored user and token
-    const storedUser = this.getStoredUser();
-    const token = this.getAccessToken();
+    // Make an API call to get the latest user data from the server
+    try {
+      const userInfo = await authApi.getCurrentUser();
 
-    if (!token || !storedUser) {
-      throw new Error('No authentication token or user found');
+      // Update stored user data with the latest info
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          'user',
+          JSON.stringify({
+            ...userInfo,
+            createdAt: userInfo.createdAt.toString(),
+          })
+        );
+      }
+
+      // Convert the createdAt string to Date object
+      return {
+        ...userInfo,
+        createdAt: new Date(userInfo.createdAt),
+      };
+    } catch (error) {
+      // Fallback to stored data if API call fails
+      console.warn(
+        'Failed to validate token via API, using stored data:',
+        error
+      );
+
+      const storedUser = this.getStoredUser();
+      const token = this.getAccessToken();
+
+      if (!token || !storedUser) {
+        throw new Error('No authentication token or user found');
+      }
+
+      return storedUser;
     }
-
-    // Convert the stored user (string createdAt) to the expected format (Date createdAt)
-    const userInfo: UserInfo = {
-      ...storedUser,
-      createdAt: new Date(storedUser.createdAt),
-    };
-
-    return userInfo;
-
-    // TODO: Re-enable this when the validate endpoint is stable
-    // return authApi.getCurrentUser();
   }
   getStoredUser(): UserInfo | null {
     const storedUser = authApi.getStoredUser();

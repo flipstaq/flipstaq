@@ -50,6 +50,12 @@ export class UserInfoDto {
     example: '2024-01-15T10:30:00Z',
   })
   createdAt: Date;
+
+  @ApiProperty({
+    description: 'Whether the user has verified their email address',
+    example: false,
+  })
+  emailVerified: boolean;
 }
 
 export class AuthResponseDto {

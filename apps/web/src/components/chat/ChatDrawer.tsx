@@ -29,6 +29,8 @@ import { Conversation, Message } from '@/types/chat';
 import { BlockButton } from '@/components/common/BlockButton';
 import ReportModal from '@/components/report/ReportModal';
 import { useBlockStatus } from '@/hooks/useBlockStatus';
+import { useVerificationCheck } from '@/hooks/useVerificationCheck';
+import VerificationPrompt from '@/components/auth/VerificationPrompt';
 
 interface ChatDrawerProps {
   isOpen: boolean;
@@ -131,6 +133,14 @@ export default function ChatDrawer({
   const { blockStatus, updateBlockStatus } = useBlockStatus(
     selectedConversation?.participant?.id || null
   );
+  // Verification check hook
+  const {
+    checkVerification,
+    showVerificationPrompt,
+    blockedFeature,
+    closePrompt,
+    isVerified,
+  } = useVerificationCheck();
 
   // Remove polling interval ref since we're using WebSocket only
   // const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -528,6 +538,11 @@ export default function ChatDrawer({
       fileSize: number;
     }>
   ) => {
+    // Check verification before sending message
+    if (!checkVerification('chat:sending_messages')) {
+      return;
+    }
+
     if (!selectedConversation || (!content.trim() && !attachments?.length))
       return;
 
@@ -697,6 +712,11 @@ export default function ChatDrawer({
     setSelectedConversation(null);
   };
   const handleStartConversation = async (participant: any) => {
+    // Check verification before starting a conversation
+    if (!checkVerification('chat:starting_conversations')) {
+      return;
+    }
+
     try {
       setIsLoading(true);
       const apiConversation = await messageService.createConversation(
@@ -729,7 +749,6 @@ export default function ChatDrawer({
       setIsLoading(false);
     }
   };
-
   if (!isOpen) return null;
 
   return (
@@ -1054,7 +1073,13 @@ export default function ChatDrawer({
             username: selectedConversation.participant.username,
           }}
         />
-      )}
+      )}{' '}
+      {/* Verification Prompt */}
+      <VerificationPrompt
+        isOpen={showVerificationPrompt}
+        onClose={closePrompt}
+        feature={blockedFeature}
+      />
     </>
   );
 }

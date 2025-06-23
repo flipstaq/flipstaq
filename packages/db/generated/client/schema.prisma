@@ -39,30 +39,33 @@ enum ReportStatus {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  username      String         @unique
-  firstName     String
-  lastName      String
-  password      String // Hashed password
-  dateOfBirth   DateTime
-  country       String
-  role          UserRole       @default(USER)
-  status        UserStatus     @default(ACTIVE)
-  isActive      Boolean        @default(true)
-  isOnline      Boolean        @default(false)
-  lastSeen      DateTime?
-  deletedAt     DateTime? // Soft delete timestamp
-  deletedById   String? // ID of admin who deleted this user
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id                String         @id @default(cuid())
+  email             String         @unique
+  username          String         @unique
+  firstName         String
+  lastName          String
+  password          String // Hashed password
+  dateOfBirth       DateTime
+  country           String
+  role              UserRole       @default(USER)
+  status            UserStatus     @default(ACTIVE)
+  isActive          Boolean        @default(true)
+  isOnline          Boolean        @default(false)
+  lastSeen          DateTime?
+  deletedAt         DateTime? // Soft delete timestamp
+  deletedById       String? // ID of admin who deleted this user
+  emailVerified     Boolean        @default(false)
+  verificationToken String?        @unique
+  tokenExpiresAt    DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
   // Relations
-  refreshTokens RefreshToken[]
-  products      Product[]
-  favorites     Favorite[]
-  reviews       Review[]
-  sentMessages  Message[]
-  conversations Conversation[] @relation("ConversationParticipants")
+  refreshTokens     RefreshToken[]
+  products          Product[]
+  favorites         Favorite[]
+  reviews           Review[]
+  sentMessages      Message[]
+  conversations     Conversation[] @relation("ConversationParticipants")
 
   // Self-referential relation for deletion tracking
   deletedBy    User?   @relation("UserDeletions", fields: [deletedById], references: [id])

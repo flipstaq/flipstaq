@@ -74,14 +74,18 @@ class WebSocketService {
         this.isConnecting = false;
         return;
       }
-
       const wsUrl = `${this.wsUrl}?token=${encodeURIComponent(token)}`;
-      console.log('Connecting to WebSocket:', wsUrl);
+
+      // Only log connection attempts in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Connecting to WebSocket:', wsUrl);
+      }
 
       this.ws = new WebSocket(wsUrl);
-
       this.ws.onopen = () => {
-        console.log('✅ WebSocket connected');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('WebSocket connected');
+        }
         this.reconnectAttempts = 0;
         this.isConnecting = false;
         this.startHeartbeat();
@@ -96,9 +100,10 @@ class WebSocketService {
           console.error('Error parsing WebSocket message:', error);
         }
       };
-
       this.ws.onclose = (event) => {
-        console.log('❌ WebSocket disconnected:', event.code, event.reason);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('WebSocket disconnected:', event.code, event.reason);
+        }
         this.isConnecting = false;
         this.stopHeartbeat();
         this.emit('disconnected', { code: event.code, reason: event.reason });
@@ -123,7 +128,6 @@ class WebSocketService {
       this.scheduleReconnect();
     }
   }
-
   private scheduleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('Max reconnection attempts reached');
@@ -133,9 +137,12 @@ class WebSocketService {
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
 
-    console.log(
-      `Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
-    );
+    // Only log reconnection attempts in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(
+        `Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
+      );
+    }
 
     setTimeout(() => {
       this.connect();
@@ -161,15 +168,22 @@ class WebSocketService {
     const { event, data, payload, success, error } = message;
     const eventData = data || payload;
 
-    if (event && eventData) {
-      console.log(`📨 WebSocket message received: ${event}`, eventData);
-    } else if (success !== undefined) {
-      console.log(
-        `📨 WebSocket response: ${success ? 'success' : 'error'}`,
-        eventData || error || message
-      );
-    } else {
-      console.log('📨 WebSocket message (raw):', message);
+    // Only log in development mode and avoid ping/pong spam
+    if (
+      process.env.NODE_ENV === 'development' &&
+      event !== 'ping' &&
+      event !== 'pong'
+    ) {
+      if (event && eventData) {
+        console.log(`📨 WebSocket message received: ${event}`, eventData);
+      } else if (success !== undefined) {
+        console.log(
+          `📨 WebSocket response: ${success ? 'success' : 'error'}`,
+          eventData || error || message
+        );
+      } else {
+        console.log('📨 WebSocket message (raw):', message);
+      }
     }
 
     // Handle success/error responses for sendMessage
@@ -215,8 +229,10 @@ class WebSocketService {
         this.send('pong', {});
         break;
       case 'pong':
-        // Server acknowledged our ping
-        console.log('🏓 Received pong from server');
+        // Server acknowledged our ping - only log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🏓 Received pong from server');
+        }
         break;
       default:
         console.warn('Unknown WebSocket event:', event);

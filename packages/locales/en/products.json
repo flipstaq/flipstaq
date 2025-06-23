@@ -110,5 +110,6 @@
     "upload_failed": "Failed to upload image. Please try again."
   },
   "product": "product",
-  "products": "products"
+  "products": "products",
+  "creating_products": "creating products"
 }

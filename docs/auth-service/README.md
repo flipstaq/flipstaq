@@ -15,9 +15,22 @@ API Gateway → Auth Service (Port 3001) → PostgreSQL Database
 - **Internal Only**: Accessible only via API Gateway with proper headers
 - **JWT Authentication**: Access and refresh token management
 - **User Registration**: Account creation with validation
+- **Email Verification**: Secure token-based email verification using Resend
 - **Password Security**: bcrypt hashing and validation
 - **Database Integration**: Prisma ORM with PostgreSQL
 - **Security Middleware**: Internal service protection
+
+## Email Verification
+
+The service includes a comprehensive email verification system:
+
+- Automatic verification email on signup
+- 30-minute token expiry for security
+- Resend functionality for unverified users
+- Integration with Resend email service
+- Multi-language support (English/Arabic)
+
+See [Email Verification Documentation](./email-verification.md) for detailed implementation.
 
 ## Configuration
 

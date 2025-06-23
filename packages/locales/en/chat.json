@@ -65,5 +65,7 @@
   "delete_message": "Delete message",
   "message_deleted": "Message deleted",
   "delete_message_confirm": "Are you sure you want to delete this message?",
-  "delete_failed": "Failed to delete message"
+  "delete_failed": "Failed to delete message",
+  "sending_messages": "sending messages",
+  "starting_conversations": "starting conversations"
 }

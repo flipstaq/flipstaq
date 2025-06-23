@@ -8,6 +8,7 @@ interface User {
   email: string;
   username: string;
   role: string;
+  emailVerified?: boolean;
   isOnline?: boolean;
   lastSeen?: string;
 }

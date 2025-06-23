@@ -59,6 +59,36 @@ This document describes the main pages and routes in the Flipstaq frontend appli
 - `/404` - Custom 404 page with localized content
 - `/_error` - Custom error handling page
 
+### Email Verification (`/verify`)
+
+- **Purpose**: Display email verification status after user clicks verification link
+- **Components**:
+  - Status indicators (success/failure icons)
+  - Translated status messages
+  - Action buttons (back to home)
+- **Features**:
+  - Automatic status detection from URL parameters
+  - Support for `?verified=true` and `?verify=invalid` states
+  - Internationalization support
+  - Responsive design
+- **Authentication**: Not required
+
+### Email Verification Banner (Global Component)
+
+- **Purpose**: Notify unverified users to verify their email address
+- **Components**:
+  - Warning banner with mail icon
+  - Resend verification button
+  - Dismiss functionality
+  - Status feedback for resend actions
+- **Features**:
+  - Only shown to authenticated, unverified users
+  - AJAX resend functionality
+  - Auto-dismiss after successful resend
+  - Fully translated
+  - Integrated into main layout
+- **Location**: Shown globally in Layout component after Header
+
 ## Navigation
 
 ### Header Navigation

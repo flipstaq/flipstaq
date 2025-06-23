@@ -65,5 +65,7 @@
   "delete_message": "حذف الرسالة",
   "message_deleted": "تم حذف الرسالة",
   "delete_message_confirm": "هل أنت متأكد من أنك تريد حذف هذه الرسالة؟",
-  "delete_failed": "فشل في حذف الرسالة"
+  "delete_failed": "فشل في حذف الرسالة",
+  "sending_messages": "إرسال الرسائل",
+  "starting_conversations": "بدء المحادثات"
 }

@@ -3,6 +3,8 @@
 import React, { useState, useRef } from 'react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useVerificationCheck } from '@/hooks/useVerificationCheck';
+import VerificationPrompt from '@/components/auth/VerificationPrompt';
 import { authService } from '@/lib/auth';
 import { X, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 
@@ -45,6 +47,12 @@ export function CreateProductForm({
 }: CreateProductFormProps) {
   const { t, language } = useLanguage();
   const { isAuthenticated } = useAuth();
+  const {
+    checkVerification,
+    showVerificationPrompt,
+    blockedFeature,
+    closePrompt,
+  } = useVerificationCheck();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRTL = language === 'ar';
 
@@ -135,7 +143,11 @@ export function CreateProductForm({
     fileInputRef.current?.click();
   };
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Check if user is verified before allowing product creation
+    if (!checkVerification('products:creating_products')) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -472,9 +484,15 @@ export function CreateProductForm({
             className="rounded-md bg-primary-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? 'Creating...' : t('products.createProduct')}
-          </button>
+          </button>{' '}
         </div>
       </form>
+
+      <VerificationPrompt
+        isOpen={showVerificationPrompt}
+        onClose={closePrompt}
+        feature={blockedFeature}
+      />
     </div>
   );
 }

@@ -133,4 +133,27 @@ export class AuthGatewayController {
     );
     return response.data;
   }
+
+  @Get("verify-email")
+  @ApiOperation({ summary: "Verify user email with token" })
+  @ApiResponse({ status: 200, description: "Email verification result" })
+  async verifyEmail(@Query("token") token: string) {
+    const response = await this.proxyService.forwardAuthRequest(
+      `verify-email?token=${token}`,
+      "GET"
+    );
+    return response.data;
+  }
+
+  @Post("resend-verification")
+  @ApiOperation({ summary: "Resend email verification" })
+  @ApiResponse({ status: 200, description: "Verification email resend result" })
+  async resendVerificationEmail(@Body() body: { email: string }) {
+    const response = await this.proxyService.forwardAuthRequest(
+      "resend-verification",
+      "POST",
+      body
+    );
+    return response.data;
+  }
 }

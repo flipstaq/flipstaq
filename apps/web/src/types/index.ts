@@ -95,5 +95,6 @@ export interface UserInfo {
   lastName: string;
   role: 'OWNER' | 'HIGHER_STAFF' | 'STAFF' | 'USER';
   country: string;
+  emailVerified: boolean;
   createdAt: Date;
 }

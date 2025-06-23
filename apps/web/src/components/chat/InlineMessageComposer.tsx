@@ -14,6 +14,8 @@ import {
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useToast } from '@/components/providers/ToastProvider';
+import { useVerificationCheck } from '@/hooks/useVerificationCheck';
+import VerificationPrompt from '@/components/auth/VerificationPrompt';
 import { messageService } from '@/lib/messageService';
 
 interface InlineMessageComposerProps {
@@ -61,6 +63,12 @@ export default function InlineMessageComposer({
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const { success, error: showError } = useToast();
+  const {
+    checkVerification,
+    showVerificationPrompt,
+    blockedFeature,
+    closePrompt,
+  } = useVerificationCheck();
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -167,9 +175,13 @@ export default function InlineMessageComposer({
   const removeAttachment = (index: number) => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check if user is verified before allowing message sending
+    if (!checkVerification('chat:sending_messages')) {
+      return;
+    }
 
     if (
       !conversationId ||
@@ -448,6 +460,12 @@ export default function InlineMessageComposer({
           />
         )}
       </form>
+      {/* Verification Prompt */}
+      <VerificationPrompt
+        isOpen={showVerificationPrompt}
+        onClose={closePrompt}
+        feature={blockedFeature}
+      />
     </div>
   );
 }

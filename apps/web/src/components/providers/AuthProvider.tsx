@@ -12,6 +12,7 @@ interface AuthContextType {
   login: (data: LoginFormData) => Promise<void>;
   signup: (data: SignupFormData) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   error: string | null;
   clearError: () => void;
 }
@@ -90,6 +91,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const userInfo = await authService.validateToken();
+      setUser(userInfo);
+    } catch (error) {
+      console.warn('Failed to refresh user:', error);
+    }
+  };
+
   const clearError = (): void => {
     setError(null);
   };
@@ -101,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     signup,
     logout,
+    refreshUser,
     error,
     clearError,
   };
