@@ -1,0 +1,13 @@
+{
+  "title": "Settings",
+  "security": {
+    "title": "Security",
+    "changePassword": "Change Password",
+    "goBack": "Go Back"
+  },
+  "profile": {
+    "title": "Profile Settings"
+  },
+  "comingSoon": "More coming soon...",
+  "quitSettings": "Back to site"
+}

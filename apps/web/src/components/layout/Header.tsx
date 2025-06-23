@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Heart,
   MessageCircle,
+  Settings,
 } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useLanguage } from '@/components/providers/LanguageProvider';
@@ -162,6 +163,15 @@ export function Header() {
                           <User className="h-4 w-4" />
                           <span>{t('common:myProfile')}</span>
                         </Link>
+                        {/* Settings link */}
+                        <Link
+                          href="/settings/security"
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="flex items-center space-x-2 px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-700 rtl:space-x-reverse"
+                        >
+                          <Settings className="h-4 w-4" />
+                          <span>{t('settings:title')}</span>
+                        </Link>
                         <hr className="my-1 border-secondary-200 dark:border-secondary-600" />
                         <button
                           onClick={() => {
@@ -257,6 +267,14 @@ export function Header() {
                         </span>
                       )}
                     </button>
+                    <Link
+                      href="/settings/security"
+                      className="btn-secondary block w-full text-center"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Settings className="mr-1 inline h-4 w-4 align-middle" />
+                      {t('settings:title')}
+                    </Link>
                     <button
                       onClick={() => {
                         logout();

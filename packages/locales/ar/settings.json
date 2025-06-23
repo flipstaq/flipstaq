@@ -1,0 +1,13 @@
+{
+  "title": "الإعدادات",
+  "security": {
+    "title": "الأمان",
+    "changePassword": "تغيير كلمة المرور",
+    "goBack": "عودة"
+  },
+  "profile": {
+    "title": "إعدادات الملف الشخصي"
+  },
+  "comingSoon": "المزيد قادم قريبًا...",
+  "quitSettings": "العودة إلى الموقع"
+}
