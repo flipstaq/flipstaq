@@ -23,17 +23,17 @@ export default function VerifyPage() {
     const { verified, verify } = router.query;
 
     if (verified === 'true') {
-      setStatus({ success: true, message: t('email_verified') });
+      setStatus({ success: true, message: t('auth:email_verified') });
       // Refresh user data to update emailVerified status
       console.log('Verify page: Starting user refresh...');
       refreshUser().then(() => {
         console.log('Verify page: User refresh completed, updated user:', user);
         // Show success toast
-        setToastMessage(t('auth.email_verified_success'));
+        setToastMessage(t('auth:email_verified_success'));
         setShowToast(true);
       });
     } else if (verify === 'invalid') {
-      setStatus({ success: false, message: t('invalid_token') });
+      setStatus({ success: false, message: t('auth:invalid_token') });
     }
   }, [router.query, t, refreshUser]);
 
@@ -53,10 +53,10 @@ export default function VerifyPage() {
           <div className="text-center">
             <div className="mx-auto h-32 w-32 animate-spin rounded-full border-b-2 border-blue-600"></div>
             <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-              {t('processing')}
+              {t('auth:processing')}
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              {t('please_wait')}
+              {t('auth:please_wait')}
             </p>
           </div>
         </div>
@@ -77,7 +77,9 @@ export default function VerifyPage() {
               )}
             </div>
             <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-              {status.success ? t('email_verified') : t('verification_failed')}
+              {status.success
+                ? t('auth:email_verified')
+                : t('auth:verification_failed')}
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               {status.message}
@@ -89,7 +91,7 @@ export default function VerifyPage() {
               onClick={handleBackToHome}
               className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:ring-offset-gray-900"
             >
-              {t('back_to_home')}
+              {t('auth:back_to_home')}
             </button>
 
             {!status.success && (
@@ -97,7 +99,7 @@ export default function VerifyPage() {
                 onClick={handleResendVerification}
                 className="group relative flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:ring-offset-gray-900 dark:hover:bg-gray-700"
               >
-                {t('resend_verification')}
+                {t('auth:resend_verification')}
               </button>
             )}
           </div>
