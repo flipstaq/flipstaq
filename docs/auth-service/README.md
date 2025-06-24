@@ -24,15 +24,16 @@ API Gateway → Auth Service (Port 3001) → PostgreSQL Database
 
 ## Email Verification
 
-The service includes a comprehensive email verification system:
+The service includes a comprehensive and **secure** email verification system:
 
 - Automatic verification email on signup
 - 30-minute token expiry for security
 - Resend functionality for unverified users
 - Integration with Resend email service
 - Multi-language support (English/Arabic)
+- **Security Features**: Rate limiting, token-based validation, prevention of fake verification
 
-See [Email Verification Documentation](./email-verification.md) for detailed implementation.
+See [Email Verification Security Documentation](./email-verification-security.md) for detailed security implementation.
 
 ## Password Reset & Management
 

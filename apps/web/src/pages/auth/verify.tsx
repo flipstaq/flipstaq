@@ -18,11 +18,11 @@ export default function VerifyPage() {
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-
   useEffect(() => {
-    const { verified, verify } = router.query;
+    const { verify } = router.query;
 
-    if (verified === 'true') {
+    // Only show success if backend confirmed verification via proper token validation
+    if (verify === 'success') {
       setStatus({ success: true, message: t('auth:email_verified') });
       // Refresh user data to update emailVerified status
       console.log('Verify page: Starting user refresh...');
@@ -34,8 +34,13 @@ export default function VerifyPage() {
       });
     } else if (verify === 'invalid') {
       setStatus({ success: false, message: t('auth:invalid_token') });
+    } else if (!verify) {
+      // If someone visits /auth/verify directly without query params, redirect to home
+      router.push('/');
+      return;
     }
-  }, [router.query, t, refreshUser]);
+    // Remove support for the insecure 'verified=true' parameter
+  }, [router.query, t, refreshUser, router]);
 
   const handleBackToHome = () => {
     router.push('/');
