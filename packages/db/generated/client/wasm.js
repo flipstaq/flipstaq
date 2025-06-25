@@ -203,6 +203,7 @@ exports.Prisma.MessageScalarFieldEnum = {
   read: 'read',
   deletedAt: 'deletedAt',
   editedAt: 'editedAt',
+  replyToMessageId: 'replyToMessageId',
   createdAt: 'createdAt'
 };
 

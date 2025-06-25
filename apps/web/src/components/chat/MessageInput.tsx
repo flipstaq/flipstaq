@@ -10,6 +10,7 @@ import {
   Image as ImageIcon,
   Upload,
   Loader2,
+  Reply,
 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useWebSocket } from '@/contexts/WebSocketContext';
@@ -28,6 +29,13 @@ interface MessageInputProps {
     }>
   ) => void;
   disabled?: boolean;
+  replyingTo?: {
+    id: string;
+    content: string;
+    senderId: string;
+    senderUsername: string;
+  } | null;
+  onCancelReply?: () => void;
 }
 
 // Emoji categories and data
@@ -923,6 +931,8 @@ export default function MessageInput({
   conversationId,
   onSend,
   disabled = false,
+  replyingTo,
+  onCancelReply,
 }: MessageInputProps) {
   const { t } = useLanguage();
   const { sendTyping } = useWebSocket();
@@ -990,9 +1000,7 @@ export default function MessageInput({
           clearInterval(typingKeepAliveRef.current);
           typingKeepAliveRef.current = null;
         }
-      }
-
-      // Reset form
+      } // Reset form
       setMessage('');
       setSelectedFiles([]);
       setUploadError(null);
@@ -1232,9 +1240,91 @@ export default function MessageInput({
       }
     };
   }, [isTyping, conversationId, sendTyping]);
+  // Handle paste events for image uploads
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    // Look for image files in the pasted content
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      // Check if the item is an image file
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        e.preventDefault(); // Prevent default paste behavior for images
+
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        // Check file size limit (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          setUploadError(t('chat:file_too_large'));
+          return;
+        }
+
+        // Check if adding this file would exceed the limit of 10
+        if (selectedFiles.length >= 10) {
+          setUploadError(t('chat:max_files_exceeded'));
+          return;
+        }
+
+        // Validate image type
+        const allowedImageTypes = [
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/webp',
+          'image/gif',
+        ];
+
+        if (!allowedImageTypes.includes(file.type)) {
+          setUploadError(t('chat:file_type_not_supported'));
+          return;
+        }
+
+        // Create a new file with a proper name
+        const timestamp = new Date().getTime();
+        const extension = file.type.split('/')[1];
+        const fileName = `pasted-image-${timestamp}.${extension}`;
+
+        // Create a new File object with the proper name
+        const renamedFile = new File([file], fileName, { type: file.type }); // Add to selected files
+        setSelectedFiles((prev) => [...prev, renamedFile]);
+        setUploadError(null);
+
+        // Clear the clipboard data to prevent multiple pastes
+        break;
+      }
+    }
+  };
 
   return (
     <div className="relative border-t border-secondary-200 bg-white dark:border-secondary-700 dark:bg-secondary-900">
+      {/* Reply preview */}
+      {replyingTo && (
+        <div className="border-b border-secondary-200 bg-secondary-50 p-3 dark:border-secondary-700 dark:bg-secondary-800">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start space-x-2 rtl:space-x-reverse">
+              <Reply className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary-600 dark:text-primary-400" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium text-secondary-900 dark:text-secondary-100">
+                  {t('chat:replying_to')} @{replyingTo.senderUsername}
+                </div>
+                <div className="line-clamp-2 text-sm text-secondary-600 dark:text-secondary-400">
+                  {replyingTo.content || t('chat:file_attachment')}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={onCancelReply}
+              className="ml-2 flex-shrink-0 rounded-md p-1 text-secondary-400 hover:bg-secondary-200 hover:text-secondary-600 dark:hover:bg-secondary-700 dark:hover:text-secondary-300"
+              title={t('chat:cancel_reply')}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
       {/* File input (hidden) */}{' '}
       <input
         ref={fileInputRef}
@@ -1300,7 +1390,7 @@ export default function MessageInput({
             </div>
           </div>
         </div>
-      )}
+      )}{' '}
       {/* Upload error */}
       {uploadError && (
         <div className="border-b border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
@@ -1380,12 +1470,13 @@ export default function MessageInput({
               >
                 <Paperclip className="h-5 w-5" />
               </button>
-              {/* Text Input */}
+              {/* Text Input */}{' '}
               <textarea
                 ref={textareaRef}
                 value={message}
                 onChange={handleMessageChange}
                 onKeyPress={handleKeyPress}
+                onPaste={handlePaste}
                 placeholder={t('chat:type_message')}
                 disabled={disabled || isUploading}
                 className="max-h-[120px] min-h-[20px] flex-1 resize-none border-0 bg-transparent px-2 py-3 text-sm text-secondary-900 placeholder-secondary-500 focus:outline-none dark:text-secondary-100 dark:placeholder-secondary-400"

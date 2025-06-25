@@ -121,6 +121,14 @@ export class CreateMessageDto {
   conversationId: string;
 
   @ApiPropertyOptional({
+    description: "Message ID to reply to (for threaded replies)",
+    example: "clx1y2z3a4b5c6d7e8f9g0h2",
+  })
+  @IsString()
+  @IsOptional()
+  replyToMessageId?: string;
+
+  @ApiPropertyOptional({
     description: "File attachments (max 10)",
     type: [MessageAttachmentDto],
     maxItems: 10,
@@ -173,11 +181,33 @@ export class MessageResponseDto {
     description: "Message creation date",
   })
   createdAt: Date;
-
   @ApiPropertyOptional({
     description: "Message edit date (if edited)",
   })
   editedAt?: Date;
+
+  @ApiPropertyOptional({
+    description: "ID of the message this is replying to",
+    example: "clx1y2z3a4b5c6d7e8f9g0h2",
+  })
+  replyToMessageId?: string;
+
+  @ApiPropertyOptional({
+    description: "Reply target message information",
+    type: "object",
+    properties: {
+      id: { type: "string" },
+      content: { type: "string" },
+      senderId: { type: "string" },
+      senderUsername: { type: "string" },
+    },
+  })
+  replyToMessage?: {
+    id: string;
+    content: string;
+    senderId: string;
+    senderUsername: string;
+  };
 
   @ApiProperty({
     description: "Sender information",

@@ -27,6 +27,13 @@ interface Message {
   content?: string;
   senderId: string;
   conversationId: string;
+  replyToMessageId?: string;
+  replyToMessage?: {
+    id: string;
+    content: string;
+    senderId: string;
+    senderUsername: string;
+  };
   createdAt: string;
   editedAt?: string;
   isRead: boolean;
@@ -43,6 +50,7 @@ interface Message {
 interface SendMessageRequest {
   content?: string;
   conversationId: string;
+  replyToMessageId?: string;
   attachments?: Array<{
     fileUrl: string;
     fileName: string;
@@ -223,13 +231,15 @@ class MessageService {
         location?: string;
         slug?: string;
       };
-    }>
+    }>,
+    replyToMessageId?: string
   ): Promise<Message> {
     try {
       const payload: SendMessageRequest = {
         conversationId,
         ...(content.trim() && { content: content.trim() }), // Only include content if it's not empty
         ...(attachments && attachments.length > 0 && { attachments }),
+        ...(replyToMessageId && { replyToMessageId }),
       };
 
       // Use WebSocket for real-time message sending

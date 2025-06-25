@@ -44,6 +44,13 @@ export interface Message {
   content?: string;
   senderId: string;
   conversationId: string;
+  replyToMessageId?: string;
+  replyToMessage?: {
+    id: string;
+    content: string;
+    senderId: string;
+    senderUsername: string;
+  };
   createdAt: Date;
   editedAt?: Date;
   isRead: boolean;

@@ -109,6 +109,7 @@ export default function ChatDrawer({
     joinConversation,
     leaveConversation,
     onNewMessage,
+    onMessageReplied,
     onMessageDeleted,
     onMessageEdited,
     onMessageReadStatusChanged,
@@ -130,6 +131,12 @@ export default function ChatDrawer({
     null
   );
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<{
+    id: string;
+    content: string;
+    senderId: string;
+    senderUsername: string;
+  } | null>(null);
 
   // Block status hook for the selected conversation participant
   const { blockStatus, updateBlockStatus } = useBlockStatus(
@@ -379,12 +386,103 @@ export default function ChatDrawer({
         });
       });
 
+      // Set up real-time message reply handler
+      const unsubscribeMessageReplied = onMessageReplied((replyMessage) => {
+        console.log('📨 Received message reply via WebSocket:', replyMessage);
+
+        // Skip if this is our own message (we already handle it in the send function)
+        if (replyMessage.senderId === user?.id) {
+          console.log('🔄 Skipping own reply from WebSocket');
+          return;
+        }
+
+        // Add the reply message to the current conversation if it matches
+        if (
+          selectedConversationRef.current?.id === replyMessage.conversationId
+        ) {
+          setMessages((prevMessages) => {
+            // Avoid duplicates by checking if message already exists
+            const existingMessage = prevMessages.find(
+              (m) => m.id === replyMessage.id
+            );
+            if (existingMessage) {
+              console.log(
+                '🔄 Reply message already exists, skipping:',
+                replyMessage.id
+              );
+              return prevMessages;
+            }
+
+            console.log(
+              '✅ Adding reply message to conversation:',
+              replyMessage.id
+            );
+            const convertedMessage: Message = {
+              id: replyMessage.id,
+              content: replyMessage.content,
+              senderId: replyMessage.senderId,
+              conversationId: replyMessage.conversationId,
+              replyToMessageId: replyMessage.replyToMessageId,
+              replyToMessage: replyMessage.replyToMessage,
+              createdAt: new Date(replyMessage.createdAt),
+              isRead: false,
+              status: 'delivered',
+              attachments: replyMessage.attachments || [],
+            };
+            return [...prevMessages, convertedMessage];
+          });
+
+          // Auto-mark the reply as read since the conversation is currently active
+          setTimeout(async () => {
+            try {
+              if (!document.hidden) {
+                await messageService.markConversationAsRead(
+                  replyMessage.conversationId
+                );
+                console.log(
+                  '✅ Auto-marked reply message as read in active conversation'
+                );
+              }
+            } catch (error) {
+              console.error('Failed to auto-mark reply as read:', error);
+            }
+          }, 100);
+        }
+
+        // Update conversation list to reflect new reply message
+        setConversations((prevConversations) => {
+          return prevConversations.map((conv) => {
+            if (conv.id === replyMessage.conversationId) {
+              return {
+                ...conv,
+                lastMessage: {
+                  id: replyMessage.id,
+                  content: replyMessage.content || undefined,
+                  senderId: replyMessage.senderId,
+                  createdAt: new Date(replyMessage.createdAt),
+                  isRead: false,
+                },
+                unreadCount:
+                  conv.id === selectedConversationRef.current?.id &&
+                  !document.hidden
+                    ? 0 // Auto-marked as read since conversation is active and visible
+                    : conv.id === selectedConversationRef.current?.id
+                      ? conv.unreadCount // Keep current count if document is hidden
+                      : conv.unreadCount + 1, // Increment for inactive conversations
+              };
+            }
+            return conv;
+          });
+        });
+      });
+
       return () => {
         unsubscribeNewMessage();
         unsubscribeReadStatus();
         unsubscribeConversationReadStatus();
         unsubscribeMessageDeleted();
         unsubscribeMessageEdited();
+        unsubscribeMessageReplied();
       };
     }
   }, [isOpen, user?.id, isConnected, connect]);
@@ -586,15 +684,22 @@ export default function ChatDrawer({
     }
 
     if (!selectedConversation || (!content.trim() && !attachments?.length))
-      return;
-
-    // Create a temporary message with "sending" status
+      return; // Create a temporary message with "sending" status
     const tempId = `temp-${Date.now()}`;
     const tempMessage: Message = {
       id: tempId,
       content: content.trim() || undefined,
       senderId: user?.id || '',
       conversationId: selectedConversation.id,
+      replyToMessageId: replyingTo?.id,
+      replyToMessage: replyingTo
+        ? {
+            id: replyingTo.id,
+            content: replyingTo.content,
+            senderId: replyingTo.senderId,
+            senderUsername: replyingTo.senderUsername,
+          }
+        : undefined,
       createdAt: new Date(),
       isRead: false,
       status: 'sending',
@@ -606,14 +711,17 @@ export default function ChatDrawer({
       })),
     };
 
+    // Clear reply state
+    setReplyingTo(null);
+
     // Add the temporary message to the UI
     setMessages((prev) => [...prev, tempMessage]);
-
     try {
       const sentMessage = await messageService.sendMessage(
         content.trim(),
         selectedConversation.id,
-        attachments
+        attachments,
+        replyingTo?.id
       );
       const message = convertApiMessage(sentMessage, user?.id);
 
@@ -791,6 +899,24 @@ export default function ChatDrawer({
       setIsLoading(false);
     }
   };
+  const handleReplyToMessage = (message: Message) => {
+    // Find sender username from conversation participant
+    const senderUsername =
+      selectedConversation?.participant.username || 'Unknown';
+
+    setReplyingTo({
+      id: message.id,
+      content: message.content || '',
+      senderId: message.senderId,
+      senderUsername:
+        message.senderId === user?.id ? user.username || 'You' : senderUsername,
+    });
+  };
+
+  const handleCancelReply = () => {
+    setReplyingTo(null);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -1037,6 +1163,7 @@ export default function ChatDrawer({
                   isLoading={isLoading}
                   onRetryMessage={handleRetryMessage}
                   onDeleteMessage={handleDeleteMessage}
+                  onReply={handleReplyToMessage}
                 />
               </div>{' '}
               {/* Typing indicator positioned below message input */}
@@ -1079,10 +1206,13 @@ export default function ChatDrawer({
                 ) : null;
               })()}
               <div className="flex-shrink-0">
+                {' '}
                 <MessageInput
                   conversationId={selectedConversation?.id}
                   onSend={handleSendMessage}
                   disabled={isLoading}
+                  replyingTo={replyingTo}
+                  onCancelReply={handleCancelReply}
                 />
               </div>
             </div>

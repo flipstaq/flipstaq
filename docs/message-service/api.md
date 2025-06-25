@@ -115,6 +115,8 @@ All public endpoints require JWT authentication via `Authorization: Bearer <toke
       "content": "Hello! Is this product still available?",
       "senderId": "clx1y2z3a4b5c6d7e8f9g0h3",
       "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1",
+      "replyToMessageId": null,
+      "replyToMessage": null,
       "read": false,
       "createdAt": "2025-06-19T17:35:00.000Z",
       "fileUrl": null,
@@ -133,6 +135,13 @@ All public endpoints require JWT authentication via `Authorization: Bearer <toke
       "content": "Yes, it's still available! Are you interested?",
       "senderId": "clx1y2z3a4b5c6d7e8f9g0h4",
       "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1",
+      "replyToMessageId": "clx1y2z3a4b5c6d7e8f9g0h5",
+      "replyToMessage": {
+        "id": "clx1y2z3a4b5c6d7e8f9g0h5",
+        "content": "Hello! Is this product still available?",
+        "senderId": "clx1y2z3a4b5c6d7e8f9g0h3",
+        "senderUsername": "currentuser"
+      },
       "read": true,
       "createdAt": "2025-06-19T17:36:00.000Z",
       "fileUrl": null,
@@ -404,9 +413,46 @@ curl -X POST \
 ```json
 {
   "content": "Hello there!",
-  "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1"
+  "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1",
+  "replyToMessageId": "clx1y2z3a4b5c6d7e8f9g0h2", // Optional: ID of message being replied to
+  "attachments": [
+    // Optional: File attachments
+    {
+      "fileUrl": "https://example.com/uploads/image.jpg",
+      "fileName": "screenshot.jpg",
+      "fileType": "image/jpeg",
+      "fileSize": 1024000
+    }
+  ]
 }
 ```
+
+**Fields:**
+
+- `content` (optional): Text content of the message
+- `conversationId` (required): ID of the conversation
+- `replyToMessageId` (optional): ID of the message being replied to. When provided, creates a reply message with preview information of the original message.
+- `attachments` (optional): Array of file attachments with the following structure:
+  - `fileUrl` (required): URL of the uploaded file
+  - `fileName` (required): Original or generated filename
+  - `fileType` (required): MIME type of the file
+  - `fileSize` (required): File size in bytes
+
+**File Attachment Support:**
+
+- **Manual Upload**: Users can select files via attachment button
+- **Paste Upload**: Users can paste images directly (Ctrl+V/⌘+V) from clipboard
+- **Supported Types**: Images (JPEG, PNG, WebP, GIF), PDFs, text files, Word docs, Excel files
+- **Size Limit**: 10MB per file
+- **File Limit**: Maximum 10 files per message
+- **Paste Behavior**: Clipboard images are automatically processed and added to attachment queue
+
+**Reply Behavior:**
+
+- When `replyToMessageId` is provided, the message will include a preview of the original message
+- The original message must exist, not be deleted, and be within the same conversation
+- Reply messages emit a `messageReplied` event instead of `newMessage` for better client-side handling
+- Reply preview includes original message content and sender username for display
 
 #### `editMessage`
 
@@ -457,6 +503,33 @@ curl -X POST \
 #### `newMessage`
 
 Emitted when a new message is received in any conversation the user participates in.
+
+#### `messageReplied`
+
+Emitted when a reply message is received in any conversation the user participates in. Contains the same message structure as `newMessage` but includes reply information:
+
+```json
+{
+  "id": "clx1y2z3a4b5c6d7e8f9g0h6",
+  "content": "Thanks for the info!",
+  "senderId": "clx1y2z3a4b5c6d7e8f9g0h4",
+  "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1",
+  "replyToMessageId": "clx1y2z3a4b5c6d7e8f9g0h5",
+  "replyToMessage": {
+    "id": "clx1y2z3a4b5c6d7e8f9g0h5",
+    "content": "The product is still available",
+    "senderId": "clx1y2z3a4b5c6d7e8f9g0h3",
+    "senderUsername": "johndoe"
+  },
+  "createdAt": "2025-06-19T18:20:00.000Z",
+  "sender": {
+    "id": "clx1y2z3a4b5c6d7e8f9g0h4",
+    "username": "alice",
+    "firstName": "Alice",
+    "lastName": "Smith"
+  }
+}
+```
 
 #### `messageEdited`
 

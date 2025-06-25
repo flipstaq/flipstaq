@@ -18,6 +18,13 @@ interface MessageEvent {
   content?: string;
   senderId: string;
   conversationId: string;
+  replyToMessageId?: string;
+  replyToMessage?: {
+    id: string;
+    content: string;
+    senderId: string;
+    senderUsername: string;
+  };
   createdAt: string;
   attachments?: Array<{
     id?: string;
@@ -204,6 +211,9 @@ class WebSocketService {
     switch (event) {
       case 'newMessage':
         this.emit('newMessage', eventData);
+        break;
+      case 'messageReplied':
+        this.emit('messageReplied', eventData);
         break;
       case 'messageEdited':
         this.emit('messageEdited', eventData);

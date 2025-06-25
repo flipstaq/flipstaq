@@ -300,6 +300,16 @@ export class MessageService {
               lastName: true,
             },
           },
+          replyToMessage: {
+            select: {
+              id: true,
+              content: true,
+              senderId: true,
+              sender: {
+                select: { username: true },
+              },
+            },
+          },
           attachments: {
             select: {
               id: true,
@@ -328,6 +338,15 @@ export class MessageService {
         content: message.content,
         senderId: message.senderId,
         conversationId: message.conversationId,
+        replyToMessageId: message.replyToMessageId,
+        replyToMessage: message.replyToMessage
+          ? {
+              id: message.replyToMessage.id,
+              content: message.replyToMessage.content || "",
+              senderId: message.replyToMessage.senderId,
+              senderUsername: message.replyToMessage.sender?.username || "",
+            }
+          : undefined,
         attachments: message.attachments?.map((att) => ({
           id: att.id,
           fileUrl: att.fileUrl,
@@ -337,6 +356,7 @@ export class MessageService {
           metadata: att.metadata as any,
         })),
         read: message.read,
+        editedAt: message.editedAt,
         createdAt: message.createdAt,
         sender: message.sender,
       })), // Reverse to show oldest first
@@ -344,14 +364,14 @@ export class MessageService {
       hasMore: skip + messages.length < total,
     };
   }
-
   /**
    * Send a new message
    */ async sendMessage(
     userId: string,
     createMessageDto: CreateMessageDto
   ): Promise<MessageResponseDto> {
-    const { content, conversationId, attachments } = createMessageDto;
+    const { content, conversationId, replyToMessageId, attachments } =
+      createMessageDto;
 
     // Validate that either content or attachments are provided
     if (!content?.trim() && (!attachments || attachments.length === 0)) {
@@ -365,6 +385,29 @@ export class MessageService {
       throw new BadRequestException(
         "Maximum 10 attachments allowed per message"
       );
+    }
+
+    // If replying to a message, validate the reply target
+    let replyToMessage = null;
+    if (replyToMessageId) {
+      replyToMessage = await this.prisma.message.findFirst({
+        where: {
+          id: replyToMessageId,
+          conversationId, // Ensure reply is within same conversation
+          deletedAt: null, // Cannot reply to deleted messages
+        },
+        include: {
+          sender: {
+            select: { username: true },
+          },
+        },
+      });
+
+      if (!replyToMessage) {
+        throw new BadRequestException(
+          "Cannot reply to this message - it may have been deleted or doesn't exist"
+        );
+      }
     } // Verify user is participant in conversation
     const conversation = await this.prisma.conversation.findFirst({
       where: {
@@ -396,12 +439,13 @@ export class MessageService {
       if (blockStatus.isBlocked) {
         throw new ForbiddenException("Cannot send message - user is blocked");
       }
-    } // Create the message with attachments
+    } // Create the message with attachments and reply
     const message = await this.prisma.message.create({
       data: {
         content: content || null,
         senderId: userId,
         conversationId,
+        replyToMessageId: replyToMessageId || null,
         attachments: attachments?.length
           ? {
               create: attachments.map((att) => ({
@@ -418,6 +462,16 @@ export class MessageService {
         sender: {
           select: { id: true, username: true, firstName: true, lastName: true },
         },
+        replyToMessage: {
+          select: {
+            id: true,
+            content: true,
+            senderId: true,
+            sender: {
+              select: { username: true },
+            },
+          },
+        },
         attachments: true,
       },
     });
@@ -432,6 +486,15 @@ export class MessageService {
       content: message.content,
       senderId: message.senderId,
       conversationId: message.conversationId,
+      replyToMessageId: message.replyToMessageId,
+      replyToMessage: message.replyToMessage
+        ? {
+            id: message.replyToMessage.id,
+            content: message.replyToMessage.content || "",
+            senderId: message.replyToMessage.senderId,
+            senderUsername: message.replyToMessage.sender?.username || "",
+          }
+        : undefined,
       attachments: message.attachments?.map((att) => ({
         id: att.id,
         fileUrl: att.fileUrl,

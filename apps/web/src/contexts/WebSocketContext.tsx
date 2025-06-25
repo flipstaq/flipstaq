@@ -33,6 +33,7 @@ interface WebSocketContextType {
   leaveConversation: (conversationId: string) => void;
   sendTyping: (conversationId: string, isTyping: boolean) => void;
   onNewMessage: (handler: (message: MessageEvent) => void) => () => void;
+  onMessageReplied: (handler: (message: MessageEvent) => void) => () => void;
   onMessageEdited: (
     handler: (data: {
       messageId: string;
@@ -108,12 +109,19 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       webSocketService.sendTyping(conversationId, isTyping);
     },
     []
-  );
-  // Event subscription helpers
+  ); // Event subscription helpers
   const onNewMessage = useCallback(
     (handler: (message: MessageEvent) => void) => {
       webSocketService.on('newMessage', handler);
       return () => webSocketService.off('newMessage', handler);
+    },
+    []
+  );
+
+  const onMessageReplied = useCallback(
+    (handler: (message: MessageEvent) => void) => {
+      webSocketService.on('messageReplied', handler);
+      return () => webSocketService.off('messageReplied', handler);
     },
     []
   );
@@ -316,6 +324,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     leaveConversation,
     sendTyping,
     onNewMessage,
+    onMessageReplied,
     onMessageEdited,
     onMessageDeleted,
     onMessageReadStatusChanged,

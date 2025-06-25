@@ -167,10 +167,13 @@ model Message {
   read           Boolean      @default(false)
   deletedAt      DateTime?    // Soft delete timestamp
   editedAt       DateTime?    // Message edit timestamp
+  replyToMessageId String?    // FK to another Message for replies
   createdAt      DateTime     @default(now())
 
   sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  replyToMessage Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id], onDelete: SetNull)
+  replies        Message[]    @relation("MessageReply")
   attachments    MessageAttachment[]
 
   @@map("messages")

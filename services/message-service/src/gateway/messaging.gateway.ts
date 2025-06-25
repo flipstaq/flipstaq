@@ -256,7 +256,6 @@ export class MessagingGateway {
       this.sendToClient(client, { error: "Invalid message format" });
     }
   }
-
   async handleSendMessage(data: CreateMessageDto, client: AuthenticatedSocket) {
     try {
       if (!client.userId) {
@@ -273,10 +272,16 @@ export class MessagingGateway {
       const participants =
         await this.messageService.getConversationParticipants(
           data.conversationId
-        ); // Emit to conversation participants (excluding sender)
+        );
+
+      // Determine if this is a reply message
+      const isReply = !!message.replyToMessageId;
+      const eventType = isReply ? "messageReplied" : "newMessage";
+
+      // Emit to conversation participants (excluding sender)
       for (const participant of participants) {
         if (participant.id !== client.userId) {
-          this.sendToUser(participant.id, "newMessage", message);
+          this.sendToUser(participant.id, eventType, message);
         }
       }
 
@@ -286,6 +291,7 @@ export class MessagingGateway {
         JSON.stringify({
           message,
           participants: participants.map((p) => p.id),
+          isReply,
         })
       );
 
@@ -623,14 +629,14 @@ export class MessagingGateway {
 
     return null;
   }
-
   // Handle messages from Redis (for cross-service communication)
   private handleRedisNewMessage(data: any) {
-    const { message, participants } = data;
+    const { message, participants, isReply } = data;
+    const eventType = isReply ? "messageReplied" : "newMessage";
 
     // Emit to connected participants
     for (const participantId of participants) {
-      this.sendToUser(participantId, "newMessage", message);
+      this.sendToUser(participantId, eventType, message);
     }
   }
 

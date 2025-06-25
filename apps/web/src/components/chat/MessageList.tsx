@@ -25,6 +25,7 @@ interface MessageListProps {
   isLoading: boolean;
   onRetryMessage?: (message: Message) => void;
   onDeleteMessage?: (messageId: string) => void;
+  onReply?: (message: Message) => void;
 }
 
 export default function MessageList({
@@ -33,6 +34,7 @@ export default function MessageList({
   isLoading,
   onRetryMessage,
   onDeleteMessage,
+  onReply,
 }: MessageListProps) {
   const { t } = useLanguage();
   const { editMessage } = useWebSocket();
@@ -268,11 +270,12 @@ export default function MessageList({
                   </div>
                 </div>
               )}
-              {/* Message */}
+              {/* Message */}{' '}
               <div
                 className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} ${
                   isPreviousMessageFromSameSender ? 'mb-1' : 'mb-3'
                 }`}
+                id={`message-${message.id}`}
               >
                 <div
                   className={`max-w-xs lg:max-w-md ${isOwnMessage ? 'order-2' : 'order-1'}`}
@@ -410,6 +413,46 @@ export default function MessageList({
                           ))}
                       </div>
                     )}{' '}
+                    {/* Reply preview */}
+                    {message.replyToMessage && (
+                      <div
+                        className={`mb-2 cursor-pointer rounded-lg border-l-4 p-2 transition-colors hover:bg-black/5 ${
+                          isOwnMessage
+                            ? 'border-white/40 bg-white/10 text-white/80'
+                            : 'border-primary-400 bg-primary-50 text-primary-800 dark:border-primary-500 dark:bg-primary-900/20 dark:text-primary-200'
+                        }`}
+                        onClick={() => {
+                          // Scroll to original message
+                          const originalElement = document.getElementById(
+                            `message-${message.replyToMessage!.id}`
+                          );
+                          if (originalElement) {
+                            originalElement.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'center',
+                            });
+                            // Add highlight effect
+                            originalElement.classList.add('animate-pulse');
+                            setTimeout(
+                              () =>
+                                originalElement.classList.remove(
+                                  'animate-pulse'
+                                ),
+                              2000
+                            );
+                          }
+                        }}
+                      >
+                        <div className="mb-1 text-xs font-medium opacity-80">
+                          {t('chat:replied_to')} @
+                          {message.replyToMessage.senderUsername}
+                        </div>
+                        <div className="line-clamp-2 text-xs opacity-70">
+                          {message.replyToMessage.content ||
+                            t('chat:file_attachment')}
+                        </div>
+                      </div>
+                    )}
                     {/* Text content */}
                     {message.content && (
                       <div className="relative">
@@ -430,6 +473,7 @@ export default function MessageList({
                     )}
                     {/* Context Menu */}{' '}
                     <div className="absolute right-1 top-1">
+                      {' '}
                       <MessageContextMenu
                         messageId={message.id}
                         senderId={message.senderId}
@@ -439,6 +483,7 @@ export default function MessageList({
                         isOwnMessage={isOwnMessage}
                         onDelete={() => onDeleteMessage?.(message.id)}
                         onEdit={() => handleEditMessage(message.id)}
+                        onReply={() => onReply?.(message)}
                       />
                     </div>
                     {/* Hover timestamp for grouped messages */}
