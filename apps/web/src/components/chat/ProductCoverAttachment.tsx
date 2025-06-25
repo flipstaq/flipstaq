@@ -53,7 +53,7 @@ export default function ProductCoverAttachment({
     }).format(price);
   };
 
-  const productUrl = username && slug ? `/${username}/${slug}` : '#';
+  const productUrl = username && slug ? `/@${username}/${slug}` : '#';
 
   return (
     <div className="mt-2 overflow-hidden rounded-lg border border-secondary-200 bg-white dark:border-secondary-600 dark:bg-secondary-700">

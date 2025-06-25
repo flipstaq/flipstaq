@@ -35,7 +35,8 @@ interface MessageInputProps {
     content: string;
     senderId: string;
     senderUsername: string;
-  } | null;  onCancelReply?: () => void;
+  } | null;
+  onCancelReply?: () => void;
 }
 
 export default function MessageInput({
@@ -245,7 +246,7 @@ export default function MessageInput({
       const newHeight = Math.min(textareaRef.current.scrollHeight, maxHeight);
       textareaRef.current.style.height = `${newHeight}px`;
     }
-  };  // Close GIF picker when clicking outside
+  }; // Close GIF picker when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -487,9 +488,9 @@ export default function MessageInput({
         <div className="border-b border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
           <p className="text-sm text-red-600 dark:text-red-400">
             {uploadError}
-          </p>        </div>
+          </p>{' '}
+        </div>
       )}
-      
       {/* Emoji Picker Portal */}
       <EmojiPickerPortal
         isVisible={showEmojiPicker}
@@ -498,7 +499,6 @@ export default function MessageInput({
         triggerRef={emojiButtonRef}
         disabled={disabled || isUploading}
       />
-      
       <div className="p-4">
         <form
           onSubmit={handleSubmit}
@@ -538,7 +538,8 @@ export default function MessageInput({
                 disabled={disabled || isUploading}
               >
                 <ImageIcon className="h-5 w-5" />
-              </button>              {/* Emoji Button */}
+              </button>{' '}
+              {/* Emoji Button */}
               <button
                 ref={emojiButtonRef}
                 type="button"
