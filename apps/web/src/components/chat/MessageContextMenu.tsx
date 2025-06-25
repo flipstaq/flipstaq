@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { MoreVertical, Flag, Copy, Trash2 } from 'lucide-react';
+import { MoreVertical, Flag, Copy, Trash2, Edit3 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useAuth } from '@/components/providers/AuthProvider';
 import ReportModal from '../report/ReportModal';
@@ -11,16 +11,22 @@ interface MessageContextMenuProps {
   messageId: string;
   senderId: string;
   content?: string;
+  createdAt: Date;
   isOwnMessage: boolean;
+  editedAt?: Date;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
 export default function MessageContextMenu({
   messageId,
   senderId,
   content,
+  createdAt,
   isOwnMessage,
+  editedAt,
   onDelete,
+  onEdit,
 }: MessageContextMenuProps) {
   const { t } = useLanguage();
   const { user } = useAuth();
@@ -97,11 +103,20 @@ export default function MessageContextMenu({
     setIsReportModalOpen(true);
     setIsOpen(false);
   };
-
   const handleDeleteMessage = () => {
     onDelete?.();
     setIsOpen(false);
   };
+
+  const handleEditMessage = () => {
+    onEdit?.();
+    setIsOpen(false);
+  };
+  // Check if message can be edited (only text messages within 24 hours, not already edited)
+  const canEdit =
+    isOwnMessage &&
+    content &&
+    new Date().getTime() - createdAt.getTime() < 24 * 60 * 60 * 1000;
 
   // Portal-based menu component
   const MenuPortal = () => {
@@ -120,6 +135,7 @@ export default function MessageContextMenu({
           backdropFilter: 'blur(1px)',
         }}
       >
+        {' '}
         {content && (
           <button
             onClick={handleCopyMessage}
@@ -129,7 +145,15 @@ export default function MessageContextMenu({
             <span>{t('common:copy')}</span>
           </button>
         )}
-
+        {canEdit && onEdit && (
+          <button
+            onClick={handleEditMessage}
+            className="flex w-full items-center space-x-2 px-3 py-2 text-left text-sm text-secondary-700 hover:bg-secondary-50 dark:text-secondary-300 dark:hover:bg-secondary-700 rtl:space-x-reverse"
+          >
+            <Edit3 className="h-4 w-4" />
+            <span>{t('chat:edit_message')}</span>
+          </button>
+        )}
         {!isOwnMessage && user?.id && (
           <button
             onClick={handleReportMessage}
@@ -139,7 +163,6 @@ export default function MessageContextMenu({
             <span>{t('report:report_message')}</span>
           </button>
         )}
-
         {isOwnMessage && onDelete && (
           <button
             onClick={handleDeleteMessage}

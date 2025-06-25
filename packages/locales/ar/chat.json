@@ -66,6 +66,16 @@
   "message_deleted": "تم حذف الرسالة",
   "delete_message_confirm": "هل أنت متأكد من أنك تريد حذف هذه الرسالة؟",
   "delete_failed": "فشل في حذف الرسالة",
+  "edit_message": "تعديل الرسالة",
+  "message_edited": "تم تعديل الرسالة",
+  "edit_message_placeholder": "عدّل رسالتك...",
+  "save_edit": "حفظ",
+  "cancel_edit": "إلغاء",
+  "edit_failed": "فشل في تعديل الرسالة",
+  "edit_content_required": "محتوى الرسالة مطلوب",
+  "edit_help_text": "اضغط Enter للحفظ، Escape للإلغاء",
+  "edited": "معدّلة",
+  "message_too_old": "لا يمكن تعديل الرسائل الأقدم من 24 ساعة",
   "sending_messages": "إرسال الرسائل",
   "starting_conversations": "بدء المحادثات"
 }

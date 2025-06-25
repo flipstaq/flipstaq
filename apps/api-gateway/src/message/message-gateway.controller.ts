@@ -581,4 +581,80 @@ export class MessageGatewayController {
       }
     );
   }
+
+  @Patch("messages/:id")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Edit a message" })
+  @ApiParam({
+    name: "id",
+    description: "The ID of the message to edit",
+    type: "string",
+  })
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        content: {
+          type: "string",
+          description: "Updated message content",
+          example: "This is the updated message content",
+        },
+      },
+      required: ["content"],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Message edited successfully",
+    schema: {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        content: { type: "string" },
+        senderId: { type: "string" },
+        conversationId: { type: "string" },
+        read: { type: "boolean" },
+        createdAt: { type: "string", format: "date-time" },
+        editedAt: { type: "string", format: "date-time" },
+        sender: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            username: { type: "string" },
+            firstName: { type: "string" },
+            lastName: { type: "string" },
+          },
+        },
+        attachments: { type: "array", items: { type: "object" } },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Message not found",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Cannot edit message - not the sender or message too old",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Cannot edit deleted message",
+  })
+  async editMessage(
+    @Param("id") messageId: string,
+    @Body() editData: { content: string },
+    @Request() req: AuthenticatedRequest
+  ) {
+    const response = await this.proxyService.forwardRequest(
+      "MESSAGE",
+      `messages/messages/${messageId}`,
+      "PATCH",
+      editData,
+      {
+        "x-user-id": req.user.sub,
+      }
+    );
+    return response.data;
+  }
 }

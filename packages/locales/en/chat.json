@@ -66,6 +66,16 @@
   "message_deleted": "Message deleted",
   "delete_message_confirm": "Are you sure you want to delete this message?",
   "delete_failed": "Failed to delete message",
+  "edit_message": "Edit message",
+  "message_edited": "Message edited",
+  "edit_message_placeholder": "Edit your message...",
+  "save_edit": "Save",
+  "cancel_edit": "Cancel",
+  "edit_failed": "Failed to edit message",
+  "edit_content_required": "Message content is required",
+  "edit_help_text": "Press Enter to save, Escape to cancel",
+  "edited": "edited",
+  "message_too_old": "Cannot edit messages older than 24 hours",
   "sending_messages": "sending messages",
   "starting_conversations": "starting conversations"
 }

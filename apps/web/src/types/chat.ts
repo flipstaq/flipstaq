@@ -45,6 +45,7 @@ export interface Message {
   senderId: string;
   conversationId: string;
   createdAt: Date;
+  editedAt?: Date;
   isRead: boolean;
   status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
   attachments?: MessageAttachment[];

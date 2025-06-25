@@ -218,6 +218,9 @@ export class MessagingGateway {
         case "sendMessage":
           this.handleSendMessage(payload, client);
           break;
+        case "editMessage":
+          this.handleEditMessage(payload, client);
+          break;
         case "deleteMessage":
           this.handleDeleteMessage(payload, client);
           break;
@@ -289,6 +292,60 @@ export class MessagingGateway {
       return this.sendToClient(client, { success: true, message });
     } catch (error) {
       this.logger.error("Send message error:", error);
+      return this.sendToClient(client, { error: error.message });
+    }
+  }
+
+  async handleEditMessage(
+    data: { messageId: string; content: string; conversationId: string },
+    client: AuthenticatedSocket
+  ) {
+    try {
+      if (!client.userId) {
+        return this.sendToClient(client, { error: "Authentication required" });
+      }
+
+      // Edit message through service
+      const editedMessage = await this.messageService.editMessage(
+        data.messageId,
+        client.userId,
+        { content: data.content }
+      );
+
+      // Get conversation participants to determine who to notify
+      const participants =
+        await this.messageService.getConversationParticipants(
+          data.conversationId
+        );
+
+      // Emit edit event to all conversation participants (including sender for confirmation)
+      for (const participant of participants) {
+        this.sendToUser(participant.id, "messageEdited", {
+          messageId: data.messageId,
+          content: data.content,
+          editedAt: editedMessage.editedAt,
+          conversationId: data.conversationId,
+        });
+      }
+
+      // Publish to Redis for potential cross-service notifications
+      await this.redisService.publish(
+        "message-edited",
+        JSON.stringify({
+          messageId: data.messageId,
+          content: data.content,
+          editedAt: editedMessage.editedAt,
+          conversationId: data.conversationId,
+          participants: participants.map((p) => p.id),
+        })
+      );
+
+      return this.sendToClient(client, {
+        success: true,
+        message: editedMessage,
+      });
+    } catch (error) {
+      this.logger.error("Edit message error:", error);
       return this.sendToClient(client, { error: error.message });
     }
   }

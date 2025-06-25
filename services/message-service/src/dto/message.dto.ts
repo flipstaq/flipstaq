@@ -169,11 +169,15 @@ export class MessageResponseDto {
     example: false,
   })
   read: boolean;
-
   @ApiProperty({
     description: "Message creation date",
   })
   createdAt: Date;
+
+  @ApiPropertyOptional({
+    description: "Message edit date (if edited)",
+  })
+  editedAt?: Date;
 
   @ApiProperty({
     description: "Sender information",
@@ -203,4 +207,14 @@ export class MarkAsReadDto {
   @IsBoolean()
   @IsOptional()
   read?: boolean = true;
+}
+
+export class EditMessageDto {
+  @ApiProperty({
+    description: "Updated message content",
+    example: "This is the updated message content",
+  })
+  @IsString()
+  @IsNotEmpty()
+  content: string;
 }

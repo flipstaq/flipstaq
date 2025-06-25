@@ -31,6 +31,7 @@ import {
   CreateMessageDto,
   MessageResponseDto,
   MarkAsReadDto,
+  EditMessageDto,
 } from "../dto/message.dto";
 import { InternalServiceGuard } from "../common/guards/internal-service.guard";
 
@@ -328,5 +329,47 @@ export class MessageController {
     }
 
     await this.messageService.deleteMessage(messageId, userId);
+  }
+
+  @Patch("messages/:id")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Edit a message" })
+  @ApiParam({
+    name: "id",
+    description: "The ID of the message to edit",
+    type: "string",
+  })
+  @ApiBody({ type: EditMessageDto })
+  @ApiResponse({
+    status: 200,
+    description: "Message edited successfully",
+    type: MessageResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Message not found",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Cannot edit message - not the sender or message too old",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Cannot edit deleted message",
+  })
+  async editMessage(
+    @Headers("x-user-id") userId: string,
+    @Param("id") messageId: string,
+    @Body() editMessageDto: EditMessageDto
+  ): Promise<MessageResponseDto> {
+    if (!userId || userId.trim() === "") {
+      throw new BadRequestException("User ID is required and cannot be empty");
+    }
+
+    return await this.messageService.editMessage(
+      messageId,
+      userId,
+      editMessageDto
+    );
   }
 }

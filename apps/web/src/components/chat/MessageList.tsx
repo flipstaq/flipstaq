@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Check,
   CheckCheck,
@@ -13,9 +13,11 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useWebSocket } from '@/contexts/WebSocketContext';
 import { Message } from '@/types/chat';
 import ProductCoverAttachment from './ProductCoverAttachment';
 import MessageContextMenu from './MessageContextMenu';
+import EditableMessage from './EditableMessage';
 
 interface MessageListProps {
   messages: Message[];
@@ -33,7 +35,9 @@ export default function MessageList({
   onDeleteMessage,
 }: MessageListProps) {
   const { t } = useLanguage();
+  const { editMessage } = useWebSocket();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -158,6 +162,28 @@ export default function MessageList({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleEditMessage = (messageId: string) => {
+    setEditingMessageId(messageId);
+  };
+  const handleSaveEdit = async (messageId: string, newContent: string) => {
+    try {
+      const message = messages.find((m) => m.id === messageId);
+      if (!message) {
+        throw new Error('Message not found');
+      }
+      // Send edit via WebSocket (non-blocking)
+      editMessage(messageId, newContent, message.conversationId);
+      setEditingMessageId(null);
+    } catch (error) {
+      console.error('Failed to edit message:', error);
+      throw error;
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
   };
   if (isLoading) {
     return (
@@ -386,9 +412,21 @@ export default function MessageList({
                     )}{' '}
                     {/* Text content */}
                     {message.content && (
-                      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-                        {message.content}
-                      </p>
+                      <div className="relative">
+                        <EditableMessage
+                          messageId={message.id}
+                          initialContent={message.content}
+                          isEditing={editingMessageId === message.id}
+                          onSave={handleSaveEdit}
+                          onCancel={handleCancelEdit}
+                        />
+                        {/* Show edited label */}
+                        {message.editedAt && (
+                          <span className="mt-1 text-xs opacity-60">
+                            {t('chat:edited')}
+                          </span>
+                        )}
+                      </div>
                     )}
                     {/* Context Menu */}{' '}
                     <div className="absolute right-1 top-1">
@@ -396,8 +434,11 @@ export default function MessageList({
                         messageId={message.id}
                         senderId={message.senderId}
                         content={message.content}
+                        createdAt={message.createdAt}
+                        editedAt={message.editedAt}
                         isOwnMessage={isOwnMessage}
                         onDelete={() => onDeleteMessage?.(message.id)}
+                        onEdit={() => handleEditMessage(message.id)}
                       />
                     </div>
                     {/* Hover timestamp for grouped messages */}

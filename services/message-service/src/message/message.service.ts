@@ -13,6 +13,7 @@ import {
   CreateMessageDto,
   MessageResponseDto,
   MarkAsReadDto,
+  EditMessageDto,
 } from "../dto/message.dto";
 
 @Injectable()
@@ -667,5 +668,107 @@ export class MessageService {
       where: { id: messageId },
       data: { deletedAt: new Date() },
     });
+  }
+
+  /**
+   * Edit a message
+   */
+  async editMessage(
+    messageId: string,
+    userId: string,
+    editMessageDto: EditMessageDto
+  ): Promise<MessageResponseDto> {
+    const { content } = editMessageDto;
+
+    // Find the message with sender and conversation details
+    const message = await this.prisma.message.findUnique({
+      where: { id: messageId },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        conversation: {
+          select: {
+            id: true,
+            participants: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+        attachments: true,
+      },
+    });
+
+    if (!message) {
+      throw new NotFoundException("Message not found");
+    }
+
+    if (message.deletedAt) {
+      throw new BadRequestException("Cannot edit a deleted message");
+    }
+
+    if (message.senderId !== userId) {
+      throw new ForbiddenException("You can only edit your own messages");
+    }
+
+    // Optional: Check if message is too old (24 hours limit)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    if (message.createdAt < twentyFourHoursAgo) {
+      throw new ForbiddenException("Cannot edit messages older than 24 hours");
+    }
+
+    // Update the message
+    const updatedMessage = await this.prisma.message.update({
+      where: { id: messageId },
+      data: {
+        content,
+        editedAt: new Date(),
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        attachments: true,
+      },
+    });
+
+    // TODO: Emit WebSocket event for real-time updates
+    // This will be implemented when we add the WebSocket gateway
+
+    return {
+      id: updatedMessage.id,
+      content: updatedMessage.content,
+      senderId: updatedMessage.senderId,
+      conversationId: updatedMessage.conversationId,
+      read: updatedMessage.read,
+      createdAt: updatedMessage.createdAt,
+      editedAt: updatedMessage.editedAt,
+      sender: {
+        id: updatedMessage.sender.id,
+        username: updatedMessage.sender.username,
+        firstName: updatedMessage.sender.firstName,
+        lastName: updatedMessage.sender.lastName,
+      },
+      attachments: updatedMessage.attachments.map((att) => ({
+        id: att.id,
+        fileUrl: att.fileUrl,
+        fileName: att.fileName,
+        fileType: att.fileType,
+        fileSize: att.fileSize,
+        metadata: att.metadata as any, // Type assertion for JsonValue compatibility
+      })),
+    };
   }
 }

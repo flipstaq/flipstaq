@@ -22,12 +22,25 @@ interface WebSocketContextType {
   connect: () => void;
   disconnect: () => void;
   sendMessage: (data: any) => void;
+  editMessage: (
+    messageId: string,
+    content: string,
+    conversationId: string
+  ) => void;
   markAsRead: (messageId: string, read?: boolean) => void;
   markConversationAsRead: (conversationId: string) => void;
   joinConversation: (conversationId: string) => void;
   leaveConversation: (conversationId: string) => void;
   sendTyping: (conversationId: string, isTyping: boolean) => void;
   onNewMessage: (handler: (message: MessageEvent) => void) => () => void;
+  onMessageEdited: (
+    handler: (data: {
+      messageId: string;
+      content: string;
+      editedAt: string;
+      conversationId: string;
+    }) => void
+  ) => () => void;
   onMessageDeleted: (
     handler: (data: {
       messageId: string;
@@ -62,11 +75,18 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const disconnect = useCallback(() => {
     webSocketService.disconnect();
   }, []);
-
   // Message operations
   const sendMessage = useCallback((data: any) => {
     webSocketService.sendMessage(data);
   }, []);
+
+  const editMessage = useCallback(
+    (messageId: string, content: string, conversationId: string) => {
+      webSocketService.editMessage({ messageId, content, conversationId });
+    },
+    []
+  );
+
   const markAsRead = useCallback((messageId: string, read = true) => {
     webSocketService.markAsRead({ messageId, read });
   }, []);
@@ -94,6 +114,21 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     (handler: (message: MessageEvent) => void) => {
       webSocketService.on('newMessage', handler);
       return () => webSocketService.off('newMessage', handler);
+    },
+    []
+  );
+
+  const onMessageEdited = useCallback(
+    (
+      handler: (data: {
+        messageId: string;
+        content: string;
+        editedAt: string;
+        conversationId: string;
+      }) => void
+    ) => {
+      webSocketService.on('messageEdited', handler);
+      return () => webSocketService.off('messageEdited', handler);
     },
     []
   );
@@ -274,12 +309,14 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     connect,
     disconnect,
     sendMessage,
+    editMessage,
     markAsRead,
     markConversationAsRead,
     joinConversation,
     leaveConversation,
     sendTyping,
     onNewMessage,
+    onMessageEdited,
     onMessageDeleted,
     onMessageReadStatusChanged,
     onConversationReadStatusChanged,

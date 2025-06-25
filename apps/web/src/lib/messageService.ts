@@ -28,6 +28,7 @@ interface Message {
   senderId: string;
   conversationId: string;
   createdAt: string;
+  editedAt?: string;
   isRead: boolean;
   status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
   attachments?: Array<{

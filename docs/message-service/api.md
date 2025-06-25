@@ -327,6 +327,54 @@ curl -X POST \
 
 ---
 
+### PATCH /messages/:id
+
+**Edit a message**
+
+#### Request Body
+
+```json
+{
+  "content": "This is the updated message content"
+}
+```
+
+#### Response (200)
+
+```json
+{
+  "id": "clx1y2z3a4b5c6d7e8f9g0h5",
+  "content": "This is the updated message content",
+  "senderId": "clx1y2z3a4b5c6d7e8f9g0h3",
+  "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1",
+  "read": false,
+  "createdAt": "2025-06-19T17:35:00.000Z",
+  "editedAt": "2025-06-19T18:15:00.000Z",
+  "sender": {
+    "id": "clx1y2z3a4b5c6d7e8f9g0h3",
+    "username": "currentuser",
+    "firstName": "Current",
+    "lastName": "User"
+  },
+  "attachments": []
+}
+```
+
+#### Errors
+
+- `400` - Cannot edit deleted message
+- `403` - Can only edit your own messages / Message too old (24h limit)
+- `404` - Message not found
+
+#### Business Rules
+
+- Only the message sender can edit their own messages
+- Messages older than 24 hours cannot be edited
+- Deleted messages cannot be edited
+- Edit timestamp (`editedAt`) is automatically set
+
+---
+
 ### PATCH /conversations/:id/read
 
 **Mark all messages in a conversation as read**
@@ -356,6 +404,16 @@ curl -X POST \
 ```json
 {
   "content": "Hello there!",
+  "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1"
+}
+```
+
+#### `editMessage`
+
+```json
+{
+  "messageId": "clx1y2z3a4b5c6d7e8f9g0h5",
+  "content": "Updated message content",
   "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1"
 }
 ```
@@ -399,6 +457,19 @@ curl -X POST \
 #### `newMessage`
 
 Emitted when a new message is received in any conversation the user participates in.
+
+#### `messageEdited`
+
+Emitted when a message is edited in any conversation the user participates in.
+
+```json
+{
+  "messageId": "clx1y2z3a4b5c6d7e8f9g0h5",
+  "content": "Updated message content",
+  "editedAt": "2025-06-19T18:15:00.000Z",
+  "conversationId": "clx1y2z3a4b5c6d7e8f9g0h1"
+}
+```
 
 #### `messageReadStatusChanged`
 

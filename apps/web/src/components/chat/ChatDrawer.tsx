@@ -84,6 +84,7 @@ const convertApiMessage = (
 ): Message => ({
   ...apiMsg,
   createdAt: new Date(apiMsg.createdAt),
+  editedAt: apiMsg.editedAt ? new Date(apiMsg.editedAt) : undefined,
   // Status logic:
   // - For own messages: show 'read' if read by recipient, otherwise 'delivered'
   // - For received messages: status doesn't matter as recipients don't see status icons
@@ -109,6 +110,7 @@ export default function ChatDrawer({
     leaveConversation,
     onNewMessage,
     onMessageDeleted,
+    onMessageEdited,
     onMessageReadStatusChanged,
     onConversationReadStatusChanged,
     typingUsers,
@@ -338,11 +340,51 @@ export default function ChatDrawer({
         });
       });
 
+      // Set up message edited handler
+      const unsubscribeMessageEdited = onMessageEdited((data) => {
+        console.log('✏️ Message edited via WebSocket:', data);
+
+        // Update the message in the current conversation
+        setMessages((prevMessages) => {
+          return prevMessages.map((msg) => {
+            if (msg.id === data.messageId) {
+              return {
+                ...msg,
+                content: data.content,
+                editedAt: new Date(data.editedAt),
+              };
+            }
+            return msg;
+          });
+        });
+
+        // Update the conversation's last message if it was the edited message
+        setConversations((prevConversations) => {
+          return prevConversations.map((conv) => {
+            if (
+              conv.id === data.conversationId &&
+              conv.lastMessage?.id === data.messageId
+            ) {
+              return {
+                ...conv,
+                lastMessage: {
+                  ...conv.lastMessage,
+                  content: data.content,
+                },
+                updatedAt: new Date(),
+              };
+            }
+            return conv;
+          });
+        });
+      });
+
       return () => {
         unsubscribeNewMessage();
         unsubscribeReadStatus();
         unsubscribeConversationReadStatus();
         unsubscribeMessageDeleted();
+        unsubscribeMessageEdited();
       };
     }
   }, [isOpen, user?.id, isConnected, connect]);

@@ -201,10 +201,12 @@ class WebSocketService {
       this.emit('sendMessageError', { message: error });
       return;
     }
-
     switch (event) {
       case 'newMessage':
         this.emit('newMessage', eventData);
+        break;
+      case 'messageEdited':
+        this.emit('messageEdited', eventData);
         break;
       case 'messageDeleted':
         this.emit('messageDeleted', eventData);
@@ -284,6 +286,15 @@ class WebSocketService {
   }): void {
     this.send('sendMessage', data);
   }
+
+  editMessage(data: {
+    messageId: string;
+    content: string;
+    conversationId: string;
+  }): void {
+    this.send('editMessage', data);
+  }
+
   markAsRead(data: { messageId: string; read?: boolean }): void {
     this.send('markAsRead', data);
   }
