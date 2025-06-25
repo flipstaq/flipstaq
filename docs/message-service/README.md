@@ -2,6 +2,15 @@
 
 ## Recent Updates (June 2025)
 
+✅ **Emoji Reactions**: Added emoji reactions for direct messages
+
+- **Built-in Emojis**: Use system emojis without external dependencies
+- **Real-time Updates**: Reactions sync instantly via WebSocket
+- **Toggle Behavior**: Click same emoji again to remove reaction
+- **User Attribution**: See who reacted with hover tooltips
+- **One Per Emoji**: Users can only react once per emoji per message
+- **Quick Access**: 6 common emojis (👍, ❤️, 😂, 😮, 😢, 😡) available instantly
+
 ✅ **Pure WebSocket Implementation**: Migrated from socket.io to custom WebSocket server
 
 - **Pure WebSocket**: Using `ws` library without NestJS WebSocket decorators
@@ -127,6 +136,8 @@ All endpoints are internal-only and accessed through the API Gateway:
 - `GET /api/v1/messages/conversations` - List conversations
 - `GET /api/v1/messages/conversations/:id/messages` - Get messages
 - `POST /api/v1/messages/upload` - Upload file attachments (includes GIF support)
+- `POST /api/v1/messages/:messageId/reactions` - Toggle emoji reaction
+- `GET /api/v1/messages/:messageId/reactions` - Get message reactions
 - `GET /api/v1/gifs/search` - Search GIFs via Tenor API (public access)
 - `GET /api/v1/gifs/trending` - Get trending GIFs (public access)
 - `GET /api/v1/gifs/categories` - Get GIF categories (public access)
@@ -149,12 +160,14 @@ All endpoints are internal-only and accessed through the API Gateway:
 - `joinConversation` - Join conversation room
 - `leaveConversation` - Leave conversation room
 - `typing` - Send typing indicator
+- `toggleReaction` - Toggle emoji reaction on message
 - `ping` - Keep connection alive
 
 #### Server → Client Events
 
 - `newMessage` - New message received
 - `messageReadStatusChanged` - Read status update
+- `messageReaction` - Emoji reaction added/removed
 - `userOnline` - User came online
 - `userOffline` - User went offline
 - `userTyping` - User typing indicator
@@ -209,6 +222,7 @@ model Message {
   senderId       String
   conversationId String
   attachments    MessageAttachment[]
+  reactions      MessageReaction[]  // Emoji reactions
   read           Boolean      @default(false)
   createdAt      DateTime     @default(now())
 
@@ -231,6 +245,23 @@ model MessageAttachment {
   createdAt DateTime @default(now())
 
   message   Message  @relation(fields: [messageId], references: [id])
+}
+```
+
+### Message Reaction Model
+
+```prisma
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String   // The emoji character (e.g., "👍", "❤️")
+  createdAt DateTime @default(now())
+
+  message   Message  @relation(fields: [messageId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId, emoji]) // One reaction per user per emoji per message
 }
 ```
 

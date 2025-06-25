@@ -45,6 +45,18 @@ interface Message {
     fileType: string;
     fileSize: number;
   }>;
+  reactions?: Array<{
+    id: string;
+    emoji: string;
+    userId: string;
+    user: {
+      id: string;
+      username: string;
+      firstName: string;
+      lastName: string;
+    };
+    createdAt: string;
+  }>;
 }
 
 interface SendMessageRequest {
@@ -407,6 +419,24 @@ class MessageService {
       console.log('✅ Message delete request sent via WebSocket');
     } catch (error) {
       console.error('Error deleting message:', error);
+      throw error;
+    }
+  }
+
+  async toggleReaction(messageId: string, emoji: string): Promise<void> {
+    try {
+      console.log('🎭 Toggling reaction via WebSocket:', { messageId, emoji });
+
+      if (!webSocketService.isConnected) {
+        throw new Error('WebSocket not connected');
+      }
+
+      // Send toggle reaction via WebSocket
+      webSocketService.toggleReaction(messageId, emoji);
+
+      console.log('✅ Reaction toggle request sent via WebSocket');
+    } catch (error) {
+      console.error('Error toggling reaction:', error);
       throw error;
     }
   }

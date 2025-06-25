@@ -2,7 +2,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { MoreVertical, Flag, Copy, Trash2, Edit3, Reply } from 'lucide-react';
+import {
+  MoreVertical,
+  Flag,
+  Copy,
+  Trash2,
+  Edit3,
+  Reply,
+  Smile,
+} from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useAuth } from '@/components/providers/AuthProvider';
 import ReportModal from '../report/ReportModal';
@@ -17,6 +25,7 @@ interface MessageContextMenuProps {
   onDelete?: () => void;
   onEdit?: () => void;
   onReply?: () => void;
+  onReact?: () => void;
 }
 
 export default function MessageContextMenu({
@@ -29,6 +38,7 @@ export default function MessageContextMenu({
   onDelete,
   onEdit,
   onReply,
+  onReact,
 }: MessageContextMenuProps) {
   const { t } = useLanguage();
   const { user } = useAuth();
@@ -113,9 +123,13 @@ export default function MessageContextMenu({
     onEdit?.();
     setIsOpen(false);
   };
-
   const handleReplyMessage = () => {
     onReply?.();
+    setIsOpen(false);
+  };
+
+  const handleReactToMessage = () => {
+    onReact?.();
     setIsOpen(false);
   };
   // Check if message can be edited (only text messages within 24 hours, not already edited)
@@ -148,6 +162,13 @@ export default function MessageContextMenu({
         >
           <Reply className="h-4 w-4" />
           <span>{t('chat:reply')}</span>
+        </button>
+        <button
+          onClick={handleReactToMessage}
+          className="flex w-full items-center space-x-2 px-3 py-2 text-left text-sm text-secondary-700 hover:bg-secondary-50 dark:text-secondary-300 dark:hover:bg-secondary-700 rtl:space-x-reverse"
+        >
+          <Smile className="h-4 w-4" />
+          <span>{t('chat:react')}</span>
         </button>
         {content && (
           <button

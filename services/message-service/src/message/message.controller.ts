@@ -32,6 +32,8 @@ import {
   MessageResponseDto,
   MarkAsReadDto,
   EditMessageDto,
+  CreateReactionDto,
+  MessageReactionDto,
 } from "../dto/message.dto";
 import { InternalServiceGuard } from "../common/guards/internal-service.guard";
 
@@ -365,11 +367,81 @@ export class MessageController {
     if (!userId || userId.trim() === "") {
       throw new BadRequestException("User ID is required and cannot be empty");
     }
-
     return await this.messageService.editMessage(
       messageId,
       userId,
       editMessageDto
     );
+  }
+
+  @Post(":id/reactions")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Toggle a reaction on a message" })
+  @ApiParam({
+    name: "id",
+    description: "Message ID",
+    type: "string",
+  })
+  @ApiBody({ type: CreateReactionDto })
+  @ApiResponse({
+    status: 200,
+    description: "Reaction toggled successfully",
+    schema: {
+      type: "object",
+      properties: {
+        action: {
+          type: "string",
+          enum: ["added", "removed"],
+        },
+        reaction: {
+          $ref: "#/components/schemas/MessageReactionDto",
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Message not found",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Access denied - not a conversation participant",
+  })
+  async toggleReaction(
+    @Headers("x-user-id") userId: string,
+    @Param("id") messageId: string,
+    @Body() createReactionDto: CreateReactionDto
+  ): Promise<{ action: "added" | "removed"; reaction?: MessageReactionDto }> {
+    if (!userId || userId.trim() === "") {
+      throw new BadRequestException("User ID is required and cannot be empty");
+    }
+
+    return await this.messageService.toggleReaction(
+      messageId,
+      userId,
+      createReactionDto.emoji
+    );
+  }
+
+  @Get(":id/reactions")
+  @ApiOperation({ summary: "Get all reactions for a message" })
+  @ApiParam({
+    name: "id",
+    description: "Message ID",
+    type: "string",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Reactions retrieved successfully",
+    type: [MessageReactionDto],
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Message not found",
+  })
+  async getMessageReactions(
+    @Param("id") messageId: string
+  ): Promise<MessageReactionDto[]> {
+    return await this.messageService.getMessageReactions(messageId);
   }
 }

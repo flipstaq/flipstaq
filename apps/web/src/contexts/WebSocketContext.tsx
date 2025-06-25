@@ -12,6 +12,7 @@ import {
   UserStatus,
   MessageEvent,
   TypingEvent,
+  ReactionEvent,
 } from '@/lib/webSocketService';
 
 interface WebSocketContextType {
@@ -32,6 +33,7 @@ interface WebSocketContextType {
   joinConversation: (conversationId: string) => void;
   leaveConversation: (conversationId: string) => void;
   sendTyping: (conversationId: string, isTyping: boolean) => void;
+  toggleReaction: (messageId: string, emoji: string) => void;
   onNewMessage: (handler: (message: MessageEvent) => void) => () => void;
   onMessageReplied: (handler: (message: MessageEvent) => void) => () => void;
   onMessageEdited: (
@@ -49,6 +51,7 @@ interface WebSocketContextType {
       deletedBy: string;
     }) => void
   ) => () => void;
+  onMessageReaction: (handler: (data: ReactionEvent) => void) => () => void;
   onMessageReadStatusChanged: (handler: (data: any) => void) => () => void;
   onConversationReadStatusChanged: (handler: (data: any) => void) => () => void;
   onUserStatusChanged: (handler: (status: UserStatus) => void) => () => void;
@@ -103,13 +106,16 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const leaveConversation = useCallback((conversationId: string) => {
     webSocketService.leaveConversation(conversationId);
   }, []);
-
   const sendTyping = useCallback(
     (conversationId: string, isTyping: boolean) => {
       webSocketService.sendTyping(conversationId, isTyping);
     },
     []
-  ); // Event subscription helpers
+  );
+
+  const toggleReaction = useCallback((messageId: string, emoji: string) => {
+    webSocketService.toggleReaction(messageId, emoji);
+  }, []); // Event subscription helpers
   const onNewMessage = useCallback(
     (handler: (message: MessageEvent) => void) => {
       webSocketService.on('newMessage', handler);
@@ -140,7 +146,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     },
     []
   );
-
   const onMessageDeleted = useCallback(
     (
       handler: (data: {
@@ -151,6 +156,14 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     ) => {
       webSocketService.on('messageDeleted', handler);
       return () => webSocketService.off('messageDeleted', handler);
+    },
+    []
+  );
+
+  const onMessageReaction = useCallback(
+    (handler: (data: ReactionEvent) => void) => {
+      webSocketService.on('messageReaction', handler);
+      return () => webSocketService.off('messageReaction', handler);
     },
     []
   );
@@ -323,10 +336,12 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     joinConversation,
     leaveConversation,
     sendTyping,
+    toggleReaction,
     onNewMessage,
     onMessageReplied,
     onMessageEdited,
     onMessageDeleted,
+    onMessageReaction,
     onMessageReadStatusChanged,
     onConversationReadStatusChanged,
     onUserStatusChanged,

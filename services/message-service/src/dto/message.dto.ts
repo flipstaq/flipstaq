@@ -140,6 +140,48 @@ export class CreateMessageDto {
   attachments?: MessageAttachmentDto[];
 }
 
+export class MessageReactionDto {
+  @ApiProperty({
+    description: "Reaction ID",
+    example: "clx1y2z3a4b5c6d7e8f9g0h4",
+  })
+  id: string;
+
+  @ApiProperty({
+    description: "Emoji used for reaction",
+    example: "👍",
+  })
+  emoji: string;
+
+  @ApiProperty({
+    description: "User ID who reacted",
+    example: "clx1y2z3a4b5c6d7e8f9g0h3",
+  })
+  userId: string;
+
+  @ApiProperty({
+    description: "User information",
+    type: "object",
+    properties: {
+      id: { type: "string" },
+      username: { type: "string" },
+      firstName: { type: "string" },
+      lastName: { type: "string" },
+    },
+  })
+  user: {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+  };
+
+  @ApiProperty({
+    description: "Reaction creation date",
+  })
+  createdAt: Date;
+}
+
 export class MessageResponseDto {
   @ApiProperty({
     description: "Unique message ID",
@@ -191,7 +233,6 @@ export class MessageResponseDto {
     example: "clx1y2z3a4b5c6d7e8f9g0h2",
   })
   replyToMessageId?: string;
-
   @ApiPropertyOptional({
     description: "Reply target message information",
     type: "object",
@@ -208,6 +249,12 @@ export class MessageResponseDto {
     senderId: string;
     senderUsername: string;
   };
+
+  @ApiPropertyOptional({
+    description: "Message reactions",
+    type: [MessageReactionDto],
+  })
+  reactions?: MessageReactionDto[];
 
   @ApiProperty({
     description: "Sender information",
@@ -247,4 +294,14 @@ export class EditMessageDto {
   @IsString()
   @IsNotEmpty()
   content: string;
+}
+
+export class CreateReactionDto {
+  @ApiProperty({
+    description: "Emoji to react with",
+    example: "👍",
+  })
+  @IsString()
+  @IsNotEmpty()
+  emoji: string;
 }

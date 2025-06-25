@@ -239,6 +239,9 @@ export class MessagingGateway {
         case "typing":
           this.handleTyping(payload, client);
           break;
+        case "toggleReaction":
+          this.handleToggleReaction(payload, client);
+          break;
         case "ping":
           // Handle ping from client to keep connection alive
           this.sendToClient(client, { event: "pong", data: {} });
@@ -561,6 +564,70 @@ export class MessagingGateway {
       );
     } catch (error) {
       this.logger.error("Typing event error:", error);
+    }
+  }
+
+  async handleToggleReaction(
+    data: { messageId: string; emoji: string },
+    client: AuthenticatedSocket
+  ) {
+    try {
+      if (!client.userId) {
+        return this.sendToClient(client, { error: "Authentication required" });
+      }
+
+      // Toggle reaction through service
+      const result = await this.messageService.toggleReaction(
+        data.messageId,
+        client.userId,
+        data.emoji
+      );
+
+      // Get the message to find conversation ID and participants
+      const message = await this.prisma.message.findFirst({
+        where: { id: data.messageId },
+        select: { conversationId: true },
+      });
+
+      if (!message) {
+        return this.sendToClient(client, { error: "Message not found" });
+      }
+
+      // Get conversation participants to notify about reaction
+      const participants =
+        await this.messageService.getConversationParticipants(
+          message.conversationId
+        );
+
+      // Prepare reaction event data
+      const reactionEventData = {
+        messageId: data.messageId,
+        emoji: data.emoji,
+        userId: client.userId,
+        username: client.username,
+        action: result.action,
+        reaction: result.reaction,
+      };
+
+      // Emit reaction event to all conversation participants
+      for (const participant of participants) {
+        this.sendToUser(participant.id, "messageReaction", reactionEventData);
+      }
+
+      // Publish to Redis for cross-service notifications
+      await this.redisService.publish(
+        "message-reaction",
+        JSON.stringify({
+          ...reactionEventData,
+          conversationId: message.conversationId,
+          participants: participants.map((p) => p.id),
+        })
+      );
+
+      return this.sendToClient(client, { success: true, ...result });
+    } catch (error) {
+      this.logger.error("Toggle reaction error:", error);
+      return this.sendToClient(client, { error: error.message });
     }
   } // Helper methods for WebSocket communication
   private sendToClient(client: AuthenticatedSocket, data: any) {

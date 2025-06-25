@@ -34,6 +34,38 @@ interface MessageEvent {
     fileSize: number;
     metadata?: any;
   }>;
+  reactions?: Array<{
+    id: string;
+    emoji: string;
+    userId: string;
+    user: {
+      id: string;
+      username: string;
+      firstName: string;
+      lastName: string;
+    };
+    createdAt: string;
+  }>;
+}
+
+interface ReactionEvent {
+  messageId: string;
+  emoji: string;
+  userId: string;
+  username: string;
+  action: 'added' | 'removed';
+  reaction?: {
+    id: string;
+    emoji: string;
+    userId: string;
+    user: {
+      id: string;
+      username: string;
+      firstName: string;
+      lastName: string;
+    };
+    createdAt: string;
+  };
 }
 
 interface TypingEvent {
@@ -221,6 +253,9 @@ class WebSocketService {
       case 'messageDeleted':
         this.emit('messageDeleted', eventData);
         break;
+      case 'messageReaction':
+        this.emit('messageReaction', eventData);
+        break;
       case 'messageReadStatusChanged':
         this.emit('messageReadStatusChanged', eventData);
         break;
@@ -323,9 +358,12 @@ class WebSocketService {
   sendTyping(conversationId: string, isTyping: boolean): void {
     this.send('typing', { conversationId, isTyping });
   }
-
   deleteMessage(messageId: string, conversationId: string): void {
     this.send('deleteMessage', { messageId, conversationId });
+  }
+
+  toggleReaction(messageId: string, emoji: string): void {
+    this.send('toggleReaction', { messageId, emoji });
   }
 
   private send(event: string, payload: any): void {
@@ -369,4 +407,10 @@ class WebSocketService {
 }
 
 export const webSocketService = new WebSocketService();
-export type { UserStatus, MessageEvent, TypingEvent, WebSocketEventHandler };
+export type {
+  UserStatus,
+  MessageEvent,
+  TypingEvent,
+  ReactionEvent,
+  WebSocketEventHandler,
+};

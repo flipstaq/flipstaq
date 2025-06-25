@@ -18,6 +18,8 @@ import { Message } from '@/types/chat';
 import ProductCoverAttachment from './ProductCoverAttachment';
 import MessageContextMenu from './MessageContextMenu';
 import EditableMessage from './EditableMessage';
+import MessageReactions from './MessageReactions';
+import EmojiReactionButton from './EmojiReactionButton';
 
 interface MessageListProps {
   messages: Message[];
@@ -26,6 +28,10 @@ interface MessageListProps {
   onRetryMessage?: (message: Message) => void;
   onDeleteMessage?: (messageId: string) => void;
   onReply?: (message: Message) => void;
+  onMessageUpdate?: (
+    messageId: string,
+    updatedMessage: Partial<Message>
+  ) => void;
 }
 
 export default function MessageList({
@@ -35,18 +41,60 @@ export default function MessageList({
   onRetryMessage,
   onDeleteMessage,
   onReply,
+  onMessageUpdate,
 }: MessageListProps) {
   const { t } = useLanguage();
-  const { editMessage } = useWebSocket();
+  const { editMessage, onMessageReaction } = useWebSocket();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-
+  const [emojiPickerMessageId, setEmojiPickerMessageId] = useState<
+    string | null
+  >(null);
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Subscribe to reaction events for real-time updates
+  useEffect(() => {
+    const unsubscribe = onMessageReaction((reactionEvent) => {
+      if (onMessageUpdate) {
+        // Get current message to update reactions
+        const currentMessage = messages.find(
+          (m) => m.id === reactionEvent.messageId
+        );
+        if (currentMessage) {
+          const currentReactions = currentMessage.reactions || [];
+          let updatedReactions;
+
+          if (reactionEvent.action === 'added' && reactionEvent.reaction) {
+            // Add the new reaction
+            updatedReactions = [...currentReactions, reactionEvent.reaction];
+          } else if (reactionEvent.action === 'removed') {
+            // Remove the reaction
+            updatedReactions = currentReactions.filter(
+              (r) =>
+                !(
+                  r.userId === reactionEvent.userId &&
+                  r.emoji === reactionEvent.emoji
+                )
+            );
+          } else {
+            updatedReactions = currentReactions;
+          }
+
+          onMessageUpdate(reactionEvent.messageId, {
+            reactions: updatedReactions,
+          });
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [onMessageReaction, onMessageUpdate, messages]);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], {
@@ -183,9 +231,11 @@ export default function MessageList({
       throw error;
     }
   };
-
   const handleCancelEdit = () => {
     setEditingMessageId(null);
+  };
+  const handleReactToMessage = (messageId: string) => {
+    setEmojiPickerMessageId(messageId);
   };
   if (isLoading) {
     return (
@@ -452,7 +502,7 @@ export default function MessageList({
                             t('chat:file_attachment')}
                         </div>
                       </div>
-                    )}
+                    )}{' '}
                     {/* Text content */}
                     {message.content && (
                       <div className="relative">
@@ -470,10 +520,25 @@ export default function MessageList({
                           </span>
                         )}
                       </div>
-                    )}
-                    {/* Context Menu */}{' '}
-                    <div className="absolute right-1 top-1">
-                      {' '}
+                    )}{' '}
+                    {/* Message Reactions - Display existing reactions only */}
+                    <MessageReactions
+                      messageId={message.id}
+                      reactions={message.reactions}
+                      currentUserId={currentUserId}
+                      showReactionButton={false}
+                      showEmojiPicker={false}
+                    />
+                    {/* Hover Actions - Context Menu and Emoji Reaction */}
+                    <div className="absolute right-1 top-1 flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <EmojiReactionButton
+                        messageId={message.id}
+                        className="opacity-0 group-hover:opacity-100"
+                        isVisible={emojiPickerMessageId === message.id}
+                        onVisibilityChange={(visible) => {
+                          setEmojiPickerMessageId(visible ? message.id : null);
+                        }}
+                      />
                       <MessageContextMenu
                         messageId={message.id}
                         senderId={message.senderId}
@@ -484,6 +549,7 @@ export default function MessageList({
                         onDelete={() => onDeleteMessage?.(message.id)}
                         onEdit={() => handleEditMessage(message.id)}
                         onReply={() => onReply?.(message)}
+                        onReact={() => handleReactToMessage(message.id)}
                       />
                     </div>
                     {/* Hover timestamp for grouped messages */}

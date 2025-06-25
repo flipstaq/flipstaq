@@ -845,6 +845,17 @@ export default function ChatDrawer({
     }
   };
 
+  const handleMessageUpdate = (
+    messageId: string,
+    updatedMessage: Partial<Message>
+  ) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((message) =>
+        message.id === messageId ? { ...message, ...updatedMessage } : message
+      )
+    );
+  };
+
   const handleClose = () => {
     setIsNewChatMode(false);
     setSearchQuery('');
@@ -1164,6 +1175,7 @@ export default function ChatDrawer({
                   onRetryMessage={handleRetryMessage}
                   onDeleteMessage={handleDeleteMessage}
                   onReply={handleReplyToMessage}
+                  onMessageUpdate={handleMessageUpdate}
                 />
               </div>{' '}
               {/* Typing indicator positioned below message input */}

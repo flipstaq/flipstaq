@@ -676,3 +676,142 @@ Planned rate limits:
 - **Naming**: `{timestamp}-{random}.{extension}`
 - **Access**: Files are served statically via the API Gateway
 - **Security**: Only authenticated users can upload and access files
+
+---
+
+## Message Reactions
+
+### POST /messages/:messageId/reactions
+
+**Toggle an emoji reaction on a message**
+
+#### Path Parameters
+
+- `messageId`: The ID of the message to react to
+
+#### Request Body
+
+```json
+{
+  "emoji": "👍"
+}
+```
+
+#### Response (200) - Reaction Added
+
+```json
+{
+  "action": "added",
+  "reaction": {
+    "id": "clx1y2z3a4b5c6d7e8f9g0h1",
+    "emoji": "👍",
+    "userId": "clx1y2z3a4b5c6d7e8f9g0h2",
+    "user": {
+      "id": "clx1y2z3a4b5c6d7e8f9g0h2",
+      "username": "johndoe",
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "createdAt": "2025-06-19T17:30:00.000Z"
+  }
+}
+```
+
+#### Response (200) - Reaction Removed
+
+```json
+{
+  "action": "removed",
+  "emoji": "👍"
+}
+```
+
+#### Validation Rules
+
+- Only built-in emoji characters are allowed
+- User can only have one reaction per emoji per message
+- Clicking the same emoji again removes the reaction
+- Maximum 5 different emojis per message (optional limit)
+
+### GET /messages/:messageId/reactions
+
+**Get all reactions for a message**
+
+#### Path Parameters
+
+- `messageId`: The ID of the message
+
+#### Response (200)
+
+```json
+[
+  {
+    "id": "clx1y2z3a4b5c6d7e8f9g0h1",
+    "emoji": "👍",
+    "userId": "clx1y2z3a4b5c6d7e8f9g0h2",
+    "user": {
+      "id": "clx1y2z3a4b5c6d7e8f9g0h2",
+      "username": "johndoe",
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "createdAt": "2025-06-19T17:30:00.000Z"
+  },
+  {
+    "id": "clx1y2z3a4b5c6d7e8f9g0h3",
+    "emoji": "❤️",
+    "userId": "clx1y2z3a4b5c6d7e8f9g0h4",
+    "user": {
+      "id": "clx1y2z3a4b5c6d7e8f9g0h4",
+      "username": "janedoe",
+      "firstName": "Jane",
+      "lastName": "Doe"
+    },
+    "createdAt": "2025-06-19T17:30:15.000Z"
+  }
+]
+```
+
+### WebSocket Events
+
+#### `toggleReaction` (Client → Server)
+
+```json
+{
+  "messageId": "clx1y2z3a4b5c6d7e8f9g0h1",
+  "emoji": "👍"
+}
+```
+
+#### `messageReaction` (Server → Client)
+
+```json
+{
+  "messageId": "clx1y2z3a4b5c6d7e8f9g0h1",
+  "emoji": "👍",
+  "userId": "clx1y2z3a4b5c6d7e8f9g0h2",
+  "username": "johndoe",
+  "action": "added",
+  "reaction": {
+    "id": "clx1y2z3a4b5c6d7e8f9g0h1",
+    "emoji": "👍",
+    "userId": "clx1y2z3a4b5c6d7e8f9g0h2",
+    "user": {
+      "id": "clx1y2z3a4b5c6d7e8f9g0h2",
+      "username": "johndoe",
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "createdAt": "2025-06-19T17:30:00.000Z"
+  }
+}
+```
+
+### Frontend Implementation Notes
+
+- **Built-in Emojis**: Use only system emojis, no external emoji libraries
+- **Real-time Updates**: Subscribe to `messageReaction` WebSocket events
+- **UI/UX**: Show emoji picker on hover/click, group reactions by emoji
+- **Animation**: Add subtle hover and click animations for reactions
+- **Accessibility**: Ensure reactions are accessible via keyboard navigation
+- **Performance**: Debounce rapid clicking to prevent spam reactions

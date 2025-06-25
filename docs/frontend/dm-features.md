@@ -201,7 +201,7 @@ The paste-to-upload feature allows users to directly paste images from their cli
 1. **Copy Image**: User copies an image to clipboard (screenshot, right-click copy, etc.)
 2. **Paste in Input**: User clicks in the message input and presses Ctrl+V (⌘+V)
 3. **Automatic Processing**: System automatically detects the image and adds it to the file queue
-4. **Visual Feedback**: 
+4. **Visual Feedback**:
    - Green success message appears: "Image pasted successfully! Ready to send."
    - Image appears in the file preview section
    - Success message auto-dismisses after 3 seconds
@@ -223,7 +223,7 @@ const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const item = items[i];
 
     // Check if the item is an image file
-    if (item.kind === 'file' && item.type.startsWith('image/')) {
+    if (item.kind === "file" && item.type.startsWith("image/")) {
       e.preventDefault(); // Prevent default paste behavior for images
 
       const file = item.getAsFile();
@@ -297,3 +297,184 @@ Available in English and Arabic with proper RTL support.
 - **Preview Optimization**: Object URLs are created and cleaned up properly
 - **Upload Queue**: Integrates with existing upload queue system
 - **Auto-cleanup**: Success messages auto-dismiss to avoid UI clutter
+
+---
+
+## Emoji Reactions Feature
+
+The emoji reactions feature allows users to react to messages with emojis, providing a quick way to express emotions or acknowledgment without sending a separate message.
+
+### User Experience Flow
+
+#### Adding a Reaction
+
+1. **Hover Over Message**: Hover over any message to reveal the reaction button next to the context menu
+2. **Click Reaction Button**: Click the smiley face (😊) icon that appears on hover
+3. **Choose Emoji**: Select from 6 quick emojis: 👍, ❤️, 😂, 😮, 😢, 😡
+4. **Instant Feedback**: The reaction appears immediately below the message
+5. **Real-time Sync**: All users in the conversation see the reaction in real-time
+
+**Alternative Method:**
+
+1. **Context Menu**: Right-click or click the three dots menu on any message
+2. **Select React**: Click the "React" option (😊 icon)
+3. **Emoji Picker Opens**: A picker with 6 emojis appears below the message: 👍, ❤️, 😂, 😮, 😢, 😡
+4. **Select Emoji**: Click on any emoji to react
+5. **Instant Reaction**: The reaction is applied immediately and picker closes
+
+#### Removing a Reaction
+
+1. **Click Same Emoji**: Click the same emoji you've already reacted with
+2. **Instant Removal**: The reaction disappears immediately
+3. **Real-time Update**: All users see the reaction removal
+
+#### Viewing Reactions
+
+1. **Grouped Display**: Reactions are grouped by emoji type with counts
+2. **User List**: Hover over a reaction to see who reacted with that emoji
+3. **Current User Highlight**: Your own reactions are highlighted in primary color
+4. **Compact Layout**: Multiple reactions display in a compact row below messages
+
+### Technical Implementation
+
+#### Components
+
+**EmojiPickerPortal.tsx** _(New)_
+
+- Shared emoji picker component using React Portal
+- Automatically calculates optimal positioning to avoid viewport overflow
+- Handles click-outside closing behavior
+- Provides consistent emoji selection across all trigger methods
+- Supports both hover and context menu activation
+
+**EmojiReactionButton.tsx** _(Enhanced)_
+
+- Uses the new EmojiPickerPortal for consistent positioning
+- Handles both internal state and external control (for context menu)
+- Provides proper portal-based overflow handling
+- Supports bidirectional communication with parent components
+- Automatically positions picker above or below based on available space
+
+**MessageReactions.tsx** _(Simplified)_
+
+- Focused solely on displaying existing reactions
+- Removed deprecated emoji picker functionality
+- Cleaner component with single responsibility
+- Shows reaction counts and user information
+- Provides tooltip with user names
+
+**MessageContextMenu.tsx** _(Unchanged)_
+
+- Includes "React" option alongside Reply, Edit, Delete
+- Uses Smile icon for visual consistency
+- Triggers EmojiReactionButton when React is selected
+
+**MessageList.tsx** _(Updated)_
+
+- Simplified state management for emoji picker visibility
+- Uses single EmojiReactionButton component for both hover and context menu
+- Handles real-time reaction updates via WebSocket
+- Manages emoji picker visibility coordination between hover and context menu
+
+**ChatDrawer.tsx** _(Unchanged)_
+
+- Manages overall message state including reactions
+- Provides message update handler for reaction changes
+- Passes current user ID for reaction ownership detection
+
+#### Portal-Based Positioning
+
+The new implementation uses React Portal to render the emoji picker in `document.body`, ensuring proper positioning and avoiding overflow issues:
+
+```typescript
+// Automatic positioning calculation
+const calculatePosition = () => {
+  const triggerRect = triggerRef.current.getBoundingClientRect();
+  const pickerWidth = 240;
+  const pickerHeight = 60;
+
+  // Smart positioning to stay within viewport
+  let left = triggerRect.left;
+  let top = triggerRect.top - pickerHeight - 8;
+
+  // Adjust for viewport overflow
+  if (left + pickerWidth > window.innerWidth) {
+    left = triggerRect.right - pickerWidth;
+  }
+  if (top < 0) {
+    top = triggerRect.bottom + 8; // Place below if no space above
+  }
+
+  return { top, left };
+};
+```
+
+#### Real-time Updates
+
+```typescript
+// Subscribe to reaction events
+useEffect(() => {
+  const unsubscribe = onMessageReaction((reactionEvent) => {
+    // Update local message state with new reaction data
+    if (reactionEvent.action === "added") {
+      // Add new reaction to message
+    } else if (reactionEvent.action === "removed") {
+      // Remove reaction from message
+    }
+  });
+  return unsubscribe;
+}, []);
+```
+
+#### WebSocket Integration
+
+- **toggleReaction**: Sends reaction toggle request to server
+- **messageReaction**: Receives real-time reaction updates
+- **Action Types**: 'added' or 'removed' for proper state management
+
+### Internationalization
+
+Translation keys for reactions:
+
+- `chat:add_emoji` - Tooltip for reaction button
+- `chat:react` - Context menu "React" option text
+- `chat:reacted_with` - Accessibility text for reactions
+- `chat:reaction_by` - User attribution text
+
+Available in English and Arabic with proper RTL support.
+
+### Validation & Security
+
+- **Built-in Emojis Only**: Only system emojis are allowed, no external sources
+- **One Reaction Per Emoji**: Users can only react once per emoji per message
+- **Message Ownership**: Users cannot react to deleted messages
+- **Rate Limiting**: Prevents spam reactions through backend validation
+
+### Accessibility
+
+- **Keyboard Navigation**: All reaction buttons are keyboard accessible
+- **Screen Reader Support**: Proper ARIA labels and announcements
+- **High Contrast**: Reactions are visible in both light and dark themes
+- **Tooltips**: Clear descriptions of reaction counts and users
+
+### Performance
+
+- **Optimistic Updates**: Reactions appear immediately before server confirmation
+- **Efficient Re-renders**: Only affected messages re-render on reaction changes
+- **Memory Management**: Proper cleanup of event listeners and subscriptions
+- **Debouncing**: Prevents rapid-fire reaction toggles
+
+### UI/UX Design
+
+- **Hover Reveal**: Reaction button appears on message hover next to the context menu
+- **Context Menu Integration**: "React" option available in message context menu
+- **Portal-Based Positioning**: Emoji picker uses React Portal for optimal placement
+- **Smart Overflow Handling**: Picker automatically repositions to stay within viewport
+- **Smooth Animations**: Subtle scale animations on hover and click
+- **Color Coding**: Current user reactions highlighted with primary color
+- **Compact Layout**: Reactions don't overwhelm the message content
+- **Responsive**: Works seamlessly on mobile and desktop devices
+- **Visual Hierarchy**: Reaction button visually grouped with other message actions
+- **Consistent Experience**: Same picker behavior for both hover and context menu triggers
+- **No Layout Shift**: Portal rendering prevents layout disruption
+- **Backdrop Blur**: Subtle visual separation when picker is open

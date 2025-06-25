@@ -39,35 +39,35 @@ enum ReportStatus {
 }
 
 model User {
-  id                  String         @id @default(cuid())
-  email               String         @unique
-  username            String         @unique
+  id                  String            @id @default(cuid())
+  email               String            @unique
+  username            String            @unique
   firstName           String
   lastName            String
   password            String // Hashed password
   dateOfBirth         DateTime
   country             String
-  role                UserRole       @default(USER)
-  status              UserStatus     @default(ACTIVE)
-  isActive            Boolean        @default(true)
-  isOnline            Boolean        @default(false)
+  role                UserRole          @default(USER)
+  status              UserStatus        @default(ACTIVE)
+  isActive            Boolean           @default(true)
+  isOnline            Boolean           @default(false)
   lastSeen            DateTime?
   deletedAt           DateTime? // Soft delete timestamp
   deletedById         String? // ID of admin who deleted this user  
-  emailVerified       Boolean        @default(false)
-  verificationToken   String?        @unique
+  emailVerified       Boolean           @default(false)
+  verificationToken   String?           @unique
   tokenExpiresAt      DateTime?
-  resetPasswordToken  String?        @unique
+  resetPasswordToken  String?           @unique
   resetTokenExpiresAt DateTime?
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  // Relations
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt // Relations
   refreshTokens       RefreshToken[]
   products            Product[]
   favorites           Favorite[]
   reviews             Review[]
   sentMessages        Message[]
-  conversations       Conversation[] @relation("ConversationParticipants")
+  messageReactions    MessageReaction[]
+  conversations       Conversation[]    @relation("ConversationParticipants")
 
   // Self-referential relation for deletion tracking
   deletedBy    User?   @relation("UserDeletions", fields: [deletedById], references: [id])
@@ -176,6 +176,7 @@ model Message {
   replyToMessage Message?            @relation("MessageReply", fields: [replyToMessageId], references: [id], onDelete: SetNull)
   replies        Message[]           @relation("MessageReply")
   attachments    MessageAttachment[]
+  reactions      MessageReaction[]
 
   @@map("messages")
 }
@@ -193,6 +194,20 @@ model MessageAttachment {
   message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@map("message_attachments")
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  emoji     String
+  messageId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji]) // one emoji per user per message
+  @@map("message_reactions")
 }
 
 model Block {

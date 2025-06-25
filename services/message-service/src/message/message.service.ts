@@ -14,6 +14,8 @@ import {
   MessageResponseDto,
   MarkAsReadDto,
   EditMessageDto,
+  CreateReactionDto,
+  MessageReactionDto,
 } from "../dto/message.dto";
 
 @Injectable()
@@ -320,6 +322,23 @@ export class MessageService {
               metadata: true,
             },
           },
+          reactions: {
+            select: {
+              id: true,
+              emoji: true,
+              userId: true,
+              createdAt: true,
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+            },
+            orderBy: { createdAt: "asc" },
+          },
         },
         orderBy: { createdAt: "desc" },
         take: limit,
@@ -354,6 +373,18 @@ export class MessageService {
           fileType: att.fileType,
           fileSize: att.fileSize,
           metadata: att.metadata as any,
+        })),
+        reactions: message.reactions?.map((reaction) => ({
+          id: reaction.id,
+          emoji: reaction.emoji,
+          userId: reaction.userId,
+          user: {
+            id: reaction.user.id,
+            username: reaction.user.username,
+            firstName: reaction.user.firstName,
+            lastName: reaction.user.lastName,
+          },
+          createdAt: reaction.createdAt,
         })),
         read: message.read,
         editedAt: message.editedAt,
@@ -833,5 +864,136 @@ export class MessageService {
         metadata: att.metadata as any, // Type assertion for JsonValue compatibility
       })),
     };
+  }
+
+  /**
+   * Add or remove a reaction to/from a message
+   */
+  async toggleReaction(
+    messageId: string,
+    userId: string,
+    emoji: string
+  ): Promise<{ action: "added" | "removed"; reaction?: MessageReactionDto }> {
+    // First check if the message exists and is not deleted
+    const message = await this.prisma.message.findFirst({
+      where: {
+        id: messageId,
+        deletedAt: null,
+      },
+      include: {
+        conversation: {
+          select: {
+            participants: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!message) {
+      throw new NotFoundException("Message not found");
+    }
+
+    // Check if user is a participant in the conversation
+    const isParticipant = message.conversation.participants.some(
+      (p) => p.id === userId
+    );
+
+    if (!isParticipant) {
+      throw new ForbiddenException(
+        "You can only react to messages in conversations you're part of"
+      );
+    }
+
+    // Check if user already reacted with this emoji
+    const existingReaction = await this.prisma.messageReaction.findUnique({
+      where: {
+        messageId_userId_emoji: {
+          messageId,
+          userId,
+          emoji,
+        },
+      },
+    });
+
+    if (existingReaction) {
+      // Remove the reaction
+      await this.prisma.messageReaction.delete({
+        where: { id: existingReaction.id },
+      });
+
+      return { action: "removed" };
+    } else {
+      // Add the reaction
+      const newReaction = await this.prisma.messageReaction.create({
+        data: {
+          messageId,
+          userId,
+          emoji,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      });
+
+      return {
+        action: "added",
+        reaction: {
+          id: newReaction.id,
+          emoji: newReaction.emoji,
+          userId: newReaction.userId,
+          user: {
+            id: newReaction.user.id,
+            username: newReaction.user.username,
+            firstName: newReaction.user.firstName,
+            lastName: newReaction.user.lastName,
+          },
+          createdAt: newReaction.createdAt,
+        },
+      };
+    }
+  }
+
+  /**
+   * Get all reactions for a message
+   */
+  async getMessageReactions(messageId: string): Promise<MessageReactionDto[]> {
+    const reactions = await this.prisma.messageReaction.findMany({
+      where: { messageId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return reactions.map((reaction) => ({
+      id: reaction.id,
+      emoji: reaction.emoji,
+      userId: reaction.userId,
+      user: {
+        id: reaction.user.id,
+        username: reaction.user.username,
+        firstName: reaction.user.firstName,
+        lastName: reaction.user.lastName,
+      },
+      createdAt: reaction.createdAt,
+    }));
   }
 }

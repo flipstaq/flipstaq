@@ -218,6 +218,14 @@ exports.Prisma.MessageAttachmentScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.MessageReactionScalarFieldEnum = {
+  id: 'id',
+  emoji: 'emoji',
+  messageId: 'messageId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.BlockScalarFieldEnum = {
   id: 'id',
   blockerId: 'blockerId',
@@ -303,6 +311,7 @@ exports.Prisma.ModelName = {
   Conversation: 'Conversation',
   Message: 'Message',
   MessageAttachment: 'MessageAttachment',
+  MessageReaction: 'MessageReaction',
   Block: 'Block',
   Report: 'Report'
 };

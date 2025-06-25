@@ -60,13 +60,13 @@ model User {
   resetPasswordToken   String?   @unique
   resetTokenExpiresAt  DateTime?
   createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-    // Relations
+  updatedAt         DateTime   @updatedAt    // Relations
   refreshTokens RefreshToken[]
   products      Product[]
   favorites     Favorite[]
   reviews       Review[]
   sentMessages  Message[]
+  messageReactions MessageReaction[]
   conversations Conversation[] @relation("ConversationParticipants")
   
   // Self-referential relation for deletion tracking
@@ -175,6 +175,7 @@ model Message {
   replyToMessage Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id], onDelete: SetNull)
   replies        Message[]    @relation("MessageReply")
   attachments    MessageAttachment[]
+  reactions      MessageReaction[]
 
   @@map("messages")
 }
@@ -192,6 +193,20 @@ model MessageAttachment {
   message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@map("message_attachments")
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  emoji     String
+  messageId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji]) // one emoji per user per message
+  @@map("message_reactions")
 }
 
 model Block {

@@ -56,4 +56,16 @@ export interface Message {
   isRead: boolean;
   status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
   attachments?: MessageAttachment[];
+  reactions?: Array<{
+    id: string;
+    emoji: string;
+    userId: string;
+    user: {
+      id: string;
+      username: string;
+      firstName: string;
+      lastName: string;
+    };
+    createdAt: string;
+  }>;
 }
