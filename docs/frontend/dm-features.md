@@ -339,9 +339,12 @@ The emoji reactions feature allows users to react to messages with emojis, provi
 
 #### Components
 
-**EmojiPickerPortal.tsx** _(New)_
+**EmojiPickerPortal.tsx** _(Enhanced)_
 
-- Shared emoji picker component using React Portal
+- Full emoji picker component using React Portal (same as MessageInput)
+- Complete emoji categories: Smileys, People, Nature, Symbols
+- Category-based navigation with tabs for better organization
+- Grid layout with comprehensive emoji selection
 - Automatically calculates optimal positioning to avoid viewport overflow
 - Handles click-outside closing behavior
 - Provides consistent emoji selection across all trigger methods
