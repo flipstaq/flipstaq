@@ -145,6 +145,7 @@ export default function MessageContextMenu({
     return createPortal(
       <div
         ref={menuRef}
+        data-message-context-menu
         className="min-w-[140px] max-w-[200px] rounded-lg border border-secondary-200 bg-white py-1 shadow-xl dark:border-secondary-700 dark:bg-secondary-800"
         style={{
           position: 'fixed',

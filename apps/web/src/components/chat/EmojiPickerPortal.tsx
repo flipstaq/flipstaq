@@ -480,10 +480,10 @@ export default function EmojiPickerPortal({
   if (!isVisible) return null;
 
   const position = calculatePosition();
-
   return createPortal(
     <div
       ref={pickerRef}
+      data-emoji-picker-portal
       className="max-h-96 w-80 overflow-hidden rounded-2xl border border-secondary-200 bg-white shadow-2xl dark:border-secondary-700 dark:bg-secondary-800"
       style={{
         position: 'fixed',

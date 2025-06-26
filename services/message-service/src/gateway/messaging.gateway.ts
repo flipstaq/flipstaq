@@ -242,6 +242,12 @@ export class MessagingGateway {
         case "toggleReaction":
           this.handleToggleReaction(payload, client);
           break;
+        case "searchMessages":
+          this.handleSearchMessages(payload, client);
+          break;
+        case "getOlderMessages":
+          this.handleGetOlderMessages(payload, client);
+          break;
         case "ping":
           // Handle ping from client to keep connection alive
           this.sendToClient(client, { event: "pong", data: {} });
@@ -629,7 +635,79 @@ export class MessagingGateway {
       this.logger.error("Toggle reaction error:", error);
       return this.sendToClient(client, { error: error.message });
     }
-  } // Helper methods for WebSocket communication
+  }
+
+  async handleSearchMessages(
+    data: { conversationId: string; query: string; limit?: number },
+    client: AuthenticatedSocket
+  ) {
+    try {
+      if (!client.userId) {
+        return this.sendToClient(client, {
+          event: "searchMessagesError",
+          error: "Authentication required",
+        });
+      } // Search messages through service
+      const result = await this.messageService.searchMessages(
+        client.userId,
+        data.conversationId,
+        data.query,
+        data.limit || 100
+      );
+
+      console.log(
+        `✅ Backend: Found ${result.total} results, returning ${result.messages.length} messages`
+      );
+
+      // Send results back to client as searchMessagesResponse event
+      return this.sendToClient(client, {
+        event: "searchMessagesResponse",
+        data: result,
+      });
+    } catch (error) {
+      this.logger.error("Search messages error:", error);
+      return this.sendToClient(client, {
+        event: "searchMessagesError",
+        error: error.message,
+      });
+    }
+  }
+
+  async handleGetOlderMessages(
+    data: { conversationId: string; beforeMessageId: string; limit?: number },
+    client: AuthenticatedSocket
+  ) {
+    try {
+      if (!client.userId) {
+        return this.sendToClient(client, {
+          event: "getOlderMessagesError",
+          error: "Authentication required",
+        });
+      }
+
+      // Get older messages through service
+      const result = await this.messageService.getOlderMessages(
+        client.userId,
+        data.conversationId,
+        data.beforeMessageId,
+        data.limit || 50
+      );
+
+      // Send results back to client
+      return this.sendToClient(client, {
+        event: "getOlderMessagesResponse",
+        data: result,
+      });
+    } catch (error) {
+      this.logger.error("Get older messages error:", error);
+      return this.sendToClient(client, {
+        event: "getOlderMessagesError",
+        error: error.message,
+      });
+    }
+  }
+
+  // Helper methods for WebSocket communication
   private sendToClient(client: AuthenticatedSocket, data: any) {
     if (client.readyState === 1) {
       // WebSocket.OPEN = 1

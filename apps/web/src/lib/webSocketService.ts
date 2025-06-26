@@ -271,6 +271,18 @@ class WebSocketService {
       case 'userTyping':
         this.emit('userTyping', eventData);
         break;
+      case 'searchMessagesResponse':
+        this.emit('searchMessagesResponse', eventData);
+        break;
+      case 'searchMessagesError':
+        this.emit('searchMessagesError', eventData);
+        break;
+      case 'getOlderMessagesResponse':
+        this.emit('getOlderMessagesResponse', eventData);
+        break;
+      case 'getOlderMessagesError':
+        this.emit('getOlderMessagesError', eventData);
+        break;
       case 'ping':
         // Respond to server ping with pong
         this.send('pong', {});
@@ -361,9 +373,94 @@ class WebSocketService {
   deleteMessage(messageId: string, conversationId: string): void {
     this.send('deleteMessage', { messageId, conversationId });
   }
-
   toggleReaction(messageId: string, emoji: string): void {
     this.send('toggleReaction', { messageId, emoji });
+  }
+
+  // Search messages in a conversation using WebSocket
+  searchMessages(
+    conversationId: string,
+    query: string,
+    limit?: number
+  ): Promise<{ messages: any[]; total: number }> {
+    console.log('🔌 WebSocketService: searchMessages called with:', {
+      conversationId,
+      query,
+      limit,
+    });
+    return new Promise((resolve, reject) => {
+      // Set up one-time listeners for response
+      const handleSuccess = (data: any) => {
+        console.log(
+          '🔌 WebSocketService: searchMessagesResponse received:',
+          data
+        );
+        this.off('searchMessagesResponse', handleSuccess);
+        this.off('searchMessagesError', handleError);
+        resolve(data);
+      };
+
+      const handleError = (error: any) => {
+        console.log(
+          '🔌 WebSocketService: searchMessagesError received:',
+          error
+        );
+        this.off('searchMessagesResponse', handleSuccess);
+        this.off('searchMessagesError', handleError);
+        reject(new Error(error.error || 'Failed to search messages'));
+      };
+
+      // Listen for response
+      this.on('searchMessagesResponse', handleSuccess);
+      this.on('searchMessagesError', handleError);
+
+      // Send search request
+      console.log('🔌 WebSocketService: Sending searchMessages event');
+      this.send('searchMessages', { conversationId, query, limit });
+
+      // Set timeout to prevent hanging
+      setTimeout(() => {
+        this.off('searchMessagesResponse', handleSuccess);
+        this.off('searchMessagesError', handleError);
+        reject(new Error('Search messages request timed out'));
+      }, 10000);
+    });
+  }
+
+  // Get older messages using WebSocket
+  getOlderMessages(
+    conversationId: string,
+    beforeMessageId: string,
+    limit?: number
+  ): Promise<{ messages: any[]; hasMore: boolean }> {
+    return new Promise((resolve, reject) => {
+      // Set up one-time listeners for response
+      const handleSuccess = (data: any) => {
+        this.off('getOlderMessagesResponse', handleSuccess);
+        this.off('getOlderMessagesError', handleError);
+        resolve(data);
+      };
+
+      const handleError = (error: any) => {
+        this.off('getOlderMessagesResponse', handleSuccess);
+        this.off('getOlderMessagesError', handleError);
+        reject(new Error(error.error || 'Failed to get older messages'));
+      };
+
+      // Listen for response
+      this.on('getOlderMessagesResponse', handleSuccess);
+      this.on('getOlderMessagesError', handleError);
+
+      // Send request
+      this.send('getOlderMessages', { conversationId, beforeMessageId, limit });
+
+      // Set timeout to prevent hanging
+      setTimeout(() => {
+        this.off('getOlderMessagesResponse', handleSuccess);
+        this.off('getOlderMessagesError', handleError);
+        reject(new Error('Get older messages request timed out'));
+      }, 10000);
+    });
   }
 
   private send(event: string, payload: any): void {

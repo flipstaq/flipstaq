@@ -129,9 +129,12 @@ export default function ReportModal({
     }
   };
   if (!isOpen || !mounted) return null;
-
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 p-4"
+      role="dialog"
+      aria-modal="true"
+    >
       <div
         className={`w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-secondary-800 ${
           language === 'ar' ? 'text-right' : 'text-left'

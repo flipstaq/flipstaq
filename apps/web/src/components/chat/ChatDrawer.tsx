@@ -24,6 +24,7 @@ import {
 import ConversationList from './ConversationList';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
+import MessageSearch from './MessageSearch';
 import { userService, User as UserType } from '@/lib/userService';
 import { Conversation, Message } from '@/types/chat';
 import { BlockButton } from '@/components/common/BlockButton';
@@ -31,6 +32,7 @@ import ReportModal from '@/components/report/ReportModal';
 import { useBlockStatus } from '@/hooks/useBlockStatus';
 import { useVerificationCheck } from '@/hooks/useVerificationCheck';
 import VerificationPrompt from '@/components/auth/VerificationPrompt';
+import { useToast } from '@/components/providers/ToastProvider';
 
 interface ChatDrawerProps {
   isOpen: boolean;
@@ -103,6 +105,7 @@ export default function ChatDrawer({
 }: ChatDrawerProps) {
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const { error: showErrorToast, success: showSuccessToast } = useToast();
   const {
     connect,
     isConnected,
@@ -122,6 +125,12 @@ export default function ChatDrawer({
     useState<Conversation | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [messageCache, setMessageCache] = useState<Map<string, Message[]>>(
+    new Map()
+  );
+  const [loadingConversations, setLoadingConversations] = useState<Set<string>>(
+    new Set()
+  );
   const [isNewChatMode, setIsNewChatMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -138,10 +147,20 @@ export default function ChatDrawer({
     senderUsername: string;
   } | null>(null);
 
+  // Infinite scroll and search state
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [isLoadingOlder, setIsLoadingOlder] = useState(false);
+  const [isMessageSearchOpen, setIsMessageSearchOpen] = useState(false);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<
+    string | null
+  >(null);
+
   // Block status hook for the selected conversation participant
-  const { blockStatus, updateBlockStatus } = useBlockStatus(
-    selectedConversation?.participant?.id || null
-  );
+  const {
+    blockStatus,
+    updateBlockStatus,
+    isLoading: isBlockLoading,
+  } = useBlockStatus(selectedConversation?.participant?.id || null);
   // Verification check hook
   const {
     checkVerification,
@@ -150,12 +169,12 @@ export default function ChatDrawer({
     closePrompt,
     isVerified,
   } = useVerificationCheck();
-
   // Remove polling interval ref since we're using WebSocket only
   // const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const conversationsRef = useRef<Conversation[]>([]);
   const selectedConversationRef = useRef<Conversation | null>(null);
   const messagesRef = useRef<Message[]>([]);
+  const messageCacheRef = useRef<Map<string, Message[]>>(new Map());
   const drawerRef = useRef<HTMLDivElement>(null);
 
   // Update refs when state changes
@@ -166,9 +185,13 @@ export default function ChatDrawer({
   useEffect(() => {
     selectedConversationRef.current = selectedConversation;
   }, [selectedConversation]);
+
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+  useEffect(() => {
+    messageCacheRef.current = messageCache;
+  }, [messageCache]);
 
   // WebSocket connection and real-time message handling
   useEffect(() => {
@@ -215,6 +238,19 @@ export default function ChatDrawer({
               status: 'delivered',
               attachments: newMessage.attachments || [],
             };
+
+            // Update cache as well
+            setMessageCache((prev) => {
+              const newMap = new Map(prev);
+              const cachedMessages =
+                newMap.get(newMessage.conversationId) || [];
+              newMap.set(newMessage.conversationId, [
+                ...cachedMessages,
+                convertedMessage,
+              ]);
+              return newMap;
+            });
+
             return [...prevMessages, convertedMessage];
           }); // Auto-mark the message as read since the conversation is currently active
           // This ensures the sender sees the blue checkmark immediately
@@ -609,7 +645,6 @@ export default function ChatDrawer({
       setIsSearchLoading(false);
     }
   }, [searchQuery]);
-
   const loadConversations = async () => {
     try {
       setIsLoading(true);
@@ -618,12 +653,60 @@ export default function ChatDrawer({
         convertApiConversation(conv, user?.id || '')
       );
       setConversations(conversations);
+
+      // Prefetch messages for the first 3 conversations for better UX
+      const topConversations = conversations.slice(0, 3);
+      topConversations.forEach((conv) => {
+        if (!messageCache.has(conv.id)) {
+          prefetchMessages(conv.id);
+        }
+      });
     } catch (error) {
       console.error('Error loading conversations:', error);
       // Show empty state or error message
       setConversations([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+  // Prefetch messages for a conversation (for instant switching)
+  const prefetchMessages = async (conversationId: string) => {
+    // Don't prefetch if already cached or currently loading
+    if (
+      messageCache.has(conversationId) ||
+      loadingConversations.has(conversationId)
+    ) {
+      return;
+    }
+
+    try {
+      setLoadingConversations((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(conversationId);
+        return newSet;
+      });
+
+      const apiMessages = await messageService.getMessages(conversationId);
+      const messages = apiMessages.map((msg) =>
+        convertApiMessage(msg, user?.id)
+      );
+
+      // Cache the messages
+      setMessageCache((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(conversationId, messages);
+        return newMap;
+      });
+
+      console.log(`✅ Prefetched messages for conversation: ${conversationId}`);
+    } catch (error) {
+      console.error('Error prefetching messages:', error);
+    } finally {
+      setLoadingConversations((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(conversationId);
+        return newSet;
+      });
     }
   };
 
@@ -634,39 +717,70 @@ export default function ChatDrawer({
     }
   }, [isOpen, user?.id]);
   const handleConversationSelect = async (conversation: Conversation) => {
+    // Set the selected conversation immediately
     setSelectedConversation(conversation);
+
+    // Reset infinite scroll state
+    setHasMoreMessages(true); // Assume there might be older messages
+    setIsLoadingOlder(false);
+    setHighlightedMessageId(null);
+
+    // Check if we have cached messages for instant display
+    const cachedMessages = messageCache.get(conversation.id);
+    if (cachedMessages) {
+      // Instantly display cached messages with no loading
+      setMessages(cachedMessages);
+      console.log(
+        `⚡ Instantly loaded ${cachedMessages.length} cached messages for: ${conversation.id}`
+      );
+    } else {
+      // If no cache, set empty array to avoid showing previous conversation's messages
+      setMessages([]);
+    }
+
+    // Mark conversation as read immediately (optimistic)
+    if (conversation.unreadCount > 0) {
+      setConversations((prevConversations) =>
+        prevConversations.map((conv) =>
+          conv.id === conversation.id ? { ...conv, unreadCount: 0 } : conv
+        )
+      );
+    }
+
+    // Background sync: Always fetch fresh messages to ensure we have the latest
     try {
-      setIsLoading(true);
       const apiMessages = await messageService.getMessages(conversation.id);
-      const messages = apiMessages.map((msg) =>
+      const freshMessages = apiMessages.map((msg) =>
         convertApiMessage(msg, user?.id)
       );
-      setMessages(messages);
 
-      // Mark all messages in this conversation as read when opening it
-      // Only if there are unread messages to avoid unnecessary API calls
+      // Update both cache and current messages
+      setMessageCache((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(conversation.id, freshMessages);
+        return newMap;
+      });
+
+      // Only update UI if this is still the selected conversation
+      if (selectedConversationRef.current?.id === conversation.id) {
+        setMessages(freshMessages);
+      }
+
+      // Mark all messages as read in the background
       if (conversation.unreadCount > 0) {
         try {
           await messageService.markConversationAsRead(conversation.id);
-
-          // Optimistically update the UI to show no unread messages
-          setConversations((prevConversations) =>
-            prevConversations.map((conv) =>
-              conv.id === conversation.id ? { ...conv, unreadCount: 0 } : conv
-            )
-          );
-
           console.log('✅ Conversation marked as read:', conversation.id);
         } catch (error) {
           console.error('Failed to mark conversation as read:', error);
-          // Don't show error to user as this is a background operation
         }
       }
     } catch (error) {
-      console.error('Error loading messages:', error);
-      setMessages([]);
-    } finally {
-      setIsLoading(false);
+      console.error('Error syncing messages:', error);
+      // If we had cached messages, keep them; otherwise show empty state
+      if (!cachedMessages) {
+        setMessages([]);
+      }
     }
   };
   const handleSendMessage = async (
@@ -712,10 +826,17 @@ export default function ChatDrawer({
     };
 
     // Clear reply state
-    setReplyingTo(null);
-
-    // Add the temporary message to the UI
+    setReplyingTo(null); // Add the temporary message to the UI and cache
     setMessages((prev) => [...prev, tempMessage]);
+
+    // Also add to cache
+    setMessageCache((prev) => {
+      const newMap = new Map(prev);
+      const cachedMessages = newMap.get(selectedConversation.id) || [];
+      newMap.set(selectedConversation.id, [...cachedMessages, tempMessage]);
+      return newMap;
+    });
+
     try {
       const sentMessage = await messageService.sendMessage(
         content.trim(),
@@ -725,10 +846,20 @@ export default function ChatDrawer({
       );
       const message = convertApiMessage(sentMessage, user?.id);
 
-      // Replace the temporary message with the actual sent message
+      // Replace the temporary message with the actual sent message in both UI and cache
       setMessages((prev) =>
         prev.map((msg) => (msg.id === tempId ? message : msg))
       );
+
+      setMessageCache((prev) => {
+        const newMap = new Map(prev);
+        const cachedMessages = newMap.get(selectedConversation.id) || [];
+        newMap.set(
+          selectedConversation.id,
+          cachedMessages.map((msg) => (msg.id === tempId ? message : msg))
+        );
+        return newMap;
+      });
 
       // Update conversation's last message
       const lastMessageContent = attachments?.length
@@ -764,7 +895,8 @@ export default function ChatDrawer({
         )
       );
 
-      // TODO: Show error toast/notification
+      // Show error notification
+      showErrorToast(t('chat:message_send_failed'));
     }
   };
   const handleRetryMessage = async (failedMessage: Message) => {
@@ -835,13 +967,11 @@ export default function ChatDrawer({
         throw new Error('No conversation selected');
       }
 
-      await messageService.deleteMessage(messageId, selectedConversation.id);
-
-      // Note: The UI will be updated via WebSocket 'messageDeleted' event
+      await messageService.deleteMessage(messageId, selectedConversation.id); // Note: The UI will be updated via WebSocket 'messageDeleted' event
       // No need to manually update state here as WebSocket will handle it
     } catch (error) {
       console.error('Error deleting message:', error);
-      // TODO: Show error toast/notification
+      showErrorToast(t('chat:message_delete_failed'));
     }
   };
 
@@ -855,14 +985,79 @@ export default function ChatDrawer({
       )
     );
   };
-
   const handleClose = () => {
     setIsNewChatMode(false);
     setSearchQuery('');
     setSearchResults([]);
     setSelectedConversation(null);
+
+    // Clear message cache for memory management
+    setMessageCache(new Map());
+    setLoadingConversations(new Set());
+
     onClose();
   };
+  // Handle outside click to close drawer
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!isOpen) return;
+
+      const target = event.target as Node;
+
+      // Don't close if clicking inside the drawer
+      if (drawerRef.current && drawerRef.current.contains(target)) {
+        return;
+      }
+
+      // Don't close if clicking on context menu or modal elements
+      const clickedElement = target as Element;
+      if (clickedElement) {
+        // Check if clicking on context menu (portaled to document.body)
+        const contextMenu = clickedElement.closest(
+          '[data-message-context-menu]'
+        );
+        if (contextMenu) {
+          return;
+        } // Check if clicking on emoji picker (portaled to document.body)
+        const emojiPicker = clickedElement.closest(
+          '[data-emoji-picker-portal]'
+        );
+        if (emojiPicker) {
+          return;
+        }
+
+        // Check if clicking on message search modal
+        const searchModal = clickedElement.closest(
+          '[data-message-search-modal]'
+        );
+        if (searchModal) {
+          return;
+        }
+
+        // Check if clicking on report modal or other modals
+        const modal = clickedElement.closest(
+          '[role="dialog"], .modal, [data-modal]'
+        );
+        if (modal) {
+          return;
+        }
+      }
+
+      handleClose();
+    };
+
+    if (isOpen) {
+      // Add a small delay to prevent immediate closing when opening
+      const timeoutId = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isOpen, handleClose]);
 
   const handleBackToList = () => {
     setSelectedConversation(null);
@@ -899,13 +1094,11 @@ export default function ChatDrawer({
       setIsNewChatMode(false);
       setSearchQuery('');
       setSearchResults([]);
-      setMessages([]);
-
-      // Load messages for this conversation
+      setMessages([]); // Load messages for this conversation
       await handleConversationSelect(conversation);
     } catch (error) {
       console.error('Error starting conversation:', error);
-      // TODO: Show error toast/notification
+      showErrorToast(t('chat:conversation_start_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -928,23 +1121,97 @@ export default function ChatDrawer({
     setReplyingTo(null);
   };
 
-  if (!isOpen) return null;
+  // Handle loading older messages for infinite scroll
+  const handleLoadOlderMessages = async () => {
+    if (!selectedConversation || isLoadingOlder || !hasMoreMessages) return;
 
+    const oldestMessage = messages[0];
+    if (!oldestMessage) return;
+    setIsLoadingOlder(true);
+    try {
+      const result = await messageService.getOlderMessages(
+        selectedConversation.id,
+        oldestMessage.id,
+        50
+      );
+
+      if (result.messages.length > 0) {
+        const convertedMessages = result.messages.map((msg) =>
+          convertApiMessage(msg, user?.id)
+        );
+
+        // Prepend older messages to the current list
+        setMessages((prev) => [...convertedMessages, ...prev]);
+
+        // Update cache
+        setMessageCache((prev) => {
+          const newMap = new Map(prev);
+          const currentCached = newMap.get(selectedConversation.id) || [];
+          newMap.set(selectedConversation.id, [
+            ...convertedMessages,
+            ...currentCached,
+          ]);
+          return newMap;
+        });
+      } // Update hasMoreMessages based on the response
+      setHasMoreMessages(result.hasMore);
+    } catch (error) {
+      console.error('Error loading older messages:', error);
+      showErrorToast(t('chat:loading_older_messages_failed'));
+      setHasMoreMessages(false);
+    } finally {
+      setIsLoadingOlder(false);
+    }
+  };
+  // Handle message search result selection
+  const handleMessageSearchSelect = (messageId: string) => {
+    setHighlightedMessageId(messageId);
+    setIsMessageSearchOpen(false); // Close the search modal
+    
+    // Scroll to the message after a short delay to ensure it's rendered
+    setTimeout(() => {
+      const messageElement = document.getElementById(`message-${messageId}`);
+      if (messageElement) {
+        messageElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+
+    // Clear highlight after a few seconds
+    setTimeout(() => {
+      setHighlightedMessageId(null);
+    }, 3000);
+  };
+
+  // Always render the component for smooth transitions, but hide with transforms
   return (
     <>
       {' '}
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
+        className={`fixed inset-0 z-40 bg-black transition-all duration-300 ease-in-out ${
+          isOpen
+            ? 'pointer-events-auto bg-opacity-50'
+            : 'pointer-events-none bg-opacity-0'
+        }`}
         onClick={handleClose}
-      />{' '}
+      />
       {/* Chat Drawer */}
       <div
         ref={drawerRef}
         className={`fixed right-0 top-0 z-50 flex h-full flex-col border-l border-secondary-200 bg-white shadow-xl transition-all duration-300 ease-in-out dark:border-secondary-700 dark:bg-secondary-900 ${
           language === 'ar' ? 'left-0 right-auto border-l-0 border-r' : ''
-        } ${isMinimized ? 'w-80 md:w-96' : 'w-full md:w-96 lg:w-[56rem]'}`}
+        } ${isMinimized ? 'w-80 md:w-96' : 'w-full md:w-96 lg:w-[56rem]'} ${
+          isOpen
+            ? 'translate-x-0'
+            : language === 'ar'
+              ? '-translate-x-full'
+              : 'translate-x-full'
+        }`}
       >
+        {' '}
         {/* Header */}
         <div className="flex items-center justify-between border-b border-secondary-200 bg-white p-4 dark:border-secondary-700 dark:bg-secondary-900">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -960,15 +1227,23 @@ export default function ChatDrawer({
                 />
               </button>
             )}
-            <h2 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
-              {selectedConversation
-                ? `${selectedConversation.participant.firstName} ${selectedConversation.participant.lastName}`
-                : t('chat:messages')}
-            </h2>{' '}
+            <div
+              className="transform transition-all duration-300 ease-in-out"
+              key={selectedConversation?.id || 'no-conversation'}
+            >
+              <h2 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
+                {selectedConversation
+                  ? `${selectedConversation.participant.firstName} ${selectedConversation.participant.lastName}`
+                  : t('chat:messages')}
+              </h2>
+            </div>{' '}
             {selectedConversation && (
-              <div className="flex items-center space-x-1 rtl:space-x-reverse">
+              <div
+                className="flex items-center space-x-1 rtl:space-x-reverse"
+                key={`status-${selectedConversation.participant.id}`}
+              >
                 <Circle
-                  className={`h-2 w-2 ${
+                  className={`h-2 w-2 transition-colors duration-200 ${
                     selectedConversation.participant.isOnline
                       ? 'fill-current text-green-500'
                       : 'fill-current text-secondary-400'
@@ -980,9 +1255,12 @@ export default function ChatDrawer({
                     : t('common:offline')}
                 </span>
               </div>
-            )}
+            )}{' '}
             {selectedConversation && (
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <div
+                className="flex items-center space-x-2 rtl:space-x-reverse"
+                key={`actions-${selectedConversation.participant.id}`}
+              >
                 <BlockButton
                   targetUserId={selectedConversation.participant.id}
                   targetUsername={selectedConversation.participant.username}
@@ -1002,6 +1280,15 @@ export default function ChatDrawer({
             )}
           </div>{' '}
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            {selectedConversation && (
+              <button
+                onClick={() => setIsMessageSearchOpen(true)}
+                className="rounded-lg p-2 text-secondary-600 transition-all duration-200 hover:scale-105 hover:bg-secondary-50 hover:text-secondary-700 dark:text-secondary-400 dark:hover:bg-secondary-700 dark:hover:text-secondary-300"
+                title={t('chat:search_messages')}
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            )}
             {!selectedConversation && (
               <button
                 onClick={handleNewChat}
@@ -1158,25 +1445,84 @@ export default function ChatDrawer({
               <ConversationList
                 conversations={conversations}
                 onConversationSelect={handleConversationSelect}
+                onConversationHover={prefetchMessages}
                 isLoading={isLoading}
                 selectedConversationId={selectedConversation?.id}
               />
             )}
           </div>{' '}
-          {/* Chat Area */}
+          {/* Chat Area */}{' '}
           {selectedConversation ? (
-            <div className="flex h-full flex-1 flex-col">
+            <div
+              className="relative flex h-full flex-1 flex-col transition-opacity duration-200 ease-in-out"
+              key={selectedConversation.id}
+            >
+              {/* Blocking Overlay */}
+              {blockStatus.isBlocked && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-200 ease-in-out">
+                  <div className="mx-4 max-w-sm rounded-lg border border-secondary-200 bg-white p-6 text-center shadow-xl dark:border-secondary-700 dark:bg-secondary-800">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                      <X className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <h3 className="mb-2 text-lg font-semibold text-secondary-900 dark:text-secondary-100">
+                      {t('chat:user_blocked')}
+                    </h3>
+                    <p className="mb-4 text-sm text-secondary-600 dark:text-secondary-400">
+                      {t('chat:blocked_user_message')}
+                    </p>{' '}
+                    <button
+                      onClick={async () => {
+                        try {
+                          await updateBlockStatus(false);
+                        } catch (error) {
+                          console.error('Failed to unblock user:', error);
+                          // Most errors should be handled by the hook automatically
+                          // Only show user-facing errors for unexpected cases
+                          const errorMessage =
+                            error instanceof Error
+                              ? error.message
+                              : 'Unknown error';
+                          showErrorToast(
+                            `Failed to unblock user: ${errorMessage}`
+                          );
+                        }
+                      }}
+                      disabled={isBlockLoading}
+                      className="w-full rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isBlockLoading ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                          <span>{t('common:loading')}</span>
+                        </div>
+                      ) : (
+                        t('chat:unblock_user')
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}{' '}
               <div className="flex-1 overflow-hidden">
                 {' '}
-                <MessageList
-                  messages={messages}
-                  currentUserId={user?.id || ''}
-                  isLoading={isLoading}
-                  onRetryMessage={handleRetryMessage}
-                  onDeleteMessage={handleDeleteMessage}
-                  onReply={handleReplyToMessage}
-                  onMessageUpdate={handleMessageUpdate}
-                />
+                <div
+                  className="h-full transition-opacity duration-200 ease-in-out"
+                  key={`messages-${selectedConversation.id}`}
+                >
+                  {' '}
+                  <MessageList
+                    messages={messages}
+                    currentUserId={user?.id || ''}
+                    isLoading={false}
+                    onRetryMessage={handleRetryMessage}
+                    onDeleteMessage={handleDeleteMessage}
+                    onReply={handleReplyToMessage}
+                    onMessageUpdate={handleMessageUpdate}
+                    onLoadOlderMessages={handleLoadOlderMessages}
+                    hasMoreMessages={hasMoreMessages}
+                    isLoadingOlder={isLoadingOlder}
+                    highlightedMessageId={highlightedMessageId}
+                  />
+                </div>
               </div>{' '}
               {/* Typing indicator positioned below message input */}
               {(() => {
@@ -1188,7 +1534,6 @@ export default function ChatDrawer({
                         typing.userId !== user?.id // Exclude current user
                     )
                   : [];
-
                 return currentTypingUsers.length > 0 ? (
                   <div className="border-t border-secondary-200 bg-white px-4 py-3 dark:border-secondary-600 dark:bg-secondary-800">
                     <div className="flex items-center space-x-3">
@@ -1216,8 +1561,11 @@ export default function ChatDrawer({
                     </div>
                   </div>
                 ) : null;
-              })()}
-              <div className="flex-shrink-0">
+              })()}{' '}
+              <div
+                className="flex-shrink-0"
+                key={`input-${selectedConversation.id}`}
+              >
                 {' '}
                 <MessageInput
                   conversationId={selectedConversation?.id}
@@ -1264,6 +1612,15 @@ export default function ChatDrawer({
         onClose={closePrompt}
         feature={blockedFeature}
       />
+      {/* Message Search Modal */}
+      {selectedConversation && (
+        <MessageSearch
+          isOpen={isMessageSearchOpen}
+          onClose={() => setIsMessageSearchOpen(false)}
+          conversationId={selectedConversation.id}
+          onMessageSelect={handleMessageSearchSelect}
+        />
+      )}
     </>
   );
 }

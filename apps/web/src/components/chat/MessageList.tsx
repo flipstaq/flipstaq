@@ -32,6 +32,10 @@ interface MessageListProps {
     messageId: string,
     updatedMessage: Partial<Message>
   ) => void;
+  onLoadOlderMessages?: () => void;
+  hasMoreMessages?: boolean;
+  isLoadingOlder?: boolean;
+  highlightedMessageId?: string | null;
 }
 
 export default function MessageList({
@@ -42,10 +46,15 @@ export default function MessageList({
   onDeleteMessage,
   onReply,
   onMessageUpdate,
+  onLoadOlderMessages,
+  hasMoreMessages = false,
+  isLoadingOlder = false,
+  highlightedMessageId,
 }: MessageListProps) {
   const { t } = useLanguage();
   const { editMessage, onMessageReaction } = useWebSocket();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [emojiPickerMessageId, setEmojiPickerMessageId] = useState<
     string | null
@@ -283,7 +292,22 @@ export default function MessageList({
     );
   }
   return (
-    <div className="from-secondary-25 dark:from-secondary-850 h-full overflow-y-auto bg-gradient-to-b to-secondary-50 dark:to-secondary-900">
+    <div
+      ref={messagesContainerRef}
+      className="from-secondary-25 dark:from-secondary-850 h-full overflow-y-auto bg-gradient-to-b to-secondary-50 dark:to-secondary-900"
+    >
+      {/* Loading older messages indicator */}
+      {isLoadingOlder && (
+        <div className="flex items-center justify-center p-4">
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-600 border-t-transparent"></div>
+            <span className="text-sm text-secondary-600 dark:text-secondary-400">
+              {t('chat:loading_older_messages')}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-2 p-4">
         {messages.map((message, index) => {
           const isOwnMessage = message.senderId === currentUserId;
@@ -329,9 +353,13 @@ export default function MessageList({
               >
                 <div
                   className={`max-w-xs lg:max-w-md ${isOwnMessage ? 'order-2' : 'order-1'}`}
-                >
-                  <div
+                >                  <div
                     className={`group relative px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md ${
+                      // Add highlighting effect when message is highlighted
+                      highlightedMessageId === message.id
+                        ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg'
+                        : ''
+                    } ${
                       isOwnMessage
                         ? `bg-gradient-to-r from-primary-600 to-primary-700 text-white ${
                             isPreviousMessageFromSameSender &&

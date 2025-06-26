@@ -89,5 +89,20 @@
   "edited": "معدّلة",
   "message_too_old": "لا يمكن تعديل الرسائل الأقدم من 24 ساعة",
   "sending_messages": "إرسال الرسائل",
-  "starting_conversations": "بدء المحادثات"
+  "starting_conversations": "بدء المحادثات",
+  "user_blocked": "المستخدم محظور",
+  "blocked_user_message": "لقد قمت بحظر هذا المستخدم. لا يمكنك إرسال أو استقبال الرسائل حتى تلغي حظرهم.",
+  "unblock_user": "إلغاء حظر المستخدم",
+  "search_messages": "البحث في الرسائل",
+  "search_placeholder": "البحث في هذه المحادثة...",
+  "search_min_chars": "اكتب حرفين على الأقل للبحث",
+  "no_search_results": "لم يتم العثور على رسائل",
+  "search_result_singular": "تم العثور على {{count}} نتيجة",
+  "search_results_plural": "تم العثور على {{count}} نتيجة",
+  "start_searching": "اكتب للبحث في رسائل هذه المحادثة",
+  "loading_older_messages": "جارٍ تحميل الرسائل الأقدم...",
+  "loading_older_messages_failed": "فشل في تحميل الرسائل الأقدم. يرجى المحاولة مرة أخرى.",
+  "message_send_failed": "فشل في إرسال الرسالة. يرجى المحاولة مرة أخرى.",
+  "message_delete_failed": "فشل في حذف الرسالة. يرجى المحاولة مرة أخرى.",
+  "conversation_start_failed": "فشل في بدء المحادثة. يرجى المحاولة مرة أخرى."
 }

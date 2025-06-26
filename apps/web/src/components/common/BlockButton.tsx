@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../providers/LanguageProvider';
-import { apiClient } from '@/lib/api/api-client';
 
 interface BlockButtonProps {
   targetUserId: string;
   targetUsername: string;
   isBlocked: boolean;
-  onBlockChange: (isBlocked: boolean) => void;
+  onBlockChange: (isBlocked: boolean) => Promise<void>;
   className?: string;
 }
 
@@ -20,27 +19,11 @@ export const BlockButton: React.FC<BlockButtonProps> = ({
   const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-
   const handleBlockAction = async () => {
     setIsLoading(true);
     try {
-      if (isBlocked) {
-        // Unblock user
-        await apiClient.request(`/users/blocks/${targetUserId}`, {
-          method: 'DELETE',
-        });
-      } else {
-        // Block user
-        await apiClient.request('/users/blocks', {
-          method: 'POST',
-          body: JSON.stringify({
-            blockedId: targetUserId,
-          }),
-        });
-      }
-
-      // Update the parent component
-      onBlockChange(!isBlocked);
+      // Use the parent's updateBlockStatus function instead of making our own API calls
+      await onBlockChange(!isBlocked);
       setShowConfirmModal(false);
 
       // Show success message

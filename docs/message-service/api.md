@@ -105,6 +105,13 @@ All public endpoints require JWT authentication via `Authorization: Bearer <toke
 - `page` (optional): Page number for pagination (default: 1)
 - `limit` (optional): Number of messages per page (default: 50, max: 100)
 
+#### Behavior
+
+- **First page (page=1)**: Returns **all messages** from the beginning of the conversation (up to 1000 messages) to ensure complete conversation history is loaded
+- **Subsequent pages**: Returns paginated results for very long conversations
+- Messages are ordered chronologically (oldest to newest)
+- **No time-based filtering** - fetches entire conversation history
+
 #### Response (200)
 
 ```json

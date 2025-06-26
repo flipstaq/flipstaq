@@ -259,7 +259,6 @@ export class MessageService {
       updatedAt: conversation.updatedAt,
     }));
   }
-
   /**
    * Get messages for a specific conversation
    */
@@ -286,7 +285,12 @@ export class MessageService {
     if (!conversation) {
       throw new NotFoundException("Conversation not found or access denied");
     }
-    const skip = (page - 1) * limit;
+
+    // For first page requests, fetch all messages from the beginning of the conversation
+    // This ensures we show complete conversation history, not just recent messages
+    const isFirstPage = page === 1;
+    const effectiveLimit = isFirstPage ? 1000 : limit; // Fetch up to 1000 messages on first load
+    const skip = isFirstPage ? 0 : (page - 1) * limit;
     const [messages, total] = await Promise.all([
       this.prisma.message.findMany({
         where: {
@@ -340,8 +344,10 @@ export class MessageService {
             orderBy: { createdAt: "asc" },
           },
         },
-        orderBy: { createdAt: "desc" },
-        take: limit,
+        // For first page, get messages from oldest to newest (complete history)
+        // For subsequent pages, get newer messages
+        orderBy: { createdAt: isFirstPage ? "asc" : "desc" },
+        take: effectiveLimit,
         skip,
       }),
       this.prisma.message.count({
@@ -352,47 +358,49 @@ export class MessageService {
       }),
     ]);
     return {
-      messages: messages.reverse().map((message) => ({
-        id: message.id,
-        content: message.content,
-        senderId: message.senderId,
-        conversationId: message.conversationId,
-        replyToMessageId: message.replyToMessageId,
-        replyToMessage: message.replyToMessage
-          ? {
-              id: message.replyToMessage.id,
-              content: message.replyToMessage.content || "",
-              senderId: message.replyToMessage.senderId,
-              senderUsername: message.replyToMessage.sender?.username || "",
-            }
-          : undefined,
-        attachments: message.attachments?.map((att) => ({
-          id: att.id,
-          fileUrl: att.fileUrl,
-          fileName: att.fileName,
-          fileType: att.fileType,
-          fileSize: att.fileSize,
-          metadata: att.metadata as any,
-        })),
-        reactions: message.reactions?.map((reaction) => ({
-          id: reaction.id,
-          emoji: reaction.emoji,
-          userId: reaction.userId,
-          user: {
-            id: reaction.user.id,
-            username: reaction.user.username,
-            firstName: reaction.user.firstName,
-            lastName: reaction.user.lastName,
-          },
-          createdAt: reaction.createdAt,
-        })),
-        read: message.read,
-        editedAt: message.editedAt,
-        createdAt: message.createdAt,
-        sender: message.sender,
-      })), // Reverse to show oldest first
+      messages: (isFirstPage ? messages : messages.reverse()).map(
+        (message) => ({
+          id: message.id,
+          content: message.content,
+          senderId: message.senderId,
+          conversationId: message.conversationId,
+          replyToMessageId: message.replyToMessageId,
+          replyToMessage: message.replyToMessage
+            ? {
+                id: message.replyToMessage.id,
+                content: message.replyToMessage.content || "",
+                senderId: message.replyToMessage.senderId,
+                senderUsername: message.replyToMessage.sender?.username || "",
+              }
+            : undefined,
+          attachments: message.attachments?.map((att) => ({
+            id: att.id,
+            fileUrl: att.fileUrl,
+            fileName: att.fileName,
+            fileType: att.fileType,
+            fileSize: att.fileSize,
+            metadata: att.metadata as any,
+          })),
+          reactions: message.reactions?.map((reaction) => ({
+            id: reaction.id,
+            emoji: reaction.emoji,
+            userId: reaction.userId,
+            user: {
+              id: reaction.user.id,
+              username: reaction.user.username,
+              firstName: reaction.user.firstName,
+              lastName: reaction.user.lastName,
+            },
+            createdAt: reaction.createdAt,
+          })),
+          read: message.read,
+          editedAt: message.editedAt,
+          createdAt: message.createdAt,
+          sender: message.sender,
+        })
+      ), // For first page: already in oldest-first order. For other pages: reverse to show oldest first
       total,
-      hasMore: skip + messages.length < total,
+      hasMore: isFirstPage ? false : skip + messages.length < total, // First page loads all, so no more pages needed
     };
   }
   /**
@@ -995,5 +1003,366 @@ export class MessageService {
       },
       createdAt: reaction.createdAt,
     }));
+  }
+
+  /**
+   * Get older messages for infinite scroll (cursor-based pagination)
+   */
+  async getOlderMessages(
+    userId: string,
+    conversationId: string,
+    beforeMessageId: string,
+    limit: number = 50
+  ): Promise<{
+    messages: MessageResponseDto[];
+    hasMore: boolean;
+  }> {
+    // Verify user is participant in conversation
+    const conversation = await this.prisma.conversation.findFirst({
+      where: {
+        id: conversationId,
+        participants: {
+          some: { id: userId },
+        },
+      },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException("Conversation not found or access denied");
+    }
+
+    // Get messages before the specified message ID (cursor-based pagination)
+    const messages = await this.prisma.message.findMany({
+      where: {
+        conversationId,
+        deletedAt: null,
+        createdAt: {
+          lt: (
+            await this.prisma.message.findUnique({
+              where: { id: beforeMessageId },
+              select: { createdAt: true },
+            })
+          )?.createdAt,
+        },
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        replyToMessage: {
+          select: {
+            id: true,
+            content: true,
+            senderId: true,
+            sender: {
+              select: { username: true },
+            },
+          },
+        },
+        attachments: {
+          select: {
+            id: true,
+            fileName: true,
+            fileType: true,
+            fileSize: true,
+            fileUrl: true,
+            metadata: true,
+          },
+        },
+        reactions: {
+          select: {
+            id: true,
+            emoji: true,
+            userId: true,
+            createdAt: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "asc" },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+
+    // Check if there are more messages
+    const hasMore = messages.length === limit;
+
+    return {
+      messages: messages.reverse().map((message) => ({
+        id: message.id,
+        content: message.content,
+        senderId: message.senderId,
+        conversationId: message.conversationId,
+        replyToMessageId: message.replyToMessageId,
+        replyToMessage: message.replyToMessage
+          ? {
+              id: message.replyToMessage.id,
+              content: message.replyToMessage.content || "",
+              senderId: message.replyToMessage.senderId,
+              senderUsername: message.replyToMessage.sender?.username || "",
+            }
+          : undefined,
+        attachments: message.attachments?.map((att) => ({
+          id: att.id,
+          fileUrl: att.fileUrl,
+          fileName: att.fileName,
+          fileType: att.fileType,
+          fileSize: att.fileSize,
+          metadata: att.metadata as any,
+        })),
+        reactions: message.reactions?.map((reaction) => ({
+          id: reaction.id,
+          emoji: reaction.emoji,
+          userId: reaction.userId,
+          user: {
+            id: reaction.user.id,
+            username: reaction.user.username,
+            firstName: reaction.user.firstName,
+            lastName: reaction.user.lastName,
+          },
+          createdAt: reaction.createdAt,
+        })),
+        read: message.read,
+        editedAt: message.editedAt,
+        createdAt: message.createdAt,
+        sender: message.sender,
+      })),
+      hasMore,
+    };
+  }
+
+  /**
+   * Search messages in a conversation
+   */
+  async searchMessages(
+    userId: string,
+    conversationId: string,
+    query: string,
+    limit: number = 100
+  ): Promise<{
+    messages: MessageResponseDto[];
+    total: number;
+  }> {
+    // Verify user is participant in conversation
+    const conversation = await this.prisma.conversation.findFirst({
+      where: {
+        id: conversationId,
+        participants: {
+          some: { id: userId },
+        },
+      },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException("Conversation not found or access denied");
+    }
+
+    // Debug logging
+    console.log(
+      `🔍 Searching messages in conversation ${conversationId} for query: "${query}"`
+    );
+
+    const [messages, total] = await Promise.all([
+      this.prisma.message.findMany({
+        where: {
+          conversationId,
+          deletedAt: null,
+          OR: [
+            {
+              content: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+            {
+              attachments: {
+                some: {
+                  fileName: {
+                    contains: query,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          ],
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+          replyToMessage: {
+            select: {
+              id: true,
+              content: true,
+              senderId: true,
+              sender: {
+                select: { username: true },
+              },
+            },
+          },
+          attachments: {
+            select: {
+              id: true,
+              fileName: true,
+              fileType: true,
+              fileSize: true,
+              fileUrl: true,
+              metadata: true,
+            },
+          },
+          reactions: {
+            select: {
+              id: true,
+              emoji: true,
+              userId: true,
+              createdAt: true,
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+            },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+        orderBy: { createdAt: "asc" },
+        take: limit,
+      }),
+      this.prisma.message.count({
+        where: {
+          conversationId,
+          deletedAt: null,
+          OR: [
+            {
+              content: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+            {
+              attachments: {
+                some: {
+                  fileName: {
+                    contains: query,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          ],
+        },
+      }),
+    ]);
+
+    return {
+      messages: messages.map((message) => ({
+        id: message.id,
+        content: message.content,
+        senderId: message.senderId,
+        conversationId: message.conversationId,
+        replyToMessageId: message.replyToMessageId,
+        replyToMessage: message.replyToMessage
+          ? {
+              id: message.replyToMessage.id,
+              content: message.replyToMessage.content || "",
+              senderId: message.replyToMessage.senderId,
+              senderUsername: message.replyToMessage.sender?.username || "",
+            }
+          : undefined,
+        attachments: message.attachments?.map((att) => ({
+          id: att.id,
+          fileUrl: att.fileUrl,
+          fileName: att.fileName,
+          fileType: att.fileType,
+          fileSize: att.fileSize,
+          metadata: att.metadata as any,
+        })),
+        reactions: message.reactions?.map((reaction) => ({
+          id: reaction.id,
+          emoji: reaction.emoji,
+          userId: reaction.userId,
+          user: {
+            id: reaction.user.id,
+            username: reaction.user.username,
+            firstName: reaction.user.firstName,
+            lastName: reaction.user.lastName,
+          },
+          createdAt: reaction.createdAt,
+        })),
+        read: message.read,
+        editedAt: message.editedAt,
+        createdAt: message.createdAt,
+        sender: message.sender,
+      })),
+      total,
+    };
+
+    // Debug logging
+    console.log(
+      `✅ Search completed. Found ${total} total results, returning ${messages.length} messages`
+    );
+
+    return {
+      messages: messages.map((message) => ({
+        id: message.id,
+        content: message.content,
+        senderId: message.senderId,
+        conversationId: message.conversationId,
+        replyToMessageId: message.replyToMessageId,
+        replyToMessage: message.replyToMessage
+          ? {
+              id: message.replyToMessage.id,
+              content: message.replyToMessage.content || "",
+              senderId: message.replyToMessage.senderId,
+              senderUsername: message.replyToMessage.sender?.username || "",
+            }
+          : undefined,
+        attachments: message.attachments?.map((att) => ({
+          id: att.id,
+          fileUrl: att.fileUrl,
+          fileName: att.fileName,
+          fileType: att.fileType,
+          fileSize: att.fileSize,
+          metadata: att.metadata as any,
+        })),
+        reactions: message.reactions?.map((reaction) => ({
+          id: reaction.id,
+          emoji: reaction.emoji,
+          userId: reaction.userId,
+          user: {
+            id: reaction.user.id,
+            username: reaction.user.username,
+            firstName: reaction.user.firstName,
+            lastName: reaction.user.lastName,
+          },
+          createdAt: reaction.createdAt,
+        })),
+        read: message.read,
+        editedAt: message.editedAt,
+        createdAt: message.createdAt,
+        sender: message.sender,
+      })),
+      total,
+    };
   }
 }

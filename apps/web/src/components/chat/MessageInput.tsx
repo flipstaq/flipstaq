@@ -58,6 +58,7 @@ export default function MessageInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
   const gifPickerRef = useRef<HTMLDivElement>(null);
+  const gifButtonRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingKeepAliveRef = useRef<NodeJS.Timeout | null>(null);
@@ -251,7 +252,9 @@ export default function MessageInput({
     const handleClickOutside = (event: MouseEvent) => {
       if (
         gifPickerRef.current &&
-        !gifPickerRef.current.contains(event.target as Node)
+        !gifPickerRef.current.contains(event.target as Node) &&
+        gifButtonRef.current &&
+        !gifButtonRef.current.contains(event.target as Node)
       ) {
         setShowGifPicker(false);
       }
@@ -263,10 +266,22 @@ export default function MessageInput({
         document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [showGifPicker]);
-
   useEffect(() => {
     adjustTextareaHeight();
   }, [message]);
+
+  // Auto-focus the textarea when a conversation is selected
+  useEffect(() => {
+    if (conversationId && textareaRef.current && !disabled) {
+      // Small delay to ensure the component is fully rendered
+      const timeoutId = setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [conversationId, disabled]);
+
   // Typing indicator management
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newMessage = e.target.value;
@@ -528,9 +543,10 @@ export default function MessageInput({
                 disabled={disabled || isUploading}
                 className="max-h-[120px] min-h-[20px] flex-1 resize-none border-0 bg-transparent px-2 py-3 text-sm text-secondary-900 placeholder-secondary-500 focus:outline-none dark:text-secondary-100 dark:placeholder-secondary-400"
                 rows={1}
-              />
+              />{' '}
               {/* GIF Button */}
               <button
+                ref={gifButtonRef}
                 type="button"
                 onClick={handleGifClick}
                 className="p-3 text-secondary-500 transition-all duration-200 hover:scale-110 hover:text-primary-600 dark:hover:text-primary-400"

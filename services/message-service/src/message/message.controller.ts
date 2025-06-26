@@ -444,4 +444,123 @@ export class MessageController {
   ): Promise<MessageReactionDto[]> {
     return await this.messageService.getMessageReactions(messageId);
   }
+
+  @Get("conversations/:id/messages/older")
+  @ApiOperation({ summary: "Get older messages for infinite scroll" })
+  @ApiParam({
+    name: "id",
+    description: "Conversation ID",
+    example: "clx1y2z3a4b5c6d7e8f9g0h1",
+  })
+  @ApiQuery({
+    name: "before",
+    description: "Message ID to fetch messages before (cursor)",
+    required: true,
+    example: "clx1y2z3a4b5c6d7e8f9g0h5",
+  })
+  @ApiQuery({
+    name: "limit",
+    description: "Number of messages to fetch",
+    required: false,
+    example: 50,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Older messages retrieved successfully",
+    schema: {
+      type: "object",
+      properties: {
+        messages: {
+          type: "array",
+          items: { $ref: "#/components/schemas/MessageResponseDto" },
+        },
+        hasMore: {
+          type: "boolean",
+          description: "Whether there are more older messages",
+        },
+      },
+    },
+  })
+  async getOlderMessages(
+    @Headers("x-user-id") userId: string,
+    @Param("id") conversationId: string,
+    @Query("before") beforeMessageId: string,
+    @Query("limit") limit?: number
+  ): Promise<{
+    messages: MessageResponseDto[];
+    hasMore: boolean;
+  }> {
+    if (!userId || userId.trim() === "") {
+      throw new BadRequestException("User ID is required and cannot be empty");
+    }
+
+    return this.messageService.getOlderMessages(
+      userId,
+      conversationId,
+      beforeMessageId,
+      limit || 50
+    );
+  }
+
+  @Get("search")
+  @ApiOperation({ summary: "Search messages in a conversation" })
+  @ApiQuery({
+    name: "conversationId",
+    description: "Conversation ID to search in",
+    required: true,
+    example: "clx1y2z3a4b5c6d7e8f9g0h1",
+  })
+  @ApiQuery({
+    name: "query",
+    description: "Search query string",
+    required: true,
+    example: "product available",
+  })
+  @ApiQuery({
+    name: "limit",
+    description: "Number of results to return",
+    required: false,
+    example: 100,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Search results retrieved successfully",
+    schema: {
+      type: "object",
+      properties: {
+        messages: {
+          type: "array",
+          items: { $ref: "#/components/schemas/MessageResponseDto" },
+        },
+        total: {
+          type: "number",
+          description: "Total number of matching messages",
+        },
+      },
+    },
+  })
+  async searchMessages(
+    @Headers("x-user-id") userId: string,
+    @Query("conversationId") conversationId: string,
+    @Query("query") query: string,
+    @Query("limit") limit?: number
+  ): Promise<{
+    messages: MessageResponseDto[];
+    total: number;
+  }> {
+    if (!userId || userId.trim() === "") {
+      throw new BadRequestException("User ID is required and cannot be empty");
+    }
+
+    if (!query?.trim()) {
+      throw new BadRequestException("Search query is required");
+    }
+
+    return this.messageService.searchMessages(
+      userId,
+      conversationId,
+      query.trim(),
+      limit || 100
+    );
+  }
 }

@@ -89,5 +89,20 @@
   "edited": "edited",
   "message_too_old": "Cannot edit messages older than 24 hours",
   "sending_messages": "sending messages",
-  "starting_conversations": "starting conversations"
+  "starting_conversations": "starting conversations",
+  "user_blocked": "User Blocked",
+  "blocked_user_message": "You have blocked this user. You cannot send or receive messages until you unblock them.",
+  "unblock_user": "Unblock User",
+  "search_messages": "Search Messages",
+  "search_placeholder": "Search in this conversation...",
+  "search_min_chars": "Type at least 2 characters to search",
+  "no_search_results": "No messages found",
+  "search_result_singular": "{{count}} result found",
+  "search_results_plural": "{{count}} results found",
+  "start_searching": "Type to search messages in this conversation",
+  "loading_older_messages": "Loading older messages...",
+  "loading_older_messages_failed": "Failed to load older messages. Please try again.",
+  "message_send_failed": "Failed to send message. Please try again.",
+  "message_delete_failed": "Failed to delete message. Please try again.",
+  "conversation_start_failed": "Failed to start conversation. Please try again."
 }

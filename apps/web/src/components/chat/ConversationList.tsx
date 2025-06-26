@@ -10,6 +10,7 @@ import { Conversation } from '@/types/chat';
 interface ConversationListProps {
   conversations: Conversation[];
   onConversationSelect: (conversation: Conversation) => void;
+  onConversationHover?: (conversationId: string) => void;
   isLoading: boolean;
   selectedConversationId?: string;
 }
@@ -17,6 +18,7 @@ interface ConversationListProps {
 export default function ConversationList({
   conversations,
   onConversationSelect,
+  onConversationHover,
   isLoading,
   selectedConversationId,
 }: ConversationListProps) {
@@ -106,6 +108,7 @@ export default function ConversationList({
             <button
               key={conversation.id}
               onClick={() => onConversationSelect(conversation)}
+              onMouseEnter={() => onConversationHover?.(conversation.id)}
               className={`group w-full p-4 text-left transition-all duration-200 focus:outline-none ${
                 selectedConversationId === conversation.id
                   ? 'from-primary-25 border-r-4 border-primary-500 bg-gradient-to-r to-primary-50 shadow-lg dark:border-primary-400 dark:from-primary-900/30 dark:to-primary-900/20'

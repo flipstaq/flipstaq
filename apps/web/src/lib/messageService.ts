@@ -205,10 +205,11 @@ class MessageService {
         'GET'
       );
 
-      const rawMessages = response.data || response.messages || response;
+      // Handle the new response format from backend
+      const messagesData = response.messages || response.data || response;
 
       // Map backend response to frontend Message interface
-      return rawMessages.map((msg: any) => ({
+      return messagesData.map((msg: any) => ({
         id: msg.id,
         content: msg.content,
         senderId: msg.senderId,
@@ -218,6 +219,10 @@ class MessageService {
         status: 'delivered' as const, // Will be properly set by convertApiMessage
         attachments: msg.attachments || [],
         sender: msg.sender,
+        replyToMessageId: msg.replyToMessageId,
+        replyToMessage: msg.replyToMessage,
+        reactions: msg.reactions || [],
+        editedAt: msg.editedAt,
       }));
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -437,6 +442,88 @@ class MessageService {
       console.log('✅ Reaction toggle request sent via WebSocket');
     } catch (error) {
       console.error('Error toggling reaction:', error);
+      throw error;
+    }
+  } // Add method for loading older messages in very long conversations (future enhancement)
+  async getOlderMessages(
+    conversationId: string,
+    beforeMessageId: string,
+    limit: number = 50
+  ): Promise<{ messages: Message[]; hasMore: boolean }> {
+    try {
+      const response = await webSocketService.getOlderMessages(
+        conversationId,
+        beforeMessageId,
+        limit
+      );
+
+      const messages = response.messages.map((msg: any) => ({
+        id: msg.id,
+        content: msg.content,
+        senderId: msg.senderId,
+        conversationId: msg.conversationId,
+        createdAt: msg.createdAt,
+        isRead: msg.read,
+        status: 'delivered' as const,
+        attachments: msg.attachments || [],
+        sender: msg.sender,
+        replyToMessageId: msg.replyToMessageId,
+        replyToMessage: msg.replyToMessage,
+        reactions: msg.reactions || [],
+        editedAt: msg.editedAt,
+      }));
+
+      return {
+        messages,
+        hasMore: response.hasMore,
+      };
+    } catch (error) {
+      console.error('Error fetching older messages:', error);
+      throw error;
+    }
+  }
+  // Search messages in a conversation (using WebSocket)
+  async searchMessages(
+    conversationId: string,
+    query: string,
+    limit: number = 100
+  ): Promise<{ messages: Message[]; total: number }> {
+    try {
+      console.log(
+        '🌐 MessageService: Calling WebSocket searchMessages for:',
+        conversationId,
+        query
+      );
+      const response = await webSocketService.searchMessages(
+        conversationId,
+        query,
+        limit
+      );
+      console.log('🌐 MessageService: Got WebSocket response:', response);
+
+      const messages = response.messages.map((msg: any) => ({
+        id: msg.id,
+        content: msg.content,
+        senderId: msg.senderId,
+        conversationId: msg.conversationId,
+        createdAt: msg.createdAt,
+        isRead: msg.read,
+        status: 'delivered' as const,
+        attachments: msg.attachments || [],
+        sender: msg.sender,
+        replyToMessageId: msg.replyToMessageId,
+        replyToMessage: msg.replyToMessage,
+        reactions: msg.reactions || [],
+        editedAt: msg.editedAt,
+      }));
+
+      console.log('🌐 MessageService: Mapped messages:', messages.length);
+      return {
+        messages,
+        total: response.total,
+      };
+    } catch (error) {
+      console.error('Error searching messages:', error);
       throw error;
     }
   }
