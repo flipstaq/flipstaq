@@ -353,11 +353,13 @@ export default function MessageList({
               >
                 <div
                   className={`max-w-xs lg:max-w-md ${isOwnMessage ? 'order-2' : 'order-1'}`}
-                >                  <div
+                >
+                  {' '}
+                  <div
                     className={`group relative px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md ${
                       // Add highlighting effect when message is highlighted
                       highlightedMessageId === message.id
-                        ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg'
+                        ? 'shadow-lg ring-2 ring-yellow-400 ring-opacity-75'
                         : ''
                     } ${
                       isOwnMessage

@@ -978,12 +978,14 @@ When users select a search result, the system provides smooth navigation to the 
 #### Implementation Details
 
 1. **Search Result Selection**: When clicking on a search result:
+
    - The search modal closes automatically
    - The target message is highlighted with a yellow ring
    - The view scrolls smoothly to center the target message
    - The highlight effect fades after 3 seconds
 
-2. **Visual Highlighting**: 
+2. **Visual Highlighting**:
+
    - Target message gets `ring-2 ring-yellow-400 ring-opacity-75 shadow-lg` classes
    - Smooth transitions ensure the highlight is noticeable but not jarring
    - Works with both light and dark themes
@@ -1020,14 +1022,14 @@ The search modal has intelligent interaction handling:
 const handleMessageSearchSelect = (messageId: string) => {
   setHighlightedMessageId(messageId);
   setIsMessageSearchOpen(false); // Close search modal only
-  
+
   // Scroll to message after short delay
   setTimeout(() => {
     const messageElement = document.getElementById(`message-${messageId}`);
     if (messageElement) {
       messageElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+        behavior: "smooth",
+        block: "center",
       });
     }
   }, 100);

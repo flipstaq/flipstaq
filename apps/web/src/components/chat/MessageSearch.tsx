@@ -127,7 +127,8 @@ export default function MessageSearch({
       minute: '2-digit',
     });
   };
-  if (!isOpen) return null;  return (
+  if (!isOpen) return null;
+  return (
     <div
       data-message-search-modal
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"

@@ -1167,7 +1167,7 @@ export default function ChatDrawer({
   const handleMessageSearchSelect = (messageId: string) => {
     setHighlightedMessageId(messageId);
     setIsMessageSearchOpen(false); // Close the search modal
-    
+
     // Scroll to the message after a short delay to ensure it's rendered
     setTimeout(() => {
       const messageElement = document.getElementById(`message-${messageId}`);
