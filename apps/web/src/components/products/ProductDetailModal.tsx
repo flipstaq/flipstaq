@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { ProductType } from '@/types';
 
 interface ProductDetail {
   id: string;
@@ -23,6 +24,7 @@ interface ProductDetail {
   slug: string;
   username: string;
   imageUrl?: string | null;
+  type: ProductType;
   createdAt: string;
   updatedAt: string;
 }

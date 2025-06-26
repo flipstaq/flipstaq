@@ -2,6 +2,7 @@
   "title": "العنوان",
   "description": "الوصف",
   "category": "الفئة",
+  "type": "النوع",
   "price": "السعر",
   "currency": "العملة",
   "location": "الموقع",
@@ -35,6 +36,7 @@
   "validation": {
     "titleRequired": "العنوان مطلوب",
     "titleMinLength": "يجب أن يكون العنوان حرف واحد على الأقل",
+    "typeRequired": "نوع المنتج مطلوب",
     "priceRequired": "السعر مطلوب",
     "priceMin": "يجب أن يكون السعر أكبر من 0",
     "locationRequired": "الموقع مطلوب",
@@ -49,6 +51,11 @@
     "GBP": "جنيه إسترليني (£)",
     "SAR": "ريال سعودي (ر.س)"
   },
+  "types": {
+    "DIGITAL": "رقمي",
+    "PHYSICAL": "مادي",
+    "SERVICE": "خدمة"
+  },
   "locations": {
     "global": "عالمي",
     "unitedStates": "الولايات المتحدة",
@@ -62,6 +69,7 @@
     "title": "أدخل عنوان المنتج...",
     "description": "أدخل وصف المنتج...",
     "category": "أدخل الفئة...",
+    "type": "اختر نوع المنتج...",
     "price": "0.00",
     "slug": "منتجي-الرائع"
   },
@@ -91,6 +99,7 @@
     "posted_by": "نشر بواسطة",
     "price": "السعر",
     "category": "الفئة",
+    "type": "النوع",
     "location": "الموقع",
     "posted_on": "تاريخ النشر",
     "message_seller": "مراسلة البائع",

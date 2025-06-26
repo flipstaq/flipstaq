@@ -196,6 +196,7 @@ x-user-role: USER
 title: "MacBook Pro 16 inch"
 description: "High-performance laptop for professionals"
 category: "Electronics"
+type: "PHYSICAL"
 price: "2499.99"
 currency: "USD"
 location: "United States"
@@ -208,6 +209,7 @@ image: <file> (optional)
 - **title** (required): String, minimum 1 character
 - **description** (optional): String
 - **category** (optional): String
+- **type** (required): Enum ["DIGITAL", "PHYSICAL", "SERVICE"]
 - **price** (required): Number, minimum 0
 - **currency** (required): Enum ["USD", "AED", "EUR", "GBP", "SAR"], default "USD"
 - **location** (required): String (country name or "Global")
@@ -447,6 +449,7 @@ x-user-role: USER
   "title": "MacBook Pro 16 inch - Updated",
   "description": "High-performance laptop for professionals, now with M1 chip",
   "category": "Electronics",
+  "type": "PHYSICAL",
   "price": 2399.99,
   "currency": "USD",
   "location": "United States",
@@ -462,6 +465,7 @@ interface ProductResponseDto {
   title: string;
   description: string | null;
   category: string | null;
+  type: "DIGITAL" | "PHYSICAL" | "SERVICE";
   price: number;
   currency: string;
   location: string;
@@ -810,6 +814,7 @@ x-user-id: <user-id>
       "location": "New York, USA",
       "slug": "vintage-laptop",
       "imageUrl": "/uploads/products/laptop-abc123.jpg",
+      "type": "PHYSICAL",
       "userId": "user456",
       "username": "janedoe",
       "isActive": true,

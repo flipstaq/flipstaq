@@ -7,6 +7,7 @@ import { productsApi, Product as ApiProduct } from '@/lib/api/products';
 import LoadingSpinner, {
   LoadingSpinnerSmall,
 } from '@/components/ui/LoadingSpinner';
+import { ProductType } from '@/types';
 
 // Import ProductDetailModal - ignore TypeScript error for now
 import { ProductDetailModal } from './ProductDetailModal';
@@ -21,6 +22,7 @@ interface Product {
   category?: string | null;
   slug: string;
   username: string;
+  type: ProductType;
   createdAt: string;
   imageUrl?: string | null;
 }

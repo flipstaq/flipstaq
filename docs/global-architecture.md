@@ -282,6 +282,20 @@ The following services are planned but not yet developed:
 The current Prisma schema includes:
 
 ```prisma
+// Enums
+enum Role {
+  USER
+  STAFF
+  HIGHER_STAFF
+  OWNER
+}
+
+enum ProductType {
+  DIGITAL
+  PHYSICAL
+  SERVICE
+}
+
 model User {
   id              String     @id @default(cuid())
   email           String     @unique
@@ -303,20 +317,21 @@ model User {
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   title       String
   description String?
   category    String?
   price       Float
-  currency    String   @default("USD")
-  location    String   // Country or "Global"
-  slug        String   // User-chosen URL part
-  imageUrl    String?  // Product image URL
+  currency    String      @default("USD")
+  location    String      // Country or "Global"
+  slug        String      // User-chosen URL part
+  imageUrl    String?     // Product image URL
+  type        ProductType // DIGITAL, PHYSICAL, or SERVICE
   userId      String
-  isActive    Boolean  @default(true)
-  isSold      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive    Boolean     @default(true)
+  isSold      Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   // Relations
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   favorites   Favorite[]

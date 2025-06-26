@@ -119,6 +119,7 @@ export default function FavoritesPage() {
                   slug: favorite.product.slug,
                   username: favorite.product.username,
                   imageUrl: favorite.product.imageUrl,
+                  type: favorite.product.type,
                   createdAt: favorite.product.createdAt,
                 }}
               />

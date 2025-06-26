@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { authService } from '@/lib/auth';
+import { ProductType } from '@/types';
 
 interface Product {
   id: string;
@@ -16,6 +17,7 @@ interface Product {
   username: string;
   imageUrl?: string | null;
   category: string | null;
+  type: ProductType;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -48,6 +50,7 @@ export function EditProductModal({
     currency: product.currency,
     location: product.location,
     slug: product.slug,
+    type: product.type,
   });
 
   useEffect(() => {
@@ -159,6 +162,7 @@ export function EditProductModal({
       formDataToSend.append('currency', formData.currency);
       formDataToSend.append('location', formData.location);
       formDataToSend.append('slug', formData.slug);
+      formDataToSend.append('type', formData.type);
 
       // Add image if selected
       if (selectedImage) {
@@ -323,6 +327,27 @@ export function EditProductModal({
               className="w-full rounded-lg border border-secondary-300 px-3 py-2 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100"
               placeholder={t('products:categoryPlaceholder')}
             />
+          </div>
+
+          {/* Product Type */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
+              {t('products:type')} *
+            </label>
+            <select
+              name="type"
+              value={formData.type}
+              onChange={handleInputChange}
+              required
+              className="w-full rounded-lg border border-secondary-300 px-3 py-2 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100"
+            >
+              <option value="DIGITAL">{t('products.types.DIGITAL')}</option>
+              <option value="PHYSICAL">{t('products.types.PHYSICAL')}</option>
+              <option value="SERVICE">{t('products.types.SERVICE')}</option>
+            </select>
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              {t('products:placeholders.type')}
+            </p>
           </div>
 
           {/* Price and Currency */}

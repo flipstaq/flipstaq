@@ -158,6 +158,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   title: 'title',
   description: 'description',
   category: 'category',
+  type: 'type',
   price: 'price',
   currency: 'currency',
   location: 'location',
@@ -287,6 +288,12 @@ exports.UserStatus = exports.$Enums.UserStatus = {
   INACTIVE: 'INACTIVE',
   BANNED: 'BANNED',
   PENDING_VERIFICATION: 'PENDING_VERIFICATION'
+};
+
+exports.ProductType = exports.$Enums.ProductType = {
+  DIGITAL: 'DIGITAL',
+  PHYSICAL: 'PHYSICAL',
+  SERVICE: 'SERVICE'
 };
 
 exports.ReportType = exports.$Enums.ReportType = {

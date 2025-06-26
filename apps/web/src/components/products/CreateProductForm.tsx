@@ -7,6 +7,7 @@ import { useVerificationCheck } from '@/hooks/useVerificationCheck';
 import VerificationPrompt from '@/components/auth/VerificationPrompt';
 import { authService } from '@/lib/auth';
 import { X, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { ProductType } from '@/types';
 
 interface CreateProductFormProps {
   onSuccess: () => void;
@@ -21,6 +22,7 @@ interface ProductFormData {
   currency: string;
   location: string;
   slug: string;
+  type: ProductType;
 }
 
 const currencies = [
@@ -39,6 +41,12 @@ const locations = [
   'Germany',
   'France',
   'Saudi Arabia',
+];
+
+const productTypes: { value: ProductType; labelKey: string }[] = [
+  { value: 'DIGITAL', labelKey: 'types.DIGITAL' },
+  { value: 'PHYSICAL', labelKey: 'types.PHYSICAL' },
+  { value: 'SERVICE', labelKey: 'types.SERVICE' },
 ];
 
 export function CreateProductForm({
@@ -64,6 +72,7 @@ export function CreateProductForm({
     currency: 'USD',
     location: 'Global',
     slug: '',
+    type: 'PHYSICAL',
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -179,6 +188,12 @@ export function CreateProductForm({
       setLoading(false);
       return;
     }
+
+    if (!formData.type) {
+      setError(t('products:typeRequired'));
+      setLoading(false);
+      return;
+    }
     try {
       const token = authService.getAccessToken();
 
@@ -195,6 +210,7 @@ export function CreateProductForm({
       formDataToSend.append('currency', formData.currency);
       formDataToSend.append('location', formData.location);
       formDataToSend.append('slug', formData.slug);
+      formDataToSend.append('type', formData.type);
 
       // Add image if selected
       if (selectedImage) {
@@ -358,6 +374,29 @@ export function CreateProductForm({
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Product Type */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
+              {t('products:type')} *
+            </label>
+            <select
+              name="type"
+              value={formData.type}
+              onChange={handleInputChange}
+              required
+              className="w-full rounded-md border border-secondary-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100"
+            >
+              {productTypes.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {t(`products.${type.labelKey}`)}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              {t('products:placeholders.type')}
+            </p>
           </div>
         </div>
         {/* Image Upload Section */}

@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ProductType } from '@flipstaq/db';
 
 export class CreateFavoriteDto {
   @ApiProperty({
@@ -62,6 +63,7 @@ export class FavoriteProductResponseDto {
     location: string;
     slug: string;
     imageUrl: string | null;
+    type: ProductType;
     userId: string;
     username: string;
     isActive: boolean;

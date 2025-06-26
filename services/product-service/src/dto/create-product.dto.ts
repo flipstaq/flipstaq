@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsNotEmpty, MinLength, IsIn } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsNotEmpty,
+  MinLength,
+  IsIn,
+  IsEnum,
+} from 'class-validator';
+import { ProductType } from '@flipstaq/db';
 
 export class CreateProductDto {
   @ApiProperty({
@@ -29,6 +38,15 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   category?: string;
+
+  @ApiProperty({
+    description: 'Product type',
+    example: 'PHYSICAL',
+    enum: ProductType,
+  })
+  @IsEnum(ProductType)
+  @IsNotEmpty()
+  type: ProductType;
 
   @ApiProperty({
     description: 'Product price',

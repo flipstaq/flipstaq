@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ProductType } from '@flipstaq/db';
 
 export class ProductResponseDto {
   @ApiProperty({
@@ -26,6 +27,13 @@ export class ProductResponseDto {
     nullable: true,
   })
   category: string | null;
+
+  @ApiProperty({
+    description: 'Product type',
+    example: 'PHYSICAL',
+    enum: ProductType,
+  })
+  type: ProductType;
 
   @ApiProperty({
     description: 'Product price',

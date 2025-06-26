@@ -13,6 +13,7 @@ import {
   formatCurrency,
   formatDate as formatDateUtil,
 } from '@/utils/formatters';
+import { ProductType } from '@/types';
 
 interface Product {
   id: string;
@@ -25,6 +26,7 @@ interface Product {
   username: string;
   imageUrl?: string | null;
   category: string | null;
+  type: ProductType;
   isActive: boolean;
   isSold: boolean;
   createdAt: string;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { authService } from '@/lib/auth';
+import { ProductType } from '@/types';
 
 interface FavoriteProduct {
   id: string;
@@ -15,6 +16,7 @@ interface FavoriteProduct {
     location: string;
     slug: string;
     imageUrl: string | null;
+    type: ProductType;
     userId: string;
     username: string;
     isActive: boolean;

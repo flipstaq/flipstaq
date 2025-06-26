@@ -5,6 +5,7 @@
   "noProductsDescription": "لا توجد حالياً منتجات تحتاج إلى مراقبة.",
   "table": {
     "product": "المنتج",
+    "type": "النوع",
     "seller": "البائع",
     "visibility": "الظهور",
     "actions": "الإجراءات"

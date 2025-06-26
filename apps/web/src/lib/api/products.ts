@@ -1,4 +1,5 @@
 import { apiClient } from './api-client';
+import { ProductType } from '@/types';
 
 export interface Product {
   id: string;
@@ -10,6 +11,7 @@ export interface Product {
   location: string;
   slug: string;
   imageUrl?: string;
+  type: ProductType;
   userId: string;
   username: string;
   isActive: boolean;

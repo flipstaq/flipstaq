@@ -1,5 +1,6 @@
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { ProductDetailPage } from '@/components/products/ProductDetailPage';
+import { ProductType } from '@/types';
 
 interface ProductDetail {
   id: string;
@@ -13,6 +14,7 @@ interface ProductDetail {
   username: string;
   userId: string;
   imageUrl?: string | null;
+  type: ProductType;
   createdAt: string;
   updatedAt: string;
 }

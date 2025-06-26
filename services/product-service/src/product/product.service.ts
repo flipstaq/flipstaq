@@ -20,7 +20,7 @@ export class ProductService {
     userId: string,
     createProductDto: CreateProductDto,
   ): Promise<ProductResponseDto> {
-    const { title, description, category, price, currency, location, slug, imageUrl } =
+    const { title, description, category, type, price, currency, location, slug, imageUrl } =
       createProductDto;
 
     // Validate user exists
@@ -58,6 +58,7 @@ export class ProductService {
         title,
         description,
         category,
+        type,
         price,
         currency,
         location,
@@ -79,6 +80,7 @@ export class ProductService {
       title: product.title,
       description: product.description,
       category: product.category,
+      type: product.type,
       price: product.price,
       currency: product.currency,
       location: product.location,
@@ -164,6 +166,7 @@ export class ProductService {
         title: product.title,
         description: product.description,
         category: product.category,
+        type: product.type,
         price: product.price,
         currency: product.currency,
         location: product.location,
@@ -229,6 +232,7 @@ export class ProductService {
       title: product.title,
       description: product.description,
       category: product.category,
+      type: product.type,
       price: product.price,
       currency: product.currency,
       location: product.location,
@@ -281,6 +285,7 @@ export class ProductService {
         title: product.title,
         description: product.description,
         category: product.category,
+        type: product.type,
         price: product.price,
         currency: product.currency,
         location: product.location,
@@ -330,6 +335,7 @@ export class ProductService {
       title,
       description,
       category,
+      type,
       price,
       currency,
       location,
@@ -369,6 +375,7 @@ export class ProductService {
         title,
         description,
         category,
+        type,
         price,
         currency,
         location,
@@ -389,6 +396,7 @@ export class ProductService {
       title: updatedProduct.title,
       description: updatedProduct.description,
       category: updatedProduct.category,
+      type: updatedProduct.type,
       price: updatedProduct.price,
       currency: updatedProduct.currency,
       location: updatedProduct.location,
@@ -547,6 +555,7 @@ export class ProductService {
       title: updatedProduct.title,
       description: updatedProduct.description,
       category: updatedProduct.category,
+      type: updatedProduct.type,
       price: updatedProduct.price,
       currency: updatedProduct.currency,
       location: updatedProduct.location,
@@ -596,6 +605,7 @@ export class ProductService {
         title: product.title,
         description: product.description,
         category: product.category,
+        type: product.type,
         price: product.price,
         currency: product.currency,
         location: product.location,

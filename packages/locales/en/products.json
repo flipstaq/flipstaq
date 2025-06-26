@@ -2,6 +2,7 @@
   "title": "Title",
   "description": "Description",
   "category": "Category",
+  "type": "Type",
   "price": "Price",
   "currency": "Currency",
   "location": "Location",
@@ -32,6 +33,7 @@
   "validation": {
     "titleRequired": "Title is required",
     "titleMinLength": "Title must be at least 1 character",
+    "typeRequired": "Product type is required",
     "priceRequired": "Price is required",
     "priceMin": "Price must be greater than 0",
     "locationRequired": "Location is required",
@@ -46,6 +48,11 @@
     "GBP": "GBP (£)",
     "SAR": "SAR (ر.س)"
   },
+  "types": {
+    "DIGITAL": "Digital",
+    "PHYSICAL": "Physical",
+    "SERVICE": "Service"
+  },
   "locations": {
     "global": "Global",
     "unitedStates": "United States",
@@ -59,6 +66,7 @@
     "title": "Enter product title...",
     "description": "Enter product description...",
     "category": "Enter category...",
+    "type": "Select product type...",
     "price": "0.00",
     "slug": "my-awesome-product"
   },
@@ -88,6 +96,7 @@
     "posted_by": "Posted by",
     "price": "Price",
     "category": "Category",
+    "type": "Type",
     "location": "Location",
     "posted_on": "Posted on",
     "message_seller": "Message Seller",

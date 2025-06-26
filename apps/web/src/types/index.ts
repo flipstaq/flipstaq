@@ -5,6 +5,8 @@ export type UserStatus =
   | 'BANNED'
   | 'PENDING_VERIFICATION';
 
+export type ProductType = 'DIGITAL' | 'PHYSICAL' | 'SERVICE';
+
 export interface User {
   id: string;
   email: string;

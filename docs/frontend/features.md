@@ -868,4 +868,219 @@ The system supports:
 - ✅ User authentication and authorization
 - ✅ File type and size validation (5MB limit)
 
----
+### Product Creation Form
+
+The product creation form (`CreateProductForm.tsx`) allows users to list new products on the platform with comprehensive validation and multi-field support.
+
+#### Form Fields
+
+**Required Fields:**
+
+- **Title**: Product name (auto-generates URL slug)
+- **Type**: Product category (DIGITAL, PHYSICAL, or SERVICE)
+- **Price**: Numeric value with currency selection
+- **Location**: Geographic availability
+
+**Optional Fields:**
+
+- **Description**: Detailed product information
+- **Category**: Custom product category
+- **Image**: Single product image upload (5MB max, JPG/PNG)
+
+#### Product Type Field
+
+The type field categorizes products into three distinct types:
+
+- **DIGITAL**: Software, downloads, digital services, e-books, courses
+- **PHYSICAL**: Tangible items that require shipping or pickup
+- **SERVICE**: Consultations, freelance work, professional services
+
+**Implementation:**
+
+- Required field validation
+- Dropdown selection interface
+- Localized labels in English and Arabic
+- Server-side validation and database enforcement
+
+**Translation Keys:**
+
+```json
+{
+  "type": "Product Type",
+  "types": {
+    "digital": "Digital",
+    "physical": "Physical",
+    "service": "Service"
+  },
+  "typeRequired": "Product type is required",
+  "placeholders": {
+    "type": "Select the type of product you're offering"
+  }
+}
+```
+
+#### Form Validation
+
+**Client-side Validation:**
+
+- Required field checking
+- Price format validation (positive numbers only)
+- Slug format validation (alphanumeric, hyphens, underscores)
+- Image format and size validation
+- Product type selection validation
+
+**Server-side Validation:**
+
+- Field presence validation
+- Type enum validation
+- Price range validation
+- Image processing and validation
+
+#### Auto-slug Generation
+
+The form automatically generates a URL-friendly slug from the product title:
+
+- Converts to lowercase
+- Removes special characters
+- Replaces spaces with hyphens
+- Removes consecutive hyphens
+- Trims leading/trailing hyphens
+
+Example: "My Awesome Product!" → "my-awesome-product"
+
+#### Image Upload
+
+**Features:**
+
+- Drag-and-drop interface
+- Preview before upload
+- Format validation (JPEG, JPG, PNG)
+- Size validation (5MB maximum)
+- Removal capability
+
+**File Validation:**
+
+- MIME type checking
+- File size validation
+- Error messaging for invalid files
+
+#### Currency Support
+
+Multi-currency pricing with localized formatting:
+
+- USD ($), AED (د.إ), EUR (€), GBP (£), SAR (ر.س)
+- Automatic formatting based on selected currency
+- Support for decimal prices
+
+#### Location Options
+
+Predefined location selections:
+
+- Global (for digital products/services)
+- Country-specific options
+- Regional availability settings
+
+### Product Display
+
+#### Product Cards
+
+**Product Type Display:**
+
+- Type badge in the top-right corner of product cards
+- Color-coded badges for different types
+- Localized type labels
+- Responsive design
+
+**Card Information:**
+
+- Product title with type badge
+- Price with currency formatting
+- Seller username and location
+- Creation date
+- Rating and review count (if available)
+
+#### Product Detail Pages
+
+**Type Information:**
+
+- Prominent type badge next to product title
+- Color-coded visual indication
+- Proper spacing and responsive layout
+- Integration with existing product metadata
+
+**Product Metadata:**
+
+- Complete product information display
+- Type-specific formatting and styling
+- Consistent visual hierarchy
+
+### Product Editing
+
+#### EditProductModal Component
+
+The `EditProductModal.tsx` component allows users to modify their existing products with full field editing capabilities.
+
+**Available Fields:**
+
+- **Title**: Product name (updates URL slug automatically)
+- **Description**: Detailed product information
+- **Category**: Custom product category
+- **Type**: Product type (DIGITAL, PHYSICAL, SERVICE) - **Added in June 2025**
+- **Price**: Numeric value with currency selection
+- **Currency**: Multi-currency support (USD, AED, EUR, GBP, SAR)
+- **Location**: Geographic availability
+- **Slug**: Custom URL slug
+- **Image**: Product image upload/replacement
+
+**Fix Applied (June 2025):**
+
+**Problem**: The EditProductModal was missing the Product Type field, preventing users from updating this essential product attribute.
+
+**Root Cause**:
+
+1. Missing `type` field in the form state initialization
+2. No Product Type dropdown in the form UI
+3. Missing `type` field in form submission data
+
+**Solution Applied:**
+
+1. **Added `type` to form state**: Updated `formData` initialization to include `type: product.type`
+2. **Added Product Type dropdown**: Inserted type selection field with localization support
+3. **Updated form submission**: Added `type` field to `FormData` submission
+4. **Backend compatibility**: Confirmed existing `CreateProductDto` already supports type field validation
+
+**Technical Implementation:**
+
+```typescript
+// Form state includes type
+const [formData, setFormData] = useState({
+  title: product.title,
+  description: product.description || "",
+  category: product.category || "",
+  type: product.type, // Added this line
+  price: product.price.toString(),
+  currency: product.currency,
+  location: product.location,
+  slug: product.slug,
+});
+
+// Form submission includes type
+formDataToSend.append("type", formData.type);
+```
+
+**UI Components:**
+
+- Dropdown selection with three options (DIGITAL, PHYSICAL, SERVICE)
+- Localized labels using translation system
+- Required field validation
+- Consistent styling with other form fields
+
+**Backend Support:**
+
+- Product Service already supported type field updates
+- Validation handled by existing `CreateProductDto`
+- Database schema already included type field with proper constraints
+
+**Files Modified:**
+
+- `/apps/web/src/components/products/EditProductModal.tsx`

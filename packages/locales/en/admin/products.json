@@ -5,6 +5,7 @@
   "noProductsDescription": "There are currently no products to moderate.",
   "table": {
     "product": "Product",
+    "type": "Type",
     "seller": "Seller",
     "visibility": "Visibility",
     "actions": "Actions"

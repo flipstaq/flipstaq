@@ -24,6 +24,7 @@ import { useBlockStatus } from '@/hooks/useBlockStatus';
 import ReportModal from '@/components/report/ReportModal';
 import Link from 'next/link';
 import Head from 'next/head';
+import { ProductType } from '@/types';
 
 interface ProductDetail {
   id: string;
@@ -37,6 +38,7 @@ interface ProductDetail {
   username: string;
   userId: string;
   imageUrl?: string | null;
+  type: ProductType;
   createdAt: string;
   updatedAt: string;
 }
@@ -71,6 +73,19 @@ export function ProductDetailPage({
   );
 
   const isRTL = language === 'ar';
+
+  const getProductTypeLabel = (type: ProductType) => {
+    switch (type) {
+      case 'DIGITAL':
+        return t('products.types.DIGITAL');
+      case 'PHYSICAL':
+        return t('products.types.PHYSICAL');
+      case 'SERVICE':
+        return t('products.types.SERVICE');
+      default:
+        return type;
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -401,9 +416,14 @@ export function ProductDetailPage({
               <div className="p-6 md:p-8">
                 {/* Product Header */}
                 <div className="mb-6">
-                  <h1 className="mb-4 text-2xl font-bold text-secondary-900 dark:text-secondary-100 md:text-3xl">
-                    {product.title}
-                  </h1>{' '}
+                  <div className="mb-4 flex items-start justify-between">
+                    <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 md:text-3xl">
+                      {product.title}
+                    </h1>
+                    <span className="ml-4 inline-flex items-center rounded-full bg-primary-100 px-3 py-1 text-sm font-medium text-primary-800 dark:bg-primary-900 dark:text-primary-200 rtl:ml-0 rtl:mr-4">
+                      {getProductTypeLabel(product.type)}
+                    </span>
+                  </div>{' '}
                   {/* Seller Info */}
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center">

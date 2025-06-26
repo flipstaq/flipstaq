@@ -2009,6 +2009,11 @@ export default function AdminPanel() {
                           <th
                             className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
                           >
+                            {t('admin-products:table.type')}
+                          </th>
+                          <th
+                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                          >
                             {t('admin-products:table.seller')}
                           </th>
                           <th
@@ -2070,6 +2075,25 @@ export default function AdminPanel() {
                                 </div>
                               </div>
                             </td>{' '}
+                            <td
+                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            >
+                              <span
+                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                                  product.type === 'DIGITAL'
+                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100'
+                                    : product.type === 'PHYSICAL'
+                                      ? 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100'
+                                      : 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100'
+                                }`}
+                              >
+                                {product.type === 'DIGITAL'
+                                  ? t('products.types.DIGITAL')
+                                  : product.type === 'PHYSICAL'
+                                    ? t('products.types.PHYSICAL')
+                                    : t('products.types.SERVICE')}
+                              </span>
+                            </td>
                             <td
                               className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
                             >

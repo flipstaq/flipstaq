@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ExternalLink, Image as ImageIcon, Star } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { FavoriteButton } from './FavoriteButton';
+import { ProductType } from '@/types';
 
 interface Product {
   id: string;
@@ -16,6 +17,7 @@ interface Product {
   slug: string;
   username: string;
   imageUrl?: string | null;
+  type: ProductType;
   createdAt: string;
   averageRating?: number;
   totalReviews?: number;
@@ -28,6 +30,20 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onProductClick }: ProductCardProps) {
   const { t, language } = useLanguage();
+
+  const getProductTypeLabel = (type: ProductType) => {
+    switch (type) {
+      case 'DIGITAL':
+        return t('products.types.DIGITAL');
+      case 'PHYSICAL':
+        return t('products.types.PHYSICAL');
+      case 'SERVICE':
+        return t('products.types.SERVICE');
+      default:
+        return type;
+    }
+  };
+
   const formatPrice = (price: number, currency: string) => {
     return new Intl.NumberFormat(language === 'ar' ? 'ar-AE' : 'en-US', {
       style: 'currency',
@@ -97,10 +113,15 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
         </div>
       </div>
       <div className="p-6">
-        {/* Product Title */}
-        <h3 className="text-lg font-semibold text-secondary-900 transition-colors duration-200 group-hover:text-primary-600 dark:text-secondary-100 dark:group-hover:text-primary-400">
-          {product.title}
-        </h3>
+        {/* Product Title and Type */}
+        <div className="flex items-start justify-between">
+          <h3 className="text-lg font-semibold text-secondary-900 transition-colors duration-200 group-hover:text-primary-600 dark:text-secondary-100 dark:group-hover:text-primary-400">
+            {product.title}
+          </h3>
+          <span className="ml-2 inline-flex items-center rounded-full bg-secondary-100 px-2.5 py-0.5 text-xs font-medium text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200 rtl:ml-0 rtl:mr-2">
+            {getProductTypeLabel(product.type)}
+          </span>
+        </div>
         {/* Product Description */}
         {product.description && (
           <p className="mt-2 line-clamp-2 text-sm text-secondary-500 dark:text-secondary-400">

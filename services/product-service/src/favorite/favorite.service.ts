@@ -116,6 +116,7 @@ export class FavoriteService {
         location: favorite.product.location,
         slug: favorite.product.slug,
         imageUrl: favorite.product.imageUrl,
+        type: favorite.product.type,
         userId: favorite.product.userId,
         username: favorite.product.user.username,
         isActive: favorite.product.isActive,
