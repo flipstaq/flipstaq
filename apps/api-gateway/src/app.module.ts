@@ -22,8 +22,8 @@ import { JwtStrategy } from "./common/strategies/jwt.strategy";
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1 minute
-        limit: 20, // 20 requests per minute default (higher for gateway)
+        ttl: 900000, // 15 minutes in milliseconds
+        limit: 200, // 200 requests per 15 minutes (higher for gateway)
       },
     ]),
     HttpModule.register({

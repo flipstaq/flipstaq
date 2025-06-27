@@ -13,8 +13,8 @@ import { InternalServiceMiddleware } from './common/middleware/internal-service.
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1 minute
-        limit: 10, // 10 requests per minute default
+        ttl: 900000, // 15 minutes
+        limit: 100, // 100 requests per 15 minutes default
       },
     ]),
     PrismaModule,

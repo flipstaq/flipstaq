@@ -498,11 +498,79 @@ _Note: The system includes a demo API key for development. For production, obtai
 - **Caching**: Browser caches GIF search results
 - **Network Efficient**: External URLs don't impact upload bandwidth
 
-- User blocking/muting
+## 🔐 Rate Limiting
 
-## Notes
+The Message Service implements dual-layer rate limiting for comprehensive protection:
 
-- This service requires the shared Prisma client from `packages/db`
-- All external access must go through the API Gateway
-- WebSocket functionality will be added in future iterations
-- Redis integration is prepared but not yet implemented
+### Rate Limits
+
+| Scope               | Limit        | Window     | Key     | Purpose                |
+| ------------------- | ------------ | ---------- | ------- | ---------------------- |
+| **Global**          | 100 requests | 15 minutes | IP      | General API protection |
+| **Message Sending** | 20 messages  | 1 minute   | User ID | Prevent message spam   |
+
+### Implementation
+
+- **Method**: Custom Middleware (dual-layer)
+- **Global Tracking**: IP-based rate limiting
+- **Message Tracking**: User ID-based rate limiting
+- **Headers**: Service-specific rate limit headers
+- **Storage**: In-memory with automatic cleanup
+
+### Rate Limit Headers
+
+#### Global Rate Limiting
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 85
+X-RateLimit-Reset: 1640995200
+```
+
+#### Message Rate Limiting
+
+```http
+X-Message-RateLimit-Limit: 20
+X-Message-RateLimit-Remaining: 15
+X-Message-RateLimit-Reset: 1640995260
+```
+
+### Error Responses
+
+#### Global Rate Limit
+
+```json
+{
+  "statusCode": 429,
+  "message": "Too many requests, please try again later.",
+  "error": "Too Many Requests"
+}
+```
+
+#### Message Rate Limit
+
+```json
+{
+  "statusCode": 429,
+  "message": "Too many messages sent. Please slow down.",
+  "error": "Too Many Requests"
+}
+```
+
+### Security Features
+
+- **Anti-Spam Protection**: Prevents message flooding
+- **User-Specific Limits**: Tracks per authenticated user
+- **Comprehensive Logging**: All violations logged with user/IP tracking
+- **WebSocket Protection**: Rate limits apply to real-time messaging
+
+### Monitoring
+
+All rate limiting events are logged:
+
+- Message sending patterns per user
+- Global API usage patterns per IP
+- Rate limit violations with detailed context
+- Performance impact monitoring
+
+For detailed rate limiting strategy, see [Global Rate Limiting Strategy](../global-rate-limiting-strategy.md).

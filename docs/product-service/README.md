@@ -222,6 +222,54 @@ The service sends automated emails for:
 - Internal service access validation
 - Email delivery tracking
 
+## 🔐 Rate Limiting
+
+The Product Service implements comprehensive rate limiting to protect against abuse:
+
+### Rate Limits
+
+| Scope      | Limit        | Window     | Purpose                |
+| ---------- | ------------ | ---------- | ---------------------- |
+| **Global** | 100 requests | 15 minutes | General API protection |
+
+### Implementation
+
+- **Method**: Custom Middleware
+- **Tracking**: IP-based rate limiting
+- **Headers**: Standard rate limit headers included
+- **Storage**: In-memory with automatic cleanup
+
+### Rate Limit Headers
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 85
+X-RateLimit-Reset: 1640995200
+```
+
+### Error Response
+
+When rate limits are exceeded:
+
+```json
+{
+  "statusCode": 429,
+  "message": "Too many requests, please try again later.",
+  "error": "Too Many Requests"
+}
+```
+
+### Security Logging
+
+All rate limiting violations are logged:
+
+- IP address of violating client
+- Current request count vs. limit
+- Timestamp of violation
+- Endpoint accessed
+
+For detailed rate limiting strategy, see [Global Rate Limiting Strategy](../global-rate-limiting-strategy.md).
+
 ## Future Enhancements
 
 - Product image upload and management

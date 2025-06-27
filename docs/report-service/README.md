@@ -149,6 +149,92 @@ enum ReportStatus {
    - Role-based access control
    - Audit trail through status changes
 
+## 🔐 Rate Limiting
+
+The Report Service implements specialized rate limiting to prevent abuse reporting:
+
+### Rate Limits
+
+| Scope                 | Limit        | Window     | Key           | Purpose                |
+| --------------------- | ------------ | ---------- | ------------- | ---------------------- |
+| **Global**            | 100 requests | 15 minutes | IP            | General API protection |
+| **Report Submission** | 5 reports    | 1 hour     | User ID or IP | Prevent report abuse   |
+
+### Implementation
+
+- **Method**: Custom Middleware (dual-layer)
+- **Global Tracking**: IP-based rate limiting
+- **Report Tracking**: User ID-based (authenticated) or IP-based (anonymous)
+- **Headers**: Service-specific rate limit headers
+- **Storage**: In-memory with automatic cleanup
+
+### Rate Limit Headers
+
+#### Global Rate Limiting
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 85
+X-RateLimit-Reset: 1640995200
+```
+
+#### Report Rate Limiting
+
+```http
+X-Report-RateLimit-Limit: 5
+X-Report-RateLimit-Remaining: 3
+X-Report-RateLimit-Reset: 1640998800
+```
+
+### Error Responses
+
+#### Global Rate Limit
+
+```json
+{
+  "statusCode": 429,
+  "message": "Too many requests, please try again later.",
+  "error": "Too Many Requests"
+}
+```
+
+#### Report Rate Limit
+
+```json
+{
+  "statusCode": 429,
+  "message": "Too many reports submitted. Please wait before submitting another report.",
+  "error": "Too Many Requests"
+}
+```
+
+### Security Features
+
+- **Anti-Abuse Protection**: Prevents report flooding and harassment
+- **Flexible Tracking**: User-based for authenticated, IP-based for anonymous
+- **Long Window**: 1-hour window prevents sustained abuse campaigns
+- **Comprehensive Logging**: All violations logged with detailed context
+
+### Report Types Protected
+
+All report endpoints are protected:
+
+- User reports
+- Product reports
+- Message reports
+- Content reports
+
+### Monitoring
+
+All rate limiting events are logged:
+
+- Report submission patterns per user/IP
+- Global API usage patterns
+- Rate limit violations with report type context
+- Abuse pattern detection
+
+For detailed rate limiting strategy, see [Global Rate Limiting Strategy](../global-rate-limiting-strategy.md).
+
 ## Usage Examples
 
 ### Reporting a Product

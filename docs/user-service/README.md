@@ -319,6 +319,45 @@ Detailed API documentation is available via Swagger when the service is running:
 - Performance monitoring
 - Health check endpoints
 
+## 🔐 Rate Limiting
+
+The User Service implements global rate limiting to protect against abuse:
+
+### Rate Limits
+
+| Scope      | Limit        | Window     | Purpose                |
+| ---------- | ------------ | ---------- | ---------------------- |
+| **Global** | 100 requests | 15 minutes | General API protection |
+
+### Implementation
+
+- **Method**: NestJS Throttler Module
+- **Tracking**: IP-based rate limiting
+- **Headers**: Standard rate limit headers included
+- **Storage**: In-memory with automatic cleanup
+
+### Rate Limit Headers
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 85
+X-RateLimit-Reset: 1640995200
+```
+
+### Error Response
+
+When rate limits are exceeded:
+
+```json
+{
+  "statusCode": 429,
+  "message": "Too many requests, please try again later.",
+  "error": "Too Many Requests"
+}
+```
+
+For detailed rate limiting strategy, see [Global Rate Limiting Strategy](../global-rate-limiting-strategy.md).
+
 ## Future Enhancements
 
 - User analytics and reporting
