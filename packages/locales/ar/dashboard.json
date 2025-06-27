@@ -23,5 +23,17 @@
   "average_rating": "متوسط التقييم",
   "from": "من",
   "reviews": "تقييم",
-  "no_reviews_yet": "لا توجد تقييمات بعد"
+  "no_reviews_yet": "لا توجد تقييمات بعد",
+  "product_rejected": "تم رفض المنتج",
+  "product_rejected_message": "تم رفض منتجك من قبل فريق المراجعة وهو غير مرئي للمشترين.",
+  "rejection_reason": "السبب",
+  "rejected_by": "رفض بواسطة",
+  "edit_to_resubmit": "قم بتعديل منتجك لإصلاح المشاكل وإعادة إرساله للمراجعة.",
+  "status_approved": "موافق عليه",
+  "status_rejected": "مرفوض",
+  "status_pending": "قيد المراجعة",
+  "cannot_edit_pending": "لا يمكن التعديل أثناء المراجعة",
+  "cannot_edit_sold": "لا يمكن تعديل المنتج المباع",
+  "visible": "مرئي",
+  "hidden": "مخفي"
 }

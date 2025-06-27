@@ -84,8 +84,14 @@ export const getServerSideProps: GetServerSideProps = async (
 
     if (!response.ok) {
       if (response.status === 404) {
+        // Product might not be publicly visible but could be accessible to owner
+        // Return props without product data, let client-side handle authenticated request
         return {
-          notFound: true,
+          props: {
+            product: null,
+            username,
+            slug,
+          },
         };
       }
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -102,8 +108,13 @@ export const getServerSideProps: GetServerSideProps = async (
     };
   } catch (error) {
     console.error('Error fetching product:', error);
+    // Instead of returning notFound, let client-side handle it
     return {
-      notFound: true,
+      props: {
+        product: null,
+        username,
+        slug,
+      },
     };
   }
 };

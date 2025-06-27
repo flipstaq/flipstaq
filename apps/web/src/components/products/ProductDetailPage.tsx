@@ -18,6 +18,9 @@ import { useChat } from '@/contexts/ChatContext';
 import { useToast } from '@/components/providers/ToastProvider';
 import { productsApi, Product } from '../../lib/api/products';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
+import { FavoriteButton } from '@/components/products/FavoriteButton';
+import { LoginPromptModal } from '@/components/auth/LoginPromptModal';
+import { useLoginModal } from '@/hooks/useLoginModal';
 import InlineMessageComposer from '@/components/chat/InlineMessageComposer';
 import { BlockButton } from '@/components/common/BlockButton';
 import { useBlockStatus } from '@/hooks/useBlockStatus';
@@ -66,6 +69,15 @@ export function ProductDetailPage({
   const [mounted, setMounted] = useState(false);
   const [showMessageComposer, setShowMessageComposer] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+  // Login modal hook
+  const {
+    isOpen: isLoginModalOpen,
+    action: loginAction,
+    title: loginTitle,
+    openModal: openLoginModal,
+    closeModal: closeLoginModal,
+  } = useLoginModal();
 
   // Block status hook for the product owner
   const { blockStatus, updateBlockStatus } = useBlockStatus(
@@ -144,7 +156,7 @@ export function ProductDetailPage({
     }
 
     if (!user) {
-      info(t('auth.loginRequired'));
+      openLoginModal(t('products.detail.message_seller'));
       return;
     }
 
@@ -174,10 +186,13 @@ export function ProductDetailPage({
   };
 
   useEffect(() => {
-    if (!initialProduct && username && slug) {
+    // Always fetch client-side if:
+    // 1. No initial product from SSR, OR
+    // 2. User is logged in (to get personalized view including own non-approved products)
+    if ((!initialProduct || user) && username && slug) {
       fetchProductDetails();
     }
-  }, [username, slug, initialProduct]);
+  }, [username, slug, initialProduct, user]); // Add user dependency to re-fetch when user state changes
   if (loading) {
     return (
       <>
@@ -536,8 +551,8 @@ export function ProductDetailPage({
                 )}{' '}
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  {/* Message Seller - Show input or button based on state */}
-                  {user && product.userId !== user.id && (
+                  {/* Message Seller - Show input or button based on state - Always visible unless own product */}
+                  {product.userId !== user?.id && (
                     <>
                       {!showMessageComposer ? (
                         <button
@@ -583,19 +598,29 @@ export function ProductDetailPage({
                     </>
                   )}
 
-                  <button
-                    onClick={handleShare}
-                    className={`rounded-lg border border-secondary-300 px-6 py-3 font-medium text-secondary-700 transition-colors hover:bg-secondary-50 dark:border-secondary-600 dark:text-secondary-300 dark:hover:bg-secondary-700 ${
-                      user && product.userId !== user.id ? '' : 'flex-1'
-                    }`}
-                  >
-                    <div className="flex items-center justify-center">
-                      <Share2
-                        className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                  <div className="flex gap-3">
+                    {/* Favorite Button - Always visible unless own product */}
+                    {product.userId !== user?.id && (
+                      <FavoriteButton
+                        productId={product.id}
+                        size="lg"
+                        className="rounded-lg border border-secondary-300 px-4 py-3 dark:border-secondary-600"
+                        onLoginRequired={openLoginModal}
                       />
-                      {t('products.directLink.share')}
-                    </div>
-                  </button>
+                    )}
+
+                    <button
+                      onClick={handleShare}
+                      className="rounded-lg border border-secondary-300 px-6 py-3 font-medium text-secondary-700 transition-colors hover:bg-secondary-50 dark:border-secondary-600 dark:text-secondary-300 dark:hover:bg-secondary-700"
+                    >
+                      <div className="flex items-center justify-center">
+                        <Share2
+                          className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                        />
+                        {t('products.directLink.share')}
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -634,6 +659,7 @@ export function ProductDetailPage({
               productId={product.id}
               productSlug={product.slug}
               productOwnerId={product.userId}
+              onLoginRequired={openLoginModal}
             />
           </div>
         </div>
@@ -650,6 +676,13 @@ export function ProductDetailPage({
           }}
         />
       )}
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        isOpen={isLoginModalOpen}
+        onClose={closeLoginModal}
+        action={loginAction}
+        title={loginTitle}
+      />
     </>
   );
 }

@@ -167,6 +167,51 @@ The service handles various error scenarios:
 - **Prisma**: ORM and database client
 - **class-validator**: DTO validation
 - **Swagger**: API documentation
+- **Resend**: Email service for notifications
+
+## Environment Configuration
+
+The service requires the following environment variables:
+
+### Required Variables
+
+```env
+# Database Configuration
+DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
+
+# JWT Configuration (for validation)
+JWT_SECRET="your_jwt_secret_key_here"
+JWT_EXPIRES_IN="2h"
+JWT_REFRESH_EXPIRES_IN="7d"
+
+# Server Configuration
+PORT=3004
+NODE_ENV="development"
+
+# CORS Configuration
+FRONTEND_URL="http://localhost:3000"
+API_GATEWAY_URL="http://localhost:3100"
+
+# Email Configuration (Resend)
+RESEND_API_KEY="re_your_resend_api_key_here"
+FROM_EMAIL="noreply@yourdomain.com"
+PLATFORM_NAME="Your Platform Name"
+PLATFORM_URL="https://yourdomain.com"
+```
+
+### Resend Setup
+
+1. **Create a Resend Account**: Go to [https://resend.com](https://resend.com) and sign up
+2. **Get API Key**: Navigate to [API Keys](https://resend.com/api-keys) and create a new API key
+3. **Set Environment Variables**: Add the API key and email configuration to your `.env` file
+4. **Domain Configuration**: For production, add and verify your domain in Resend dashboard
+
+### Email Templates
+
+The service sends automated emails for:
+
+- **Product Approval**: Notification when a product is approved by admin
+- **Product Rejection**: Notification when a product is rejected with reason
 
 ## Monitoring & Logging
 
@@ -175,6 +220,7 @@ The service handles various error scenarios:
 - Performance monitoring
 - Database query logging
 - Internal service access validation
+- Email delivery tracking
 
 ## Future Enhancements
 
@@ -186,3 +232,5 @@ The service handles various error scenarios:
 - Product variations (size, color, etc.)
 - Bulk product operations
 - Product analytics and insights
+- Email template customization
+- Email delivery analytics

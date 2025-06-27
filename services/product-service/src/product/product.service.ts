@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   BadRequestException,
   NotFoundException,
   ConflictException,
@@ -9,10 +10,18 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { ProductResponseDto } from '../dto/product-response.dto';
 import { UpdateProductStatusDto } from '../dto/update-product-status.dto';
+import { ApproveProductDto, ProductApprovalResponseDto } from '../dto/approve-product.dto';
+import { MailerService } from '../mailer/mailer.service';
+import { ProductStatus, UserRole } from '@flipstaq/db';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(ProductService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailerService: MailerService,
+  ) {}
 
   /**
    * Create a new product
@@ -65,6 +74,8 @@ export class ProductService {
         slug,
         imageUrl,
         userId,
+        visible: false, // New products are not visible until approved
+        status: ProductStatus.PENDING,
       },
       include: {
         user: {
@@ -90,6 +101,9 @@ export class ProductService {
       username: product.user.username,
       isActive: product.isActive,
       isSold: product.isSold || false,
+      status: product.status,
+      approvedAt: product.approvedAt,
+      approvedById: product.approvedById,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     };
@@ -101,6 +115,7 @@ export class ProductService {
     const where: any = {
       isActive: true,
       visible: true, // Only show visible products to public
+      status: ProductStatus.APPROVED, // Only show approved products to public
     };
 
     // If user is authenticated, exclude products from users who blocked them or they blocked
@@ -176,6 +191,9 @@ export class ProductService {
         username: product.user.username,
         isActive: product.isActive,
         isSold: product.isSold || false,
+        status: product.status,
+        approvedAt: product.approvedAt,
+        approvedById: product.approvedById,
         createdAt: product.createdAt,
         updatedAt: product.updatedAt,
         averageRating,
@@ -190,6 +208,16 @@ export class ProductService {
     slug: string,
     currentUserId?: string,
   ): Promise<ProductResponseDto> {
+    // Build the OR conditions dynamically based on currentUserId
+    const orConditions: Array<{ status?: ProductStatus; userId?: string }> = [
+      { status: ProductStatus.APPROVED },
+    ];
+
+    // Only add the userId condition if currentUserId is provided
+    if (currentUserId) {
+      orConditions.push({ userId: currentUserId });
+    }
+
     const product = await this.prisma.product.findFirst({
       where: {
         slug,
@@ -197,6 +225,8 @@ export class ProductService {
         user: {
           username,
         },
+        // Only show approved products to public, or allow owner to see their own
+        OR: orConditions,
       },
       include: {
         user: {
@@ -242,6 +272,9 @@ export class ProductService {
       username: product.user.username,
       isActive: product.isActive,
       isSold: product.isSold || false,
+      status: product.status,
+      approvedAt: product.approvedAt,
+      approvedById: product.approvedById,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     };
@@ -259,6 +292,22 @@ export class ProductService {
         user: {
           select: {
             username: true,
+          },
+        },
+        approvedBy: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        rejectedBy: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
           },
         },
         reviews: {
@@ -295,6 +344,14 @@ export class ProductService {
         username: product.user.username,
         isActive: product.isActive,
         isSold: product.isSold || false,
+        status: product.status,
+        approvedAt: product.approvedAt,
+        approvedById: product.approvedById,
+        rejectedAt: product.rejectedAt,
+        rejectedById: product.rejectedById,
+        approvalReason: product.approvalReason,
+        approvedBy: product.approvedBy,
+        rejectedBy: product.rejectedBy,
         createdAt: product.createdAt,
         updatedAt: product.updatedAt,
         averageRating,
@@ -381,6 +438,17 @@ export class ProductService {
         location,
         slug: newSlug || slug,
         imageUrl,
+        // Reset to PENDING if product was previously rejected
+        ...(existingProduct.status === 'REJECTED'
+          ? {
+              status: 'PENDING',
+              approvedAt: null,
+              approvedById: null,
+              rejectedAt: null,
+              rejectedById: null,
+              approvalReason: null,
+            }
+          : {}),
       },
       include: {
         user: {
@@ -406,6 +474,9 @@ export class ProductService {
       username: updatedProduct.user.username,
       isActive: updatedProduct.isActive,
       isSold: updatedProduct.isSold || false,
+      status: updatedProduct.status,
+      approvedAt: updatedProduct.approvedAt,
+      approvedById: updatedProduct.approvedById,
       createdAt: updatedProduct.createdAt,
       updatedAt: updatedProduct.updatedAt,
     };
@@ -565,6 +636,9 @@ export class ProductService {
       username: updatedProduct.user.username,
       isActive: updatedProduct.isActive,
       isSold: updatedProduct.isSold,
+      status: updatedProduct.status,
+      approvedAt: updatedProduct.approvedAt,
+      approvedById: updatedProduct.approvedById,
       createdAt: updatedProduct.createdAt,
       updatedAt: updatedProduct.updatedAt,
     };
@@ -616,6 +690,9 @@ export class ProductService {
         isActive: product.isActive,
         isSold: product.isSold || false,
         visible: product.visible,
+        status: product.status,
+        approvedAt: product.approvedAt,
+        approvedById: product.approvedById,
         createdAt: product.createdAt,
         updatedAt: product.updatedAt,
         averageRating,
@@ -625,16 +702,21 @@ export class ProductService {
   }
 
   /**
-   * Admin: Toggle product visibility
+   * Admin: Toggle product visibility (only for approved products)
    */
   async toggleProductVisibility(productId: string): Promise<{ visible: boolean }> {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
-      select: { visible: true },
+      select: { visible: true, status: true },
     });
 
     if (!product) {
       throw new NotFoundException('Product not found');
+    }
+
+    // Only allow visibility toggle for approved products
+    if (product.status !== ProductStatus.APPROVED) {
+      throw new BadRequestException('Only approved products can have their visibility toggled');
     }
 
     const updatedProduct = await this.prisma.product.update({
@@ -649,17 +731,380 @@ export class ProductService {
   /**
    * Admin: Delete product permanently
    */
-  async deleteProductPermanently(productId: string): Promise<void> {
+  async deleteProductPermanently(productId: string, reason?: string): Promise<void> {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
+      include: {
+        user: {
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
     if (!product) {
       throw new NotFoundException('Product not found');
     }
 
+    // Send deletion email if reason is provided
+    if (reason && reason.trim()) {
+      try {
+        const sellerName = `${product.user.firstName} ${product.user.lastName}`.trim();
+        await this.mailerService.sendProductDeletionEmail(
+          product.title,
+          product.user.email,
+          sellerName,
+          reason,
+        );
+        this.logger.log(`Deletion email sent for product: ${product.title}`);
+      } catch (error) {
+        this.logger.error('Failed to send deletion email:', error);
+        // Continue with deletion even if email fails
+      }
+    }
+
     await this.prisma.product.delete({
       where: { id: productId },
+    });
+  }
+
+  /**
+   * Admin: Restore a deleted product (soft-deleted products only)
+   */
+  async restoreProduct(productId: string): Promise<void> {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true, isActive: true, title: true },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (product.isActive) {
+      throw new BadRequestException('Product is already active');
+    }
+
+    await this.prisma.product.update({
+      where: { id: productId },
+      data: { isActive: true },
+    });
+
+    this.logger.log(`Product restored: ${product.title}`);
+  }
+
+  /**
+   * Approve or reject a product (Staff, Higher Staff, or Owner only)
+   */
+  async approveProduct(
+    productId: string,
+    approverId: string,
+    approverRole: UserRole,
+    approveProductDto: ApproveProductDto,
+  ): Promise<ProductApprovalResponseDto> {
+    // Check if approver has permission (Staff, Higher Staff, or Owner)
+    if (!['STAFF', 'HIGHER_STAFF', 'OWNER'].includes(approverRole)) {
+      throw new ForbiddenException('You do not have permission to approve products');
+    }
+
+    // Find the product with seller information
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    // Update product status and visibility
+    const updatedProduct = await this.prisma.product.update({
+      where: { id: productId },
+      data: {
+        status: approveProductDto.status,
+        approvedAt: new Date(),
+        approvedById: approverId,
+        // Set visibility based on approval status
+        visible: approveProductDto.status === ProductStatus.APPROVED ? true : false,
+      },
+    });
+
+    // Send email notification
+    let emailSent = false;
+    const sellerName = `${product.user.firstName} ${product.user.lastName}`;
+    const wasRejected = product.status === ProductStatus.REJECTED;
+
+    if (approveProductDto.status === ProductStatus.APPROVED) {
+      if (wasRejected) {
+        // Send special approval email for previously rejected products
+        emailSent = await this.mailerService.sendProductReApprovalEmail(
+          product.title,
+          product.user.email,
+          sellerName,
+          approveProductDto.reason || 'Your product has been reviewed and approved.',
+        );
+      } else {
+        // Send regular approval email for first-time approvals
+        emailSent = await this.mailerService.sendProductApprovalEmail(
+          product.title,
+          product.user.email,
+          sellerName,
+        );
+      }
+    } else if (approveProductDto.status === ProductStatus.REJECTED) {
+      emailSent = await this.mailerService.sendProductRejectionEmail(
+        product.title,
+        product.user.email,
+        sellerName,
+        approveProductDto.reason,
+      );
+    }
+
+    const message =
+      approveProductDto.status === ProductStatus.APPROVED
+        ? 'Product approved successfully'
+        : 'Product rejected successfully';
+
+    return {
+      status: updatedProduct.status,
+      approvedAt: updatedProduct.approvedAt,
+      approvedById: updatedProduct.approvedById,
+      emailSent,
+      message,
+    };
+  }
+
+  /**
+   * Admin: Get pending products for moderation (Staff, Higher Staff, or Owner only)
+   */
+  async getPendingProducts(
+    userId: string,
+    approverRole: UserRole,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<ProductResponseDto[]> {
+    // Check if approver has permission
+    if (!['STAFF', 'HIGHER_STAFF', 'OWNER'].includes(approverRole)) {
+      throw new ForbiddenException('You do not have permission to view pending products');
+    }
+
+    const skip = (page - 1) * limit;
+
+    const products = await this.prisma.product.findMany({
+      where: {
+        status: ProductStatus.PENDING,
+        isActive: true,
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
+        _count: {
+          select: {
+            reviews: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'asc', // Oldest pending products first
+      },
+      skip,
+      take: limit,
+    });
+
+    return products.map((product) => ({
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      category: product.category,
+      type: product.type,
+      price: product.price,
+      currency: product.currency,
+      location: product.location,
+      slug: product.slug,
+      imageUrl: product.imageUrl,
+      userId: product.userId,
+      username: product.user.username,
+      isActive: product.isActive,
+      isSold: product.isSold,
+      status: product.status,
+      approvedAt: product.approvedAt,
+      approvedById: product.approvedById,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+      totalReviews: product._count.reviews,
+    }));
+  }
+
+  /**
+   * Admin: Get approved products for moderation (Staff, Higher Staff, or Owner only)
+   */
+  async getApprovedProducts(userId: string, approverRole: UserRole): Promise<ProductResponseDto[]> {
+    // Check if approver has permission (Staff, Higher Staff, or Owner)
+    if (!['STAFF', 'HIGHER_STAFF', 'OWNER'].includes(approverRole)) {
+      throw new ForbiddenException('You do not have permission to view products');
+    }
+
+    // Get approved products with user information
+    const products = await this.prisma.product.findMany({
+      where: {
+        status: ProductStatus.APPROVED,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        approvedBy: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        reviews: {
+          where: {
+            visible: true,
+          },
+          select: {
+            rating: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return products.map((product) => {
+      const averageRating =
+        product.reviews.length > 0
+          ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
+          : 0;
+
+      return {
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        currency: product.currency,
+        location: product.location,
+        slug: product.slug,
+        imageUrl: product.imageUrl,
+        type: product.type,
+        userId: product.userId,
+        username: product.user.username,
+        isActive: product.isActive,
+        isSold: product.isSold,
+        visible: product.visible,
+        status: product.status,
+        approvedAt: product.approvedAt,
+        approvedBy: product.approvedBy,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        averageRating,
+        totalReviews: product.reviews.length,
+      };
+    });
+  }
+
+  /**
+   * Admin: Get rejected products for moderation (Staff, Higher Staff, or Owner only)
+   */
+  async getRejectedProducts(userId: string, approverRole: UserRole): Promise<ProductResponseDto[]> {
+    // Check if approver has permission (Staff, Higher Staff, or Owner)
+    if (!['STAFF', 'HIGHER_STAFF', 'OWNER'].includes(approverRole)) {
+      throw new ForbiddenException('You do not have permission to view products');
+    }
+
+    // Get rejected products with user information
+    const products = await this.prisma.product.findMany({
+      where: {
+        status: ProductStatus.REJECTED,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        approvedBy: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        reviews: {
+          where: {
+            visible: true,
+          },
+          select: {
+            rating: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return products.map((product) => {
+      const averageRating =
+        product.reviews.length > 0
+          ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
+          : 0;
+
+      return {
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        currency: product.currency,
+        location: product.location,
+        slug: product.slug,
+        imageUrl: product.imageUrl,
+        type: product.type,
+        userId: product.userId,
+        username: product.user.username,
+        isActive: product.isActive,
+        isSold: product.isSold,
+        visible: product.visible,
+        status: product.status,
+        approvedAt: product.approvedAt,
+        approvedBy: product.approvedBy,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        averageRating,
+        totalReviews: product.reviews.length,
+      };
     });
   }
 }

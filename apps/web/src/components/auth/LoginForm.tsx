@@ -30,7 +30,10 @@ export function LoginForm() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      const redirectUrl = router.query.redirect as string;
+      const targetUrl =
+        redirectUrl && typeof redirectUrl === 'string' ? redirectUrl : '/';
+      router.push(targetUrl);
     }
   }, [isAuthenticated, router]);
   // Clear error when component mounts
@@ -62,7 +65,7 @@ export function LoginForm() {
           <p className="mt-2 text-center text-sm text-secondary-600 dark:text-secondary-400">
             {t('auth:dontHaveAccount')}{' '}
             <Link
-              href="/auth/signup"
+              href={`/auth/signup${router.query.redirect ? `?redirect=${encodeURIComponent(router.query.redirect as string)}` : ''}`}
               className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
             >
               {t('auth:signUpHere')}

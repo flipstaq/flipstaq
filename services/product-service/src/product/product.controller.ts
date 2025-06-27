@@ -19,7 +19,9 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { ProductResponseDto } from '../dto/product-response.dto';
 import { UpdateProductStatusDto } from '../dto/update-product-status.dto';
+import { ApproveProductDto, ProductApprovalResponseDto } from '../dto/approve-product.dto';
 import { InternalServiceGuard } from '../common/guards/internal-service.guard';
+import { UserRole } from '@flipstaq/db';
 
 @ApiTags('Internal Products')
 @Controller('internal/products')
@@ -361,11 +363,181 @@ export class ProductController {
   async deleteProductPermanently(
     @Param('id') productId: string,
     @Headers('x-user-id') userId: string,
+    @Body() deleteProductDto?: { reason?: string },
   ): Promise<{ message: string }> {
     if (!userId || userId.trim() === '') {
       throw new BadRequestException('User ID is required and cannot be empty');
     }
-    await this.productService.deleteProductPermanently(productId);
+    await this.productService.deleteProductPermanently(productId, deleteProductDto?.reason);
     return { message: 'Product deleted permanently' };
+  }
+
+  @Patch('admin/:id/restore')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin: Restore deleted product' })
+  @ApiParam({
+    name: 'id',
+    description: 'Product ID',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product restored successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Product restored successfully',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Admin access required',
+  })
+  async restoreProduct(
+    @Param('id') productId: string,
+    @Headers('x-user-id') userId: string,
+  ): Promise<{ message: string }> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+    await this.productService.restoreProduct(productId);
+    return { message: 'Product restored successfully' };
+  }
+
+  @Get('admin/pending')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get all pending products for admin approval' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of pending products',
+    type: [ProductResponseDto],
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
+  async getPendingProducts(
+    @Headers('x-user-id') userId: string,
+    @Headers('x-user-role') userRole: string,
+  ): Promise<ProductResponseDto[]> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    // Validate role
+    const validRoles: UserRole[] = ['STAFF', 'HIGHER_STAFF', 'OWNER'];
+    if (!validRoles.includes(userRole as UserRole)) {
+      throw new BadRequestException('Invalid user role');
+    }
+
+    return this.productService.getPendingProducts(userId, userRole as UserRole);
+  }
+
+  @Patch(':id/approve')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Approve a product (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Product ID to approve' })
+  @ApiBody({ type: ApproveProductDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Product approved successfully',
+    type: ProductApprovalResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+  })
+  async approveProduct(
+    @Param('id') productId: string,
+    @Body() approveProductDto: ApproveProductDto,
+    @Headers('x-user-id') userId: string,
+    @Headers('x-user-role') userRole: string,
+  ): Promise<ProductApprovalResponseDto> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    // Validate role
+    const validRoles: UserRole[] = ['STAFF', 'HIGHER_STAFF', 'OWNER'];
+    if (!validRoles.includes(userRole as UserRole)) {
+      throw new BadRequestException('Invalid user role');
+    }
+
+    return this.productService.approveProduct(
+      productId,
+      userId,
+      userRole as UserRole,
+      approveProductDto,
+    );
+  }
+
+  @Get('admin/approved')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get all approved products (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of approved products',
+    type: [ProductResponseDto],
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
+  async getApprovedProducts(
+    @Headers('x-user-id') userId: string,
+    @Headers('x-user-role') userRole: string,
+  ): Promise<ProductResponseDto[]> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    // Validate role
+    const validRoles: UserRole[] = ['STAFF', 'HIGHER_STAFF', 'OWNER'];
+    if (!validRoles.includes(userRole as UserRole)) {
+      throw new BadRequestException('Invalid user role');
+    }
+
+    return this.productService.getApprovedProducts(userId, userRole as UserRole);
+  }
+
+  @Get('admin/rejected')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get all rejected products (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of rejected products',
+    type: [ProductResponseDto],
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
+  async getRejectedProducts(
+    @Headers('x-user-id') userId: string,
+    @Headers('x-user-role') userRole: string,
+  ): Promise<ProductResponseDto[]> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    // Validate role
+    const validRoles: UserRole[] = ['STAFF', 'HIGHER_STAFF', 'OWNER'];
+    if (!validRoles.includes(userRole as UserRole)) {
+      throw new BadRequestException('Invalid user role');
+    }
+
+    return this.productService.getRejectedProducts(userId, userRole as UserRole);
   }
 }

@@ -168,6 +168,12 @@ exports.Prisma.ProductScalarFieldEnum = {
   isActive: 'isActive',
   isSold: 'isSold',
   visible: 'visible',
+  status: 'status',
+  approvedAt: 'approvedAt',
+  approvedById: 'approvedById',
+  rejectedAt: 'rejectedAt',
+  rejectedById: 'rejectedById',
+  approvalReason: 'approvalReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -294,6 +300,12 @@ exports.ProductType = exports.$Enums.ProductType = {
   DIGITAL: 'DIGITAL',
   PHYSICAL: 'PHYSICAL',
   SERVICE: 'SERVICE'
+};
+
+exports.ProductStatus = exports.$Enums.ProductStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
 };
 
 exports.ReportType = exports.$Enums.ReportType = {

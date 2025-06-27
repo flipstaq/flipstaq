@@ -10,6 +10,7 @@ interface FavoriteButtonProps {
   className?: string;
   showTooltip?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  onLoginRequired?: (action: string) => void;
 }
 
 export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
@@ -17,10 +18,11 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   className = '',
   showTooltip = true,
   size = 'md',
+  onLoginRequired,
 }) => {
   const { t } = useLanguage();
   const { isAuthenticated } = useAuth();
-  const { success, error } = useToast();
+  const { success, error, info } = useToast();
   const { addToFavorites, removeFromFavorites, isProductFavorited } =
     useFavorites();
   const [isFavorited, setIsFavorited] = useState(false);
@@ -58,7 +60,11 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      // Could redirect to login or show a modal
+      if (onLoginRequired) {
+        onLoginRequired(t('products.detail.save_product'));
+      } else {
+        info(t('products.detail.login_to_save'));
+      }
       return;
     }
 
@@ -94,9 +100,6 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
     }
   };
 
-  if (!isAuthenticated) {
-    return null; // Don't show favorite button to unauthenticated users
-  }
   const tooltip = isFavorited ? t('removeFromSaved') : t('saveForLater');
 
   return (
@@ -110,7 +113,9 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         ${
           isFavorited
             ? 'bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30'
-            : 'bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:bg-gray-800 dark:hover:bg-red-900/20'
+            : isAuthenticated
+              ? 'bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:bg-gray-800 dark:hover:bg-red-900/20'
+              : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:bg-gray-800 dark:hover:bg-gray-700'
         }
         ${isLoading ? 'cursor-not-allowed opacity-50' : 'hover:scale-110'}
         ${className}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api/api-client';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 interface BlockStatus {
   isBlocked: boolean;
@@ -7,14 +8,16 @@ interface BlockStatus {
 }
 
 export const useBlockStatus = (targetUserId: string | null) => {
+  const { user } = useAuth();
   const [blockStatus, setBlockStatus] = useState<BlockStatus>({
     isBlocked: false,
     isBlockedBy: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const fetchBlockStatus = async () => {
-    if (!targetUserId) return;
+    if (!targetUserId || !user) return;
 
     setIsLoading(true);
     setError(null);
@@ -33,20 +36,22 @@ export const useBlockStatus = (targetUserId: string | null) => {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     // Reset state when targetUserId changes
-    if (targetUserId) {
+    if (targetUserId && user) {
       setBlockStatus({ isBlocked: false, isBlockedBy: false });
       setError(null);
       fetchBlockStatus();
     } else {
-      // Clear state when no target user
+      // Clear state when no target user or no authenticated user
       setBlockStatus({ isBlocked: false, isBlockedBy: false });
       setError(null);
     }
-  }, [targetUserId]);
+  }, [targetUserId, user]);
+
   const updateBlockStatus = async (isBlocked: boolean) => {
-    if (!targetUserId) return;
+    if (!targetUserId || !user) return;
 
     setIsLoading(true);
     setError(null);
@@ -76,7 +81,9 @@ export const useBlockStatus = (targetUserId: string | null) => {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to update block status';
       setError(errorMessage);
-      console.error('Error updating block status:', err); // If the error suggests the user is already in the desired state,
+      console.error('Error updating block status:', err);
+
+      // If the error suggests the user is already in the desired state,
       // refetch the status to sync with server
       if (
         errorMessage.includes('already blocked') ||
@@ -85,7 +92,9 @@ export const useBlockStatus = (targetUserId: string | null) => {
         errorMessage.includes('not found')
       ) {
         console.log('🔄 State mismatch detected, refetching block status...');
-        await fetchBlockStatus(); // If it was a "Block not found" error when trying to unblock,
+        await fetchBlockStatus();
+
+        // If it was a "Block not found" error when trying to unblock,
         // the user is likely already unblocked, so we can consider this a success
         if (errorMessage.includes('Block not found') && !isBlocked) {
           return; // Don't re-throw the error, treat as success
@@ -105,6 +114,7 @@ export const useBlockStatus = (targetUserId: string | null) => {
       setIsLoading(false);
     }
   };
+
   const resetBlockStatus = () => {
     setBlockStatus({ isBlocked: false, isBlockedBy: false });
     setError(null);

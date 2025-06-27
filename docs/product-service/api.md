@@ -92,6 +92,102 @@ interface DashboardStats {
 - Sold products cannot be edited (frontend restriction)
 - Status changes are reflected in dashboard statistics
 
+## Product Approval Workflow
+
+All newly created products are automatically set to `PENDING` status and require manual approval by staff members (Staff, Higher Staff, or Owner) before becoming publicly visible.
+
+### Approval Endpoints
+
+#### Get Pending Products
+
+```http
+GET /api/products/admin/pending
+Authorization: Bearer <token>
+X-User-Role: STAFF|HIGHER_STAFF|OWNER
+```
+
+**Response:**
+
+```json
+{
+  "id": "string",
+  "title": "string",
+  "description": "string",
+  "category": "string",
+  "type": "BUY_NOW|AUCTION",
+  "price": 0,
+  "currency": "string",
+  "location": "string",
+  "slug": "string",
+  "imageUrl": "string",
+  "userId": "string",
+  "username": "string",
+  "isActive": true,
+  "isSold": false,
+  "visible": true,
+  "status": "PENDING",
+  "approvedAt": null,
+  "approvedById": null,
+  "createdAt": "2023-01-01T00:00:00Z",
+  "updatedAt": "2023-01-01T00:00:00Z",
+  "totalReviews": 0
+}
+```
+
+#### Approve/Reject Product
+
+```http
+PATCH /api/products/admin/{productId}/approve
+Authorization: Bearer <token>
+X-User-Role: STAFF|HIGHER_STAFF|OWNER
+Content-Type: application/json
+
+{
+  "status": "APPROVED|REJECTED",
+  "reason": "string" // Required for REJECTED status
+}
+```
+
+**Response:**
+
+```json
+{
+  "status": "APPROVED|REJECTED",
+  "approvedAt": "2023-01-01T00:00:00Z",
+  "approvedById": "string",
+  "emailSent": true,
+  "message": "Product approved successfully"
+}
+```
+
+### Status Flow
+
+1. **PENDING** - Product created but not yet approved (default for new products)
+2. **APPROVED** - Product approved by staff and visible to public
+3. **REJECTED** - Product rejected by staff with reason provided
+
+### Email Notifications
+
+When a product is approved or rejected, an automatic email notification is sent to the seller:
+
+- **Approval Email**: Confirms the product has been approved and is now live
+- **Rejection Email**: Explains why the product was rejected and includes the reason provided by staff
+
+### Access Control
+
+- **Staff, Higher Staff, Owner**: Can view pending products and approve/reject them
+- **Regular Users**: Cannot see unapproved products (except their own)
+- **Public API**: Only returns approved products
+
+### Implementation Notes
+
+- Products with `status: PENDING` are only visible to:
+  - The product owner (seller)
+  - Staff members in the admin panel
+- Public product listings automatically filter out non-approved products
+- Product detail pages enforce approval status checks
+- Search functionality only includes approved products
+
 ## File Storage
 
 ### Image Upload Structure

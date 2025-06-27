@@ -120,6 +120,15 @@ export const ProductType: {
 
 export type ProductType = (typeof ProductType)[keyof typeof ProductType]
 
+
+export const ProductStatus: {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+export type ProductStatus = (typeof ProductStatus)[keyof typeof ProductStatus]
+
 }
 
 export type UserRole = $Enums.UserRole
@@ -141,6 +150,10 @@ export const ReportStatus: typeof $Enums.ReportStatus
 export type ProductType = $Enums.ProductType
 
 export const ProductType: typeof $Enums.ProductType
+
+export type ProductStatus = $Enums.ProductStatus
+
+export const ProductStatus: typeof $Enums.ProductStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1854,6 +1867,8 @@ export namespace Prisma {
   export type UserCountOutputType = {
     refreshTokens: number
     products: number
+    approvedProducts: number
+    rejectedProducts: number
     favorites: number
     reviews: number
     sentMessages: number
@@ -1868,6 +1883,8 @@ export namespace Prisma {
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     refreshTokens?: boolean | UserCountOutputTypeCountRefreshTokensArgs
     products?: boolean | UserCountOutputTypeCountProductsArgs
+    approvedProducts?: boolean | UserCountOutputTypeCountApprovedProductsArgs
+    rejectedProducts?: boolean | UserCountOutputTypeCountRejectedProductsArgs
     favorites?: boolean | UserCountOutputTypeCountFavoritesArgs
     reviews?: boolean | UserCountOutputTypeCountReviewsArgs
     sentMessages?: boolean | UserCountOutputTypeCountSentMessagesArgs
@@ -1901,6 +1918,20 @@ export namespace Prisma {
    * UserCountOutputType without action
    */
   export type UserCountOutputTypeCountProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountApprovedProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountRejectedProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ProductWhereInput
   }
 
@@ -2403,6 +2434,8 @@ export namespace Prisma {
     updatedAt?: boolean
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
     products?: boolean | User$productsArgs<ExtArgs>
+    approvedProducts?: boolean | User$approvedProductsArgs<ExtArgs>
+    rejectedProducts?: boolean | User$rejectedProductsArgs<ExtArgs>
     favorites?: boolean | User$favoritesArgs<ExtArgs>
     reviews?: boolean | User$reviewsArgs<ExtArgs>
     sentMessages?: boolean | User$sentMessagesArgs<ExtArgs>
@@ -2497,6 +2530,8 @@ export namespace Prisma {
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
     products?: boolean | User$productsArgs<ExtArgs>
+    approvedProducts?: boolean | User$approvedProductsArgs<ExtArgs>
+    rejectedProducts?: boolean | User$rejectedProductsArgs<ExtArgs>
     favorites?: boolean | User$favoritesArgs<ExtArgs>
     reviews?: boolean | User$reviewsArgs<ExtArgs>
     sentMessages?: boolean | User$sentMessagesArgs<ExtArgs>
@@ -2521,6 +2556,8 @@ export namespace Prisma {
     objects: {
       refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
       products: Prisma.$ProductPayload<ExtArgs>[]
+      approvedProducts: Prisma.$ProductPayload<ExtArgs>[]
+      rejectedProducts: Prisma.$ProductPayload<ExtArgs>[]
       favorites: Prisma.$FavoritePayload<ExtArgs>[]
       reviews: Prisma.$ReviewPayload<ExtArgs>[]
       sentMessages: Prisma.$MessagePayload<ExtArgs>[]
@@ -2951,6 +2988,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     refreshTokens<T extends User$refreshTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     products<T extends User$productsArgs<ExtArgs> = {}>(args?: Subset<T, User$productsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    approvedProducts<T extends User$approvedProductsArgs<ExtArgs> = {}>(args?: Subset<T, User$approvedProductsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rejectedProducts<T extends User$rejectedProductsArgs<ExtArgs> = {}>(args?: Subset<T, User$rejectedProductsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     favorites<T extends User$favoritesArgs<ExtArgs> = {}>(args?: Subset<T, User$favoritesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FavoritePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends User$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, User$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sentMessages<T extends User$sentMessagesArgs<ExtArgs> = {}>(args?: Subset<T, User$sentMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3435,6 +3474,54 @@ export namespace Prisma {
    * User.products
    */
   export type User$productsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Product
+     */
+    select?: ProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Product
+     */
+    omit?: ProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductInclude<ExtArgs> | null
+    where?: ProductWhereInput
+    orderBy?: ProductOrderByWithRelationInput | ProductOrderByWithRelationInput[]
+    cursor?: ProductWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductScalarFieldEnum | ProductScalarFieldEnum[]
+  }
+
+  /**
+   * User.approvedProducts
+   */
+  export type User$approvedProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Product
+     */
+    select?: ProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Product
+     */
+    omit?: ProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductInclude<ExtArgs> | null
+    where?: ProductWhereInput
+    orderBy?: ProductOrderByWithRelationInput | ProductOrderByWithRelationInput[]
+    cursor?: ProductWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductScalarFieldEnum | ProductScalarFieldEnum[]
+  }
+
+  /**
+   * User.rejectedProducts
+   */
+  export type User$rejectedProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Product
      */
@@ -4802,6 +4889,12 @@ export namespace Prisma {
     isActive: boolean | null
     isSold: boolean | null
     visible: boolean | null
+    status: $Enums.ProductStatus | null
+    approvedAt: Date | null
+    approvedById: string | null
+    rejectedAt: Date | null
+    rejectedById: string | null
+    approvalReason: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4821,6 +4914,12 @@ export namespace Prisma {
     isActive: boolean | null
     isSold: boolean | null
     visible: boolean | null
+    status: $Enums.ProductStatus | null
+    approvedAt: Date | null
+    approvedById: string | null
+    rejectedAt: Date | null
+    rejectedById: string | null
+    approvalReason: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4840,6 +4939,12 @@ export namespace Prisma {
     isActive: number
     isSold: number
     visible: number
+    status: number
+    approvedAt: number
+    approvedById: number
+    rejectedAt: number
+    rejectedById: number
+    approvalReason: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -4869,6 +4974,12 @@ export namespace Prisma {
     isActive?: true
     isSold?: true
     visible?: true
+    status?: true
+    approvedAt?: true
+    approvedById?: true
+    rejectedAt?: true
+    rejectedById?: true
+    approvalReason?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4888,6 +4999,12 @@ export namespace Prisma {
     isActive?: true
     isSold?: true
     visible?: true
+    status?: true
+    approvedAt?: true
+    approvedById?: true
+    rejectedAt?: true
+    rejectedById?: true
+    approvalReason?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4907,6 +5024,12 @@ export namespace Prisma {
     isActive?: true
     isSold?: true
     visible?: true
+    status?: true
+    approvedAt?: true
+    approvedById?: true
+    rejectedAt?: true
+    rejectedById?: true
+    approvalReason?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -5013,6 +5136,12 @@ export namespace Prisma {
     isActive: boolean
     isSold: boolean
     visible: boolean
+    status: $Enums.ProductStatus
+    approvedAt: Date | null
+    approvedById: string | null
+    rejectedAt: Date | null
+    rejectedById: string | null
+    approvalReason: string | null
     createdAt: Date
     updatedAt: Date
     _count: ProductCountAggregateOutputType | null
@@ -5051,9 +5180,17 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: boolean
+    approvedAt?: boolean
+    approvedById?: boolean
+    rejectedAt?: boolean
+    rejectedById?: boolean
+    approvalReason?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    approvedBy?: boolean | Product$approvedByArgs<ExtArgs>
+    rejectedBy?: boolean | Product$rejectedByArgs<ExtArgs>
     favorites?: boolean | Product$favoritesArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
@@ -5074,9 +5211,17 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: boolean
+    approvedAt?: boolean
+    approvedById?: boolean
+    rejectedAt?: boolean
+    rejectedById?: boolean
+    approvalReason?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    approvedBy?: boolean | Product$approvedByArgs<ExtArgs>
+    rejectedBy?: boolean | Product$rejectedByArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
   export type ProductSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5094,9 +5239,17 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: boolean
+    approvedAt?: boolean
+    approvedById?: boolean
+    rejectedAt?: boolean
+    rejectedById?: boolean
+    approvalReason?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    approvedBy?: boolean | Product$approvedByArgs<ExtArgs>
+    rejectedBy?: boolean | Product$rejectedByArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
   export type ProductSelectScalar = {
@@ -5114,28 +5267,42 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: boolean
+    approvedAt?: boolean
+    approvedById?: boolean
+    rejectedAt?: boolean
+    rejectedById?: boolean
+    approvalReason?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "type" | "price" | "currency" | "location" | "slug" | "imageUrl" | "userId" | "isActive" | "isSold" | "visible" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "type" | "price" | "currency" | "location" | "slug" | "imageUrl" | "userId" | "isActive" | "isSold" | "visible" | "status" | "approvedAt" | "approvedById" | "rejectedAt" | "rejectedById" | "approvalReason" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    approvedBy?: boolean | Product$approvedByArgs<ExtArgs>
+    rejectedBy?: boolean | Product$rejectedByArgs<ExtArgs>
     favorites?: boolean | Product$favoritesArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ProductIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    approvedBy?: boolean | Product$approvedByArgs<ExtArgs>
+    rejectedBy?: boolean | Product$rejectedByArgs<ExtArgs>
   }
   export type ProductIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    approvedBy?: boolean | Product$approvedByArgs<ExtArgs>
+    rejectedBy?: boolean | Product$rejectedByArgs<ExtArgs>
   }
 
   export type $ProductPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Product"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      approvedBy: Prisma.$UserPayload<ExtArgs> | null
+      rejectedBy: Prisma.$UserPayload<ExtArgs> | null
       favorites: Prisma.$FavoritePayload<ExtArgs>[]
       reviews: Prisma.$ReviewPayload<ExtArgs>[]
     }
@@ -5154,6 +5321,12 @@ export namespace Prisma {
       isActive: boolean
       isSold: boolean
       visible: boolean
+      status: $Enums.ProductStatus
+      approvedAt: Date | null
+      approvedById: string | null
+      rejectedAt: Date | null
+      rejectedById: string | null
+      approvalReason: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["product"]>
@@ -5551,6 +5724,8 @@ export namespace Prisma {
   export interface Prisma__ProductClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    approvedBy<T extends Product$approvedByArgs<ExtArgs> = {}>(args?: Subset<T, Product$approvedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    rejectedBy<T extends Product$rejectedByArgs<ExtArgs> = {}>(args?: Subset<T, Product$rejectedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     favorites<T extends Product$favoritesArgs<ExtArgs> = {}>(args?: Subset<T, Product$favoritesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FavoritePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends Product$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Product$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -5596,6 +5771,12 @@ export namespace Prisma {
     readonly isActive: FieldRef<"Product", 'Boolean'>
     readonly isSold: FieldRef<"Product", 'Boolean'>
     readonly visible: FieldRef<"Product", 'Boolean'>
+    readonly status: FieldRef<"Product", 'ProductStatus'>
+    readonly approvedAt: FieldRef<"Product", 'DateTime'>
+    readonly approvedById: FieldRef<"Product", 'String'>
+    readonly rejectedAt: FieldRef<"Product", 'DateTime'>
+    readonly rejectedById: FieldRef<"Product", 'String'>
+    readonly approvalReason: FieldRef<"Product", 'String'>
     readonly createdAt: FieldRef<"Product", 'DateTime'>
     readonly updatedAt: FieldRef<"Product", 'DateTime'>
   }
@@ -5991,6 +6172,44 @@ export namespace Prisma {
      * Limit how many Products to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Product.approvedBy
+   */
+  export type Product$approvedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * Product.rejectedBy
+   */
+  export type Product$rejectedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
   }
 
   /**
@@ -15044,6 +15263,12 @@ export namespace Prisma {
     isActive: 'isActive',
     isSold: 'isSold',
     visible: 'visible',
+    status: 'status',
+    approvedAt: 'approvedAt',
+    approvedById: 'approvedById',
+    rejectedAt: 'rejectedAt',
+    rejectedById: 'rejectedById',
+    approvalReason: 'approvalReason',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -15292,6 +15517,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'ProductStatus'
+   */
+  export type EnumProductStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProductStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ProductStatus[]'
+   */
+  export type ListEnumProductStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProductStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -15378,6 +15617,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     refreshTokens?: RefreshTokenListRelationFilter
     products?: ProductListRelationFilter
+    approvedProducts?: ProductListRelationFilter
+    rejectedProducts?: ProductListRelationFilter
     favorites?: FavoriteListRelationFilter
     reviews?: ReviewListRelationFilter
     sentMessages?: MessageListRelationFilter
@@ -15415,6 +15656,8 @@ export namespace Prisma {
     updatedAt?: SortOrder
     refreshTokens?: RefreshTokenOrderByRelationAggregateInput
     products?: ProductOrderByRelationAggregateInput
+    approvedProducts?: ProductOrderByRelationAggregateInput
+    rejectedProducts?: ProductOrderByRelationAggregateInput
     favorites?: FavoriteOrderByRelationAggregateInput
     reviews?: ReviewOrderByRelationAggregateInput
     sentMessages?: MessageOrderByRelationAggregateInput
@@ -15455,6 +15698,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     refreshTokens?: RefreshTokenListRelationFilter
     products?: ProductListRelationFilter
+    approvedProducts?: ProductListRelationFilter
+    rejectedProducts?: ProductListRelationFilter
     favorites?: FavoriteListRelationFilter
     reviews?: ReviewListRelationFilter
     sentMessages?: MessageListRelationFilter
@@ -15596,9 +15841,17 @@ export namespace Prisma {
     isActive?: BoolFilter<"Product"> | boolean
     isSold?: BoolFilter<"Product"> | boolean
     visible?: BoolFilter<"Product"> | boolean
+    status?: EnumProductStatusFilter<"Product"> | $Enums.ProductStatus
+    approvedAt?: DateTimeNullableFilter<"Product"> | Date | string | null
+    approvedById?: StringNullableFilter<"Product"> | string | null
+    rejectedAt?: DateTimeNullableFilter<"Product"> | Date | string | null
+    rejectedById?: StringNullableFilter<"Product"> | string | null
+    approvalReason?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    approvedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    rejectedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     favorites?: FavoriteListRelationFilter
     reviews?: ReviewListRelationFilter
   }
@@ -15618,9 +15871,17 @@ export namespace Prisma {
     isActive?: SortOrder
     isSold?: SortOrder
     visible?: SortOrder
+    status?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedById?: SortOrderInput | SortOrder
+    rejectedAt?: SortOrderInput | SortOrder
+    rejectedById?: SortOrderInput | SortOrder
+    approvalReason?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    approvedBy?: UserOrderByWithRelationInput
+    rejectedBy?: UserOrderByWithRelationInput
     favorites?: FavoriteOrderByRelationAggregateInput
     reviews?: ReviewOrderByRelationAggregateInput
   }
@@ -15644,9 +15905,17 @@ export namespace Prisma {
     isActive?: BoolFilter<"Product"> | boolean
     isSold?: BoolFilter<"Product"> | boolean
     visible?: BoolFilter<"Product"> | boolean
+    status?: EnumProductStatusFilter<"Product"> | $Enums.ProductStatus
+    approvedAt?: DateTimeNullableFilter<"Product"> | Date | string | null
+    approvedById?: StringNullableFilter<"Product"> | string | null
+    rejectedAt?: DateTimeNullableFilter<"Product"> | Date | string | null
+    rejectedById?: StringNullableFilter<"Product"> | string | null
+    approvalReason?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    approvedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    rejectedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     favorites?: FavoriteListRelationFilter
     reviews?: ReviewListRelationFilter
   }, "id" | "userId_slug">
@@ -15666,6 +15935,12 @@ export namespace Prisma {
     isActive?: SortOrder
     isSold?: SortOrder
     visible?: SortOrder
+    status?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedById?: SortOrderInput | SortOrder
+    rejectedAt?: SortOrderInput | SortOrder
+    rejectedById?: SortOrderInput | SortOrder
+    approvalReason?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ProductCountOrderByAggregateInput
@@ -15693,6 +15968,12 @@ export namespace Prisma {
     isActive?: BoolWithAggregatesFilter<"Product"> | boolean
     isSold?: BoolWithAggregatesFilter<"Product"> | boolean
     visible?: BoolWithAggregatesFilter<"Product"> | boolean
+    status?: EnumProductStatusWithAggregatesFilter<"Product"> | $Enums.ProductStatus
+    approvedAt?: DateTimeNullableWithAggregatesFilter<"Product"> | Date | string | null
+    approvedById?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    rejectedAt?: DateTimeNullableWithAggregatesFilter<"Product"> | Date | string | null
+    rejectedById?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    approvalReason?: StringNullableWithAggregatesFilter<"Product"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
   }
@@ -16277,6 +16558,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -16314,6 +16597,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -16349,6 +16634,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -16386,6 +16673,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -16540,9 +16829,15 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutProductsInput
+    approvedBy?: UserCreateNestedOneWithoutApprovedProductsInput
+    rejectedBy?: UserCreateNestedOneWithoutRejectedProductsInput
     favorites?: FavoriteCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
   }
@@ -16562,6 +16857,12 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    rejectedAt?: Date | string | null
+    rejectedById?: string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     favorites?: FavoriteUncheckedCreateNestedManyWithoutProductInput
@@ -16582,9 +16883,15 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutProductsNestedInput
+    approvedBy?: UserUpdateOneWithoutApprovedProductsNestedInput
+    rejectedBy?: UserUpdateOneWithoutRejectedProductsNestedInput
     favorites?: FavoriteUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
   }
@@ -16604,6 +16911,12 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedById?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     favorites?: FavoriteUncheckedUpdateManyWithoutProductNestedInput
@@ -16625,6 +16938,12 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    rejectedAt?: Date | string | null
+    rejectedById?: string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -16643,6 +16962,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -16662,6 +16985,12 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedById?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17621,6 +17950,13 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type EnumProductStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProductStatus | EnumProductStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProductStatus[] | ListEnumProductStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProductStatus[] | ListEnumProductStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProductStatusFilter<$PrismaModel> | $Enums.ProductStatus
+  }
+
   export type ProductUserIdSlugCompoundUniqueInput = {
     userId: string
     slug: string
@@ -17641,6 +17977,12 @@ export namespace Prisma {
     isActive?: SortOrder
     isSold?: SortOrder
     visible?: SortOrder
+    status?: SortOrder
+    approvedAt?: SortOrder
+    approvedById?: SortOrder
+    rejectedAt?: SortOrder
+    rejectedById?: SortOrder
+    approvalReason?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -17664,6 +18006,12 @@ export namespace Prisma {
     isActive?: SortOrder
     isSold?: SortOrder
     visible?: SortOrder
+    status?: SortOrder
+    approvedAt?: SortOrder
+    approvedById?: SortOrder
+    rejectedAt?: SortOrder
+    rejectedById?: SortOrder
+    approvalReason?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -17683,6 +18031,12 @@ export namespace Prisma {
     isActive?: SortOrder
     isSold?: SortOrder
     visible?: SortOrder
+    status?: SortOrder
+    approvedAt?: SortOrder
+    approvedById?: SortOrder
+    rejectedAt?: SortOrder
+    rejectedById?: SortOrder
+    approvalReason?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -17715,6 +18069,16 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type EnumProductStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProductStatus | EnumProductStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProductStatus[] | ListEnumProductStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProductStatus[] | ListEnumProductStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProductStatusWithAggregatesFilter<$PrismaModel> | $Enums.ProductStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumProductStatusFilter<$PrismaModel>
+    _max?: NestedEnumProductStatusFilter<$PrismaModel>
   }
 
   export type ProductScalarRelationFilter = {
@@ -18161,6 +18525,20 @@ export namespace Prisma {
     connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
   }
 
+  export type ProductCreateNestedManyWithoutApprovedByInput = {
+    create?: XOR<ProductCreateWithoutApprovedByInput, ProductUncheckedCreateWithoutApprovedByInput> | ProductCreateWithoutApprovedByInput[] | ProductUncheckedCreateWithoutApprovedByInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutApprovedByInput | ProductCreateOrConnectWithoutApprovedByInput[]
+    createMany?: ProductCreateManyApprovedByInputEnvelope
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+  }
+
+  export type ProductCreateNestedManyWithoutRejectedByInput = {
+    create?: XOR<ProductCreateWithoutRejectedByInput, ProductUncheckedCreateWithoutRejectedByInput> | ProductCreateWithoutRejectedByInput[] | ProductUncheckedCreateWithoutRejectedByInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutRejectedByInput | ProductCreateOrConnectWithoutRejectedByInput[]
+    createMany?: ProductCreateManyRejectedByInputEnvelope
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+  }
+
   export type FavoriteCreateNestedManyWithoutUserInput = {
     create?: XOR<FavoriteCreateWithoutUserInput, FavoriteUncheckedCreateWithoutUserInput> | FavoriteCreateWithoutUserInput[] | FavoriteUncheckedCreateWithoutUserInput[]
     connectOrCreate?: FavoriteCreateOrConnectWithoutUserInput | FavoriteCreateOrConnectWithoutUserInput[]
@@ -18240,6 +18618,20 @@ export namespace Prisma {
     create?: XOR<ProductCreateWithoutUserInput, ProductUncheckedCreateWithoutUserInput> | ProductCreateWithoutUserInput[] | ProductUncheckedCreateWithoutUserInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutUserInput | ProductCreateOrConnectWithoutUserInput[]
     createMany?: ProductCreateManyUserInputEnvelope
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+  }
+
+  export type ProductUncheckedCreateNestedManyWithoutApprovedByInput = {
+    create?: XOR<ProductCreateWithoutApprovedByInput, ProductUncheckedCreateWithoutApprovedByInput> | ProductCreateWithoutApprovedByInput[] | ProductUncheckedCreateWithoutApprovedByInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutApprovedByInput | ProductCreateOrConnectWithoutApprovedByInput[]
+    createMany?: ProductCreateManyApprovedByInputEnvelope
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+  }
+
+  export type ProductUncheckedCreateNestedManyWithoutRejectedByInput = {
+    create?: XOR<ProductCreateWithoutRejectedByInput, ProductUncheckedCreateWithoutRejectedByInput> | ProductCreateWithoutRejectedByInput[] | ProductUncheckedCreateWithoutRejectedByInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutRejectedByInput | ProductCreateOrConnectWithoutRejectedByInput[]
+    createMany?: ProductCreateManyRejectedByInputEnvelope
     connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
   }
 
@@ -18358,6 +18750,34 @@ export namespace Prisma {
     connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
     update?: ProductUpdateWithWhereUniqueWithoutUserInput | ProductUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ProductUpdateManyWithWhereWithoutUserInput | ProductUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
+  }
+
+  export type ProductUpdateManyWithoutApprovedByNestedInput = {
+    create?: XOR<ProductCreateWithoutApprovedByInput, ProductUncheckedCreateWithoutApprovedByInput> | ProductCreateWithoutApprovedByInput[] | ProductUncheckedCreateWithoutApprovedByInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutApprovedByInput | ProductCreateOrConnectWithoutApprovedByInput[]
+    upsert?: ProductUpsertWithWhereUniqueWithoutApprovedByInput | ProductUpsertWithWhereUniqueWithoutApprovedByInput[]
+    createMany?: ProductCreateManyApprovedByInputEnvelope
+    set?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    disconnect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    delete?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    update?: ProductUpdateWithWhereUniqueWithoutApprovedByInput | ProductUpdateWithWhereUniqueWithoutApprovedByInput[]
+    updateMany?: ProductUpdateManyWithWhereWithoutApprovedByInput | ProductUpdateManyWithWhereWithoutApprovedByInput[]
+    deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
+  }
+
+  export type ProductUpdateManyWithoutRejectedByNestedInput = {
+    create?: XOR<ProductCreateWithoutRejectedByInput, ProductUncheckedCreateWithoutRejectedByInput> | ProductCreateWithoutRejectedByInput[] | ProductUncheckedCreateWithoutRejectedByInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutRejectedByInput | ProductCreateOrConnectWithoutRejectedByInput[]
+    upsert?: ProductUpsertWithWhereUniqueWithoutRejectedByInput | ProductUpsertWithWhereUniqueWithoutRejectedByInput[]
+    createMany?: ProductCreateManyRejectedByInputEnvelope
+    set?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    disconnect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    delete?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    update?: ProductUpdateWithWhereUniqueWithoutRejectedByInput | ProductUpdateWithWhereUniqueWithoutRejectedByInput[]
+    updateMany?: ProductUpdateManyWithWhereWithoutRejectedByInput | ProductUpdateManyWithWhereWithoutRejectedByInput[]
     deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
   }
 
@@ -18524,6 +18944,34 @@ export namespace Prisma {
     deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
   }
 
+  export type ProductUncheckedUpdateManyWithoutApprovedByNestedInput = {
+    create?: XOR<ProductCreateWithoutApprovedByInput, ProductUncheckedCreateWithoutApprovedByInput> | ProductCreateWithoutApprovedByInput[] | ProductUncheckedCreateWithoutApprovedByInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutApprovedByInput | ProductCreateOrConnectWithoutApprovedByInput[]
+    upsert?: ProductUpsertWithWhereUniqueWithoutApprovedByInput | ProductUpsertWithWhereUniqueWithoutApprovedByInput[]
+    createMany?: ProductCreateManyApprovedByInputEnvelope
+    set?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    disconnect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    delete?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    update?: ProductUpdateWithWhereUniqueWithoutApprovedByInput | ProductUpdateWithWhereUniqueWithoutApprovedByInput[]
+    updateMany?: ProductUpdateManyWithWhereWithoutApprovedByInput | ProductUpdateManyWithWhereWithoutApprovedByInput[]
+    deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
+  }
+
+  export type ProductUncheckedUpdateManyWithoutRejectedByNestedInput = {
+    create?: XOR<ProductCreateWithoutRejectedByInput, ProductUncheckedCreateWithoutRejectedByInput> | ProductCreateWithoutRejectedByInput[] | ProductUncheckedCreateWithoutRejectedByInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutRejectedByInput | ProductCreateOrConnectWithoutRejectedByInput[]
+    upsert?: ProductUpsertWithWhereUniqueWithoutRejectedByInput | ProductUpsertWithWhereUniqueWithoutRejectedByInput[]
+    createMany?: ProductCreateManyRejectedByInputEnvelope
+    set?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    disconnect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    delete?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    update?: ProductUpdateWithWhereUniqueWithoutRejectedByInput | ProductUpdateWithWhereUniqueWithoutRejectedByInput[]
+    updateMany?: ProductUpdateManyWithWhereWithoutRejectedByInput | ProductUpdateManyWithWhereWithoutRejectedByInput[]
+    deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
+  }
+
   export type FavoriteUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<FavoriteCreateWithoutUserInput, FavoriteUncheckedCreateWithoutUserInput> | FavoriteCreateWithoutUserInput[] | FavoriteUncheckedCreateWithoutUserInput[]
     connectOrCreate?: FavoriteCreateOrConnectWithoutUserInput | FavoriteCreateOrConnectWithoutUserInput[]
@@ -18669,6 +19117,18 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type UserCreateNestedOneWithoutApprovedProductsInput = {
+    create?: XOR<UserCreateWithoutApprovedProductsInput, UserUncheckedCreateWithoutApprovedProductsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutApprovedProductsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutRejectedProductsInput = {
+    create?: XOR<UserCreateWithoutRejectedProductsInput, UserUncheckedCreateWithoutRejectedProductsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRejectedProductsInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type FavoriteCreateNestedManyWithoutProductInput = {
     create?: XOR<FavoriteCreateWithoutProductInput, FavoriteUncheckedCreateWithoutProductInput> | FavoriteCreateWithoutProductInput[] | FavoriteUncheckedCreateWithoutProductInput[]
     connectOrCreate?: FavoriteCreateOrConnectWithoutProductInput | FavoriteCreateOrConnectWithoutProductInput[]
@@ -18709,12 +19169,36 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type EnumProductStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ProductStatus
+  }
+
   export type UserUpdateOneRequiredWithoutProductsNestedInput = {
     create?: XOR<UserCreateWithoutProductsInput, UserUncheckedCreateWithoutProductsInput>
     connectOrCreate?: UserCreateOrConnectWithoutProductsInput
     upsert?: UserUpsertWithoutProductsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutProductsInput, UserUpdateWithoutProductsInput>, UserUncheckedUpdateWithoutProductsInput>
+  }
+
+  export type UserUpdateOneWithoutApprovedProductsNestedInput = {
+    create?: XOR<UserCreateWithoutApprovedProductsInput, UserUncheckedCreateWithoutApprovedProductsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutApprovedProductsInput
+    upsert?: UserUpsertWithoutApprovedProductsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutApprovedProductsInput, UserUpdateWithoutApprovedProductsInput>, UserUncheckedUpdateWithoutApprovedProductsInput>
+  }
+
+  export type UserUpdateOneWithoutRejectedProductsNestedInput = {
+    create?: XOR<UserCreateWithoutRejectedProductsInput, UserUncheckedCreateWithoutRejectedProductsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRejectedProductsInput
+    upsert?: UserUpsertWithoutRejectedProductsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRejectedProductsInput, UserUpdateWithoutRejectedProductsInput>, UserUncheckedUpdateWithoutRejectedProductsInput>
   }
 
   export type FavoriteUpdateManyWithoutProductNestedInput = {
@@ -19378,6 +19862,13 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type NestedEnumProductStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProductStatus | EnumProductStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProductStatus[] | ListEnumProductStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProductStatus[] | ListEnumProductStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProductStatusFilter<$PrismaModel> | $Enums.ProductStatus
+  }
+
   export type NestedEnumProductTypeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.ProductType | EnumProductTypeFieldRefInput<$PrismaModel>
     in?: $Enums.ProductType[] | ListEnumProductTypeFieldRefInput<$PrismaModel>
@@ -19402,6 +19893,16 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedEnumProductStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProductStatus | EnumProductStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProductStatus[] | ListEnumProductStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProductStatus[] | ListEnumProductStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProductStatusWithAggregatesFilter<$PrismaModel> | $Enums.ProductStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumProductStatusFilter<$PrismaModel>
+    _max?: NestedEnumProductStatusFilter<$PrismaModel>
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -19515,8 +20016,14 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    approvedBy?: UserCreateNestedOneWithoutApprovedProductsInput
+    rejectedBy?: UserCreateNestedOneWithoutRejectedProductsInput
     favorites?: FavoriteCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
   }
@@ -19535,6 +20042,12 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    rejectedAt?: Date | string | null
+    rejectedById?: string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     favorites?: FavoriteUncheckedCreateNestedManyWithoutProductInput
@@ -19548,6 +20061,130 @@ export namespace Prisma {
 
   export type ProductCreateManyUserInputEnvelope = {
     data: ProductCreateManyUserInput | ProductCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ProductCreateWithoutApprovedByInput = {
+    id?: string
+    title: string
+    description?: string | null
+    category?: string | null
+    type: $Enums.ProductType
+    price: number
+    currency?: string
+    location: string
+    slug: string
+    imageUrl?: string | null
+    isActive?: boolean
+    isSold?: boolean
+    visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    approvalReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutProductsInput
+    rejectedBy?: UserCreateNestedOneWithoutRejectedProductsInput
+    favorites?: FavoriteCreateNestedManyWithoutProductInput
+    reviews?: ReviewCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutApprovedByInput = {
+    id?: string
+    title: string
+    description?: string | null
+    category?: string | null
+    type: $Enums.ProductType
+    price: number
+    currency?: string
+    location: string
+    slug: string
+    imageUrl?: string | null
+    userId: string
+    isActive?: boolean
+    isSold?: boolean
+    visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    rejectedById?: string | null
+    approvalReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    favorites?: FavoriteUncheckedCreateNestedManyWithoutProductInput
+    reviews?: ReviewUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutApprovedByInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutApprovedByInput, ProductUncheckedCreateWithoutApprovedByInput>
+  }
+
+  export type ProductCreateManyApprovedByInputEnvelope = {
+    data: ProductCreateManyApprovedByInput | ProductCreateManyApprovedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ProductCreateWithoutRejectedByInput = {
+    id?: string
+    title: string
+    description?: string | null
+    category?: string | null
+    type: $Enums.ProductType
+    price: number
+    currency?: string
+    location: string
+    slug: string
+    imageUrl?: string | null
+    isActive?: boolean
+    isSold?: boolean
+    visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    approvalReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutProductsInput
+    approvedBy?: UserCreateNestedOneWithoutApprovedProductsInput
+    favorites?: FavoriteCreateNestedManyWithoutProductInput
+    reviews?: ReviewCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutRejectedByInput = {
+    id?: string
+    title: string
+    description?: string | null
+    category?: string | null
+    type: $Enums.ProductType
+    price: number
+    currency?: string
+    location: string
+    slug: string
+    imageUrl?: string | null
+    userId: string
+    isActive?: boolean
+    isSold?: boolean
+    visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    rejectedAt?: Date | string | null
+    approvalReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    favorites?: FavoriteUncheckedCreateNestedManyWithoutProductInput
+    reviews?: ReviewUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutRejectedByInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutRejectedByInput, ProductUncheckedCreateWithoutRejectedByInput>
+  }
+
+  export type ProductCreateManyRejectedByInputEnvelope = {
+    data: ProductCreateManyRejectedByInput | ProductCreateManyRejectedByInput[]
     skipDuplicates?: boolean
   }
 
@@ -19708,6 +20345,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -19744,6 +20383,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -19783,6 +20424,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -19818,6 +20461,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -19986,8 +20631,46 @@ export namespace Prisma {
     isActive?: BoolFilter<"Product"> | boolean
     isSold?: BoolFilter<"Product"> | boolean
     visible?: BoolFilter<"Product"> | boolean
+    status?: EnumProductStatusFilter<"Product"> | $Enums.ProductStatus
+    approvedAt?: DateTimeNullableFilter<"Product"> | Date | string | null
+    approvedById?: StringNullableFilter<"Product"> | string | null
+    rejectedAt?: DateTimeNullableFilter<"Product"> | Date | string | null
+    rejectedById?: StringNullableFilter<"Product"> | string | null
+    approvalReason?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
+  }
+
+  export type ProductUpsertWithWhereUniqueWithoutApprovedByInput = {
+    where: ProductWhereUniqueInput
+    update: XOR<ProductUpdateWithoutApprovedByInput, ProductUncheckedUpdateWithoutApprovedByInput>
+    create: XOR<ProductCreateWithoutApprovedByInput, ProductUncheckedCreateWithoutApprovedByInput>
+  }
+
+  export type ProductUpdateWithWhereUniqueWithoutApprovedByInput = {
+    where: ProductWhereUniqueInput
+    data: XOR<ProductUpdateWithoutApprovedByInput, ProductUncheckedUpdateWithoutApprovedByInput>
+  }
+
+  export type ProductUpdateManyWithWhereWithoutApprovedByInput = {
+    where: ProductScalarWhereInput
+    data: XOR<ProductUpdateManyMutationInput, ProductUncheckedUpdateManyWithoutApprovedByInput>
+  }
+
+  export type ProductUpsertWithWhereUniqueWithoutRejectedByInput = {
+    where: ProductWhereUniqueInput
+    update: XOR<ProductUpdateWithoutRejectedByInput, ProductUncheckedUpdateWithoutRejectedByInput>
+    create: XOR<ProductCreateWithoutRejectedByInput, ProductUncheckedCreateWithoutRejectedByInput>
+  }
+
+  export type ProductUpdateWithWhereUniqueWithoutRejectedByInput = {
+    where: ProductWhereUniqueInput
+    data: XOR<ProductUpdateWithoutRejectedByInput, ProductUncheckedUpdateWithoutRejectedByInput>
+  }
+
+  export type ProductUpdateManyWithWhereWithoutRejectedByInput = {
+    where: ProductScalarWhereInput
+    data: XOR<ProductUpdateManyMutationInput, ProductUncheckedUpdateManyWithoutRejectedByInput>
   }
 
   export type FavoriteUpsertWithWhereUniqueWithoutUserInput = {
@@ -20164,6 +20847,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -20200,6 +20885,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -20355,6 +21042,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -20391,6 +21080,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -20441,6 +21132,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -20477,6 +21170,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -20511,6 +21206,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -20547,6 +21244,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -20561,6 +21260,164 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutProductsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutProductsInput, UserUncheckedCreateWithoutProductsInput>
+  }
+
+  export type UserCreateWithoutApprovedProductsInput = {
+    id?: string
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    dateOfBirth: Date | string
+    country: string
+    role?: $Enums.UserRole
+    status?: $Enums.UserStatus
+    isActive?: boolean
+    isOnline?: boolean
+    lastSeen?: Date | string | null
+    deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
+    resetPasswordToken?: string | null
+    resetTokenExpiresAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    products?: ProductCreateNestedManyWithoutUserInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
+    favorites?: FavoriteCreateNestedManyWithoutUserInput
+    reviews?: ReviewCreateNestedManyWithoutUserInput
+    sentMessages?: MessageCreateNestedManyWithoutSenderInput
+    messageReactions?: MessageReactionCreateNestedManyWithoutUserInput
+    conversations?: ConversationCreateNestedManyWithoutParticipantsInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedUsersInput
+    deletedUsers?: UserCreateNestedManyWithoutDeletedByInput
+    blockedUsers?: BlockCreateNestedManyWithoutBlockerInput
+    blockedBy?: BlockCreateNestedManyWithoutBlockedInput
+    submittedReports?: ReportCreateNestedManyWithoutReporterInput
+  }
+
+  export type UserUncheckedCreateWithoutApprovedProductsInput = {
+    id?: string
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    dateOfBirth: Date | string
+    country: string
+    role?: $Enums.UserRole
+    status?: $Enums.UserStatus
+    isActive?: boolean
+    isOnline?: boolean
+    lastSeen?: Date | string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
+    resetPasswordToken?: string | null
+    resetTokenExpiresAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
+    favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
+    reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
+    sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
+    messageReactions?: MessageReactionUncheckedCreateNestedManyWithoutUserInput
+    conversations?: ConversationUncheckedCreateNestedManyWithoutParticipantsInput
+    deletedUsers?: UserUncheckedCreateNestedManyWithoutDeletedByInput
+    blockedUsers?: BlockUncheckedCreateNestedManyWithoutBlockerInput
+    blockedBy?: BlockUncheckedCreateNestedManyWithoutBlockedInput
+    submittedReports?: ReportUncheckedCreateNestedManyWithoutReporterInput
+  }
+
+  export type UserCreateOrConnectWithoutApprovedProductsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutApprovedProductsInput, UserUncheckedCreateWithoutApprovedProductsInput>
+  }
+
+  export type UserCreateWithoutRejectedProductsInput = {
+    id?: string
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    dateOfBirth: Date | string
+    country: string
+    role?: $Enums.UserRole
+    status?: $Enums.UserStatus
+    isActive?: boolean
+    isOnline?: boolean
+    lastSeen?: Date | string | null
+    deletedAt?: Date | string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
+    resetPasswordToken?: string | null
+    resetTokenExpiresAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    favorites?: FavoriteCreateNestedManyWithoutUserInput
+    reviews?: ReviewCreateNestedManyWithoutUserInput
+    sentMessages?: MessageCreateNestedManyWithoutSenderInput
+    messageReactions?: MessageReactionCreateNestedManyWithoutUserInput
+    conversations?: ConversationCreateNestedManyWithoutParticipantsInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedUsersInput
+    deletedUsers?: UserCreateNestedManyWithoutDeletedByInput
+    blockedUsers?: BlockCreateNestedManyWithoutBlockerInput
+    blockedBy?: BlockCreateNestedManyWithoutBlockedInput
+    submittedReports?: ReportCreateNestedManyWithoutReporterInput
+  }
+
+  export type UserUncheckedCreateWithoutRejectedProductsInput = {
+    id?: string
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    dateOfBirth: Date | string
+    country: string
+    role?: $Enums.UserRole
+    status?: $Enums.UserStatus
+    isActive?: boolean
+    isOnline?: boolean
+    lastSeen?: Date | string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    emailVerified?: boolean
+    verificationToken?: string | null
+    tokenExpiresAt?: Date | string | null
+    resetPasswordToken?: string | null
+    resetTokenExpiresAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
+    reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
+    sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
+    messageReactions?: MessageReactionUncheckedCreateNestedManyWithoutUserInput
+    conversations?: ConversationUncheckedCreateNestedManyWithoutParticipantsInput
+    deletedUsers?: UserUncheckedCreateNestedManyWithoutDeletedByInput
+    blockedUsers?: BlockUncheckedCreateNestedManyWithoutBlockerInput
+    blockedBy?: BlockUncheckedCreateNestedManyWithoutBlockedInput
+    submittedReports?: ReportUncheckedCreateNestedManyWithoutReporterInput
+  }
+
+  export type UserCreateOrConnectWithoutRejectedProductsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutRejectedProductsInput, UserUncheckedCreateWithoutRejectedProductsInput>
   }
 
   export type FavoriteCreateWithoutProductInput = {
@@ -20649,6 +21506,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -20685,6 +21544,178 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
+    favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
+    reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
+    sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
+    messageReactions?: MessageReactionUncheckedUpdateManyWithoutUserNestedInput
+    conversations?: ConversationUncheckedUpdateManyWithoutParticipantsNestedInput
+    deletedUsers?: UserUncheckedUpdateManyWithoutDeletedByNestedInput
+    blockedUsers?: BlockUncheckedUpdateManyWithoutBlockerNestedInput
+    blockedBy?: BlockUncheckedUpdateManyWithoutBlockedNestedInput
+    submittedReports?: ReportUncheckedUpdateManyWithoutReporterNestedInput
+  }
+
+  export type UserUpsertWithoutApprovedProductsInput = {
+    update: XOR<UserUpdateWithoutApprovedProductsInput, UserUncheckedUpdateWithoutApprovedProductsInput>
+    create: XOR<UserCreateWithoutApprovedProductsInput, UserUncheckedCreateWithoutApprovedProductsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutApprovedProductsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutApprovedProductsInput, UserUncheckedUpdateWithoutApprovedProductsInput>
+  }
+
+  export type UserUpdateWithoutApprovedProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    dateOfBirth?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resetPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    resetTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    products?: ProductUpdateManyWithoutUserNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
+    favorites?: FavoriteUpdateManyWithoutUserNestedInput
+    reviews?: ReviewUpdateManyWithoutUserNestedInput
+    sentMessages?: MessageUpdateManyWithoutSenderNestedInput
+    messageReactions?: MessageReactionUpdateManyWithoutUserNestedInput
+    conversations?: ConversationUpdateManyWithoutParticipantsNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedUsersNestedInput
+    deletedUsers?: UserUpdateManyWithoutDeletedByNestedInput
+    blockedUsers?: BlockUpdateManyWithoutBlockerNestedInput
+    blockedBy?: BlockUpdateManyWithoutBlockedNestedInput
+    submittedReports?: ReportUpdateManyWithoutReporterNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutApprovedProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    dateOfBirth?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resetPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    resetTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
+    favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
+    reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
+    sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
+    messageReactions?: MessageReactionUncheckedUpdateManyWithoutUserNestedInput
+    conversations?: ConversationUncheckedUpdateManyWithoutParticipantsNestedInput
+    deletedUsers?: UserUncheckedUpdateManyWithoutDeletedByNestedInput
+    blockedUsers?: BlockUncheckedUpdateManyWithoutBlockerNestedInput
+    blockedBy?: BlockUncheckedUpdateManyWithoutBlockedNestedInput
+    submittedReports?: ReportUncheckedUpdateManyWithoutReporterNestedInput
+  }
+
+  export type UserUpsertWithoutRejectedProductsInput = {
+    update: XOR<UserUpdateWithoutRejectedProductsInput, UserUncheckedUpdateWithoutRejectedProductsInput>
+    create: XOR<UserCreateWithoutRejectedProductsInput, UserUncheckedCreateWithoutRejectedProductsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutRejectedProductsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutRejectedProductsInput, UserUncheckedUpdateWithoutRejectedProductsInput>
+  }
+
+  export type UserUpdateWithoutRejectedProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    dateOfBirth?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resetPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    resetTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    favorites?: FavoriteUpdateManyWithoutUserNestedInput
+    reviews?: ReviewUpdateManyWithoutUserNestedInput
+    sentMessages?: MessageUpdateManyWithoutSenderNestedInput
+    messageReactions?: MessageReactionUpdateManyWithoutUserNestedInput
+    conversations?: ConversationUpdateManyWithoutParticipantsNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedUsersNestedInput
+    deletedUsers?: UserUpdateManyWithoutDeletedByNestedInput
+    blockedUsers?: BlockUpdateManyWithoutBlockerNestedInput
+    blockedBy?: BlockUpdateManyWithoutBlockedNestedInput
+    submittedReports?: ReportUpdateManyWithoutReporterNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutRejectedProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    dateOfBirth?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    lastSeen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    tokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resetPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    resetTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -20752,6 +21783,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
     messageReactions?: MessageReactionCreateNestedManyWithoutUserInput
@@ -20788,6 +21821,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
     messageReactions?: MessageReactionUncheckedCreateNestedManyWithoutUserInput
@@ -20817,9 +21852,15 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutProductsInput
+    approvedBy?: UserCreateNestedOneWithoutApprovedProductsInput
+    rejectedBy?: UserCreateNestedOneWithoutRejectedProductsInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
   }
 
@@ -20838,6 +21879,12 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    rejectedAt?: Date | string | null
+    rejectedById?: string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     reviews?: ReviewUncheckedCreateNestedManyWithoutProductInput
@@ -20883,6 +21930,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
     messageReactions?: MessageReactionUpdateManyWithoutUserNestedInput
@@ -20919,6 +21968,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
     messageReactions?: MessageReactionUncheckedUpdateManyWithoutUserNestedInput
@@ -20954,9 +22005,15 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutProductsNestedInput
+    approvedBy?: UserUpdateOneWithoutApprovedProductsNestedInput
+    rejectedBy?: UserUpdateOneWithoutRejectedProductsNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -20975,6 +22032,12 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedById?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviews?: ReviewUncheckedUpdateManyWithoutProductNestedInput
@@ -20994,9 +22057,15 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutProductsInput
+    approvedBy?: UserCreateNestedOneWithoutApprovedProductsInput
+    rejectedBy?: UserCreateNestedOneWithoutRejectedProductsInput
     favorites?: FavoriteCreateNestedManyWithoutProductInput
   }
 
@@ -21015,6 +22084,12 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    rejectedAt?: Date | string | null
+    rejectedById?: string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     favorites?: FavoriteUncheckedCreateNestedManyWithoutProductInput
@@ -21049,6 +22124,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
     messageReactions?: MessageReactionCreateNestedManyWithoutUserInput
@@ -21085,6 +22162,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
     messageReactions?: MessageReactionUncheckedCreateNestedManyWithoutUserInput
@@ -21125,9 +22204,15 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutProductsNestedInput
+    approvedBy?: UserUpdateOneWithoutApprovedProductsNestedInput
+    rejectedBy?: UserUpdateOneWithoutRejectedProductsNestedInput
     favorites?: FavoriteUpdateManyWithoutProductNestedInput
   }
 
@@ -21146,6 +22231,12 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedById?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     favorites?: FavoriteUncheckedUpdateManyWithoutProductNestedInput
@@ -21186,6 +22277,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
     messageReactions?: MessageReactionUpdateManyWithoutUserNestedInput
@@ -21222,6 +22315,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
     messageReactions?: MessageReactionUncheckedUpdateManyWithoutUserNestedInput
@@ -21256,6 +22351,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -21292,6 +22389,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -21401,6 +22500,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     messageReactions?: MessageReactionCreateNestedManyWithoutUserInput
@@ -21437,6 +22538,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     messageReactions?: MessageReactionUncheckedCreateNestedManyWithoutUserInput
@@ -21631,6 +22734,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     messageReactions?: MessageReactionUpdateManyWithoutUserNestedInput
@@ -21667,6 +22772,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     messageReactions?: MessageReactionUncheckedUpdateManyWithoutUserNestedInput
@@ -21932,6 +23039,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -21968,6 +23077,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -22057,6 +23168,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -22093,6 +23206,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -22127,6 +23242,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -22163,6 +23280,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -22202,6 +23321,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -22238,6 +23359,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -22288,6 +23411,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -22324,6 +23449,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -22369,6 +23496,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -22405,6 +23534,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -22439,6 +23570,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     products?: ProductCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
@@ -22475,6 +23608,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     products?: ProductUncheckedCreateNestedManyWithoutUserInput
+    approvedProducts?: ProductUncheckedCreateNestedManyWithoutApprovedByInput
+    rejectedProducts?: ProductUncheckedCreateNestedManyWithoutRejectedByInput
     favorites?: FavoriteUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -22525,6 +23660,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -22561,6 +23698,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -22592,6 +23731,60 @@ export namespace Prisma {
     isActive?: boolean
     isSold?: boolean
     visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    rejectedAt?: Date | string | null
+    rejectedById?: string | null
+    approvalReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProductCreateManyApprovedByInput = {
+    id?: string
+    title: string
+    description?: string | null
+    category?: string | null
+    type: $Enums.ProductType
+    price: number
+    currency?: string
+    location: string
+    slug: string
+    imageUrl?: string | null
+    userId: string
+    isActive?: boolean
+    isSold?: boolean
+    visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    rejectedById?: string | null
+    approvalReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProductCreateManyRejectedByInput = {
+    id?: string
+    title: string
+    description?: string | null
+    category?: string | null
+    type: $Enums.ProductType
+    price: number
+    currency?: string
+    location: string
+    slug: string
+    imageUrl?: string | null
+    userId: string
+    isActive?: boolean
+    isSold?: boolean
+    visible?: boolean
+    status?: $Enums.ProductStatus
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    rejectedAt?: Date | string | null
+    approvalReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -22717,8 +23910,14 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    approvedBy?: UserUpdateOneWithoutApprovedProductsNestedInput
+    rejectedBy?: UserUpdateOneWithoutRejectedProductsNestedInput
     favorites?: FavoriteUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
   }
@@ -22737,6 +23936,12 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedById?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     favorites?: FavoriteUncheckedUpdateManyWithoutProductNestedInput
@@ -22757,6 +23962,164 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isSold?: BoolFieldUpdateOperationsInput | boolean
     visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedById?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductUpdateWithoutApprovedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumProductTypeFieldUpdateOperationsInput | $Enums.ProductType
+    price?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSold?: BoolFieldUpdateOperationsInput | boolean
+    visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutProductsNestedInput
+    rejectedBy?: UserUpdateOneWithoutRejectedProductsNestedInput
+    favorites?: FavoriteUpdateManyWithoutProductNestedInput
+    reviews?: ReviewUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutApprovedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumProductTypeFieldUpdateOperationsInput | $Enums.ProductType
+    price?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSold?: BoolFieldUpdateOperationsInput | boolean
+    visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedById?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    favorites?: FavoriteUncheckedUpdateManyWithoutProductNestedInput
+    reviews?: ReviewUncheckedUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateManyWithoutApprovedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumProductTypeFieldUpdateOperationsInput | $Enums.ProductType
+    price?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSold?: BoolFieldUpdateOperationsInput | boolean
+    visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedById?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductUpdateWithoutRejectedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumProductTypeFieldUpdateOperationsInput | $Enums.ProductType
+    price?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSold?: BoolFieldUpdateOperationsInput | boolean
+    visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutProductsNestedInput
+    approvedBy?: UserUpdateOneWithoutApprovedProductsNestedInput
+    favorites?: FavoriteUpdateManyWithoutProductNestedInput
+    reviews?: ReviewUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutRejectedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumProductTypeFieldUpdateOperationsInput | $Enums.ProductType
+    price?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSold?: BoolFieldUpdateOperationsInput | boolean
+    visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    favorites?: FavoriteUncheckedUpdateManyWithoutProductNestedInput
+    reviews?: ReviewUncheckedUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateManyWithoutRejectedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumProductTypeFieldUpdateOperationsInput | $Enums.ProductType
+    price?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSold?: BoolFieldUpdateOperationsInput | boolean
+    visible?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumProductStatusFieldUpdateOperationsInput | $Enums.ProductStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvalReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -22913,6 +24276,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -22948,6 +24313,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -23166,6 +24533,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     products?: ProductUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
@@ -23202,6 +24571,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     products?: ProductUncheckedUpdateManyWithoutUserNestedInput
+    approvedProducts?: ProductUncheckedUpdateManyWithoutApprovedByNestedInput
+    rejectedProducts?: ProductUncheckedUpdateManyWithoutRejectedByNestedInput
     favorites?: FavoriteUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput

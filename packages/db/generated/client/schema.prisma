@@ -44,6 +44,12 @@ enum ProductType {
   SERVICE
 }
 
+enum ProductStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id                  String            @id @default(cuid())
   email               String            @unique
@@ -69,6 +75,8 @@ model User {
   updatedAt           DateTime          @updatedAt // Relations
   refreshTokens       RefreshToken[]
   products            Product[]
+  approvedProducts    Product[]         @relation("ProductApprovals")
+  rejectedProducts    Product[]         @relation("ProductRejections")
   favorites           Favorite[]
   reviews             Review[]
   sentMessages        Message[]
@@ -102,27 +110,35 @@ model RefreshToken {
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  title       String
-  description String?
-  category    String?
-  type        ProductType
-  price       Float
-  currency    String      @default("USD")
-  location    String // Country or "Global"
-  slug        String // User-chosen URL part
-  imageUrl    String? // Product image URL
-  userId      String
-  isActive    Boolean     @default(true)
-  isSold      Boolean     @default(false) // New field for marking products as sold
-  visible     Boolean     @default(true) // Moderation visibility flag
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id             String        @id @default(cuid())
+  title          String
+  description    String?
+  category       String?
+  type           ProductType
+  price          Float
+  currency       String        @default("USD")
+  location       String // Country or "Global"
+  slug           String // User-chosen URL part
+  imageUrl       String? // Product image URL
+  userId         String
+  isActive       Boolean       @default(true)
+  isSold         Boolean       @default(false) // New field for marking products as sold
+  visible        Boolean       @default(true) // Moderation visibility flag
+  status         ProductStatus @default(PENDING)
+  approvedAt     DateTime?
+  approvedById   String?
+  rejectedAt     DateTime?
+  rejectedById   String?
+  approvalReason String? // Reason for approval or rejection
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   // Relations
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  favorites Favorite[]
-  reviews   Review[]
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approvedBy User?      @relation("ProductApprovals", fields: [approvedById], references: [id], onDelete: SetNull)
+  rejectedBy User?      @relation("ProductRejections", fields: [rejectedById], references: [id], onDelete: SetNull)
+  favorites  Favorite[]
+  reviews    Review[]
 
   // Unique constraint for slug per user
   @@unique([userId, slug])

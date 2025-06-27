@@ -106,7 +106,11 @@
     "cannot_message_yourself": "لا يمكنك مراسلة نفسك",
     "chat_opened": "تم فتح المحادثة مع البائع",
     "product_image": "صورة المنتج",
-    "no_image_available": "لا توجد صورة متاحة"
+    "no_image_available": "لا توجد صورة متاحة",
+    "save_product": "حفظ المنتج",
+    "login_to_save": "سجل الدخول لحفظ هذا المنتج",
+    "login_to_message": "سجل الدخول لمراسلة البائع",
+    "login_to_review": "سجل الدخول لترك تقييم"
   },
   "upload": {
     "upload_image": "رفع صورة المنتج",

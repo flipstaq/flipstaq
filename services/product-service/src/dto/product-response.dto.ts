@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ProductType } from '@flipstaq/db';
+import { ProductType, ProductStatus } from '@flipstaq/db';
 
 export class ProductResponseDto {
   @ApiProperty({
@@ -88,6 +88,74 @@ export class ProductResponseDto {
     example: false,
   })
   isSold: boolean;
+
+  @ApiProperty({
+    description: 'Product approval status',
+    example: 'APPROVED',
+    enum: ProductStatus,
+  })
+  status: ProductStatus;
+
+  @ApiProperty({
+    description: 'When the product was approved',
+    example: '2025-06-26T18:51:35.000Z',
+    nullable: true,
+  })
+  approvedAt?: Date;
+
+  @ApiProperty({
+    description: 'ID of the user who approved the product',
+    example: 'cmbzf1a2b0001x8i9uvxyze1k',
+    nullable: true,
+  })
+  approvedById?: string;
+
+  @ApiProperty({
+    description: 'When the product was rejected',
+    example: '2025-06-26T18:51:35.000Z',
+    nullable: true,
+  })
+  rejectedAt?: Date;
+
+  @ApiProperty({
+    description: 'ID of the user who rejected the product',
+    example: 'cmbzf1a2b0001x8i9uvxyze1k',
+    nullable: true,
+  })
+  rejectedById?: string;
+
+  @ApiProperty({
+    description: 'Reason for approval or rejection',
+    example: 'Product does not meet quality standards',
+    nullable: true,
+  })
+  approvalReason?: string;
+
+  @ApiProperty({
+    description: 'User who approved the product',
+    nullable: true,
+    type: 'object',
+    additionalProperties: true,
+  })
+  approvedBy?: {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+  };
+
+  @ApiProperty({
+    description: 'User who rejected the product',
+    nullable: true,
+    type: 'object',
+    additionalProperties: true,
+  })
+  rejectedBy?: {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+  };
 
   @ApiProperty({
     description: 'Product creation date',

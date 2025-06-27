@@ -8,7 +8,7 @@ import {
   IsIn,
   IsEnum,
 } from 'class-validator';
-import { ProductType } from '@flipstaq/db';
+import { ProductType, ProductStatus } from '@flipstaq/db';
 
 export class CreateProductDto {
   @ApiProperty({

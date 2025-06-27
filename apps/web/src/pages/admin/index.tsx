@@ -11,6 +11,7 @@ import {
 } from '@/lib/api/admin';
 import { UserInfo, User, PaginatedUsersResponse, UserRole } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { RefreshCw } from 'lucide-react';
 
 // Toast notification interface
 interface Toast {
@@ -559,13 +560,36 @@ export default function AdminPanel() {
   // Tab management
   const [activeTab, setActiveTab] = useState<
     'users' | 'products' | 'reviews' | 'reports'
-  >('users'); // Products state
+  >('users');
+  const [activeProductTab, setActiveProductTab] = useState<
+    'pending' | 'approved' | 'rejected' | 'all' | 'deleted'
+  >('pending'); // Enhanced Product sub-tabs
   const [products, setProducts] = useState<ProductForAdmin[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
+  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [productTypeFilter, setProductTypeFilter] = useState('ALL');
+
+  // Product counts for tabs
+  const [productCounts, setProductCounts] = useState({
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    deleted: 0,
+    all: 0,
+  });
+
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [selectedProductForApproval, setSelectedProductForApproval] =
+    useState<ProductForAdmin | null>(null);
+  const [approvalAction, setApprovalAction] = useState<
+    'approve' | 'reject' | 'reapprove' | null
+  >(null);
+  const [approvalReason, setApprovalReason] = useState('');
   const [selectedProduct, setSelectedProduct] =
     useState<ProductForAdmin | null>(null);
   const [showProductModal, setShowProductModal] = useState(false);
   const [showDeleteProductModal, setShowDeleteProductModal] = useState(false);
+  const [deletionReason, setDeletionReason] = useState('');
   // Reviews state
   const [reviews, setReviews] = useState<ReviewForAdmin[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -875,20 +899,137 @@ export default function AdminPanel() {
     } finally {
       setActionLoading(false);
     }
-  }; // Product management functions
+  };
+
+  // Product management functions
+  const fetchProductCounts = async () => {
+    try {
+      // Fetch all product lists to get counts
+      const [
+        pendingProducts,
+        approvedProducts,
+        rejectedProducts,
+        deletedProducts,
+        allProducts,
+      ] = await Promise.all([
+        adminApi.getPendingProducts(),
+        adminApi.getApprovedProducts(),
+        adminApi.getRejectedProducts(),
+        adminApi.getDeletedProducts(),
+        adminApi.getAllProducts(),
+      ]);
+
+      setProductCounts({
+        pending: pendingProducts.length,
+        approved: approvedProducts.length,
+        rejected: rejectedProducts.length,
+        deleted: deletedProducts.length,
+        all: allProducts.length,
+      });
+    } catch (error) {
+      console.error('Error fetching product counts:', error);
+    }
+  };
+
   const fetchProducts = async () => {
     try {
-      console.log('Fetching admin products...');
+      console.log(`Fetching ${activeProductTab} products...`);
       setProductsLoading(true);
-      const response = await adminApi.getAllProducts();
-      console.log('Admin products response:', response);
+
+      let response;
+      switch (activeProductTab) {
+        case 'pending':
+          response = await adminApi.getPendingProducts();
+          break;
+        case 'approved':
+          response = await adminApi.getApprovedProducts();
+          break;
+        case 'rejected':
+          response = await adminApi.getRejectedProducts();
+          break;
+        case 'deleted':
+          response = await adminApi.getDeletedProducts();
+          break;
+        case 'all':
+        default:
+          response = await adminApi.getAllProducts();
+          break;
+      }
+
+      console.log(`Admin ${activeProductTab} products response:`, response);
+      console.log(`Found ${response.length} ${activeProductTab} products`);
       setProducts(response);
     } catch (error) {
       console.error('Error fetching products:', error);
-      addToast('error', 'Failed to fetch products');
+      addToast('error', `Failed to fetch ${activeProductTab} products`);
     } finally {
       setProductsLoading(false);
     }
+  };
+
+  // Filter products based on search and type
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      product.title.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+      product.username
+        .toLowerCase()
+        .includes(productSearchTerm.toLowerCase()) ||
+      product.slug.toLowerCase().includes(productSearchTerm.toLowerCase());
+
+    const matchesType =
+      productTypeFilter === 'ALL' || product.type === productTypeFilter;
+
+    return matchesSearch && matchesType;
+  });
+
+  const handleApproveProduct = async (productId: string, reason?: string) => {
+    try {
+      setActionLoading(true);
+      console.log('Approving product:', productId, 'with reason:', reason);
+      const response = await adminApi.approveProduct(productId, reason);
+      console.log('Approval response:', response);
+      addToast('success', 'Product approved successfully');
+      console.log('Fetching products after approval...');
+      await fetchProducts();
+      await fetchProductCounts(); // Refresh counts
+      console.log('Products refetched successfully');
+      setShowApprovalModal(false);
+      setSelectedProductForApproval(null);
+      setApprovalAction(null);
+      setApprovalReason('');
+    } catch (error) {
+      console.error('Error approving product:', error);
+      addToast('error', 'Failed to approve product');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectProduct = async (productId: string, reason: string) => {
+    try {
+      setActionLoading(true);
+      await adminApi.rejectProduct(productId, reason);
+      addToast('success', 'Product rejected successfully');
+      await fetchProducts();
+      setShowApprovalModal(false);
+      setSelectedProductForApproval(null);
+      setApprovalAction(null);
+      setApprovalReason('');
+    } catch (error) {
+      console.error('Error rejecting product:', error);
+      addToast('error', 'Failed to reject product');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const openApprovalModal = (
+    product: ProductForAdmin,
+    action: 'approve' | 'reject' | 'reapprove'
+  ) => {
+    setSelectedProductForApproval(product);
+    setApprovalAction(action);
+    setShowApprovalModal(true);
   };
   const handleToggleProductVisibility = async (productId: string) => {
     try {
@@ -906,14 +1047,31 @@ export default function AdminPanel() {
   const handleDeleteProduct = async (productId: string) => {
     try {
       setActionLoading(true);
-      await adminApi.deleteProductPermanently(productId);
+      await adminApi.deleteProductPermanently(productId, deletionReason);
       addToast('success', 'Product deleted permanently');
       await fetchProducts();
+      await fetchProductCounts(); // Refresh counts
       setShowDeleteProductModal(false);
       setSelectedProduct(null);
+      setDeletionReason('');
     } catch (error) {
       console.error('Error deleting product:', error);
       addToast('error', 'Failed to delete product');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRestoreProduct = async (productId: string) => {
+    try {
+      setActionLoading(true);
+      await adminApi.restoreProduct(productId);
+      addToast('success', 'Product restored successfully');
+      await fetchProducts();
+      await fetchProductCounts(); // Refresh counts
+    } catch (error) {
+      console.error('Error restoring product:', error);
+      addToast('error', 'Failed to restore product');
     } finally {
       setActionLoading(false);
     }
@@ -1177,12 +1335,20 @@ export default function AdminPanel() {
   useEffect(() => {
     if (activeTab === 'products') {
       fetchProducts();
+      fetchProductCounts(); // Fetch counts when products tab is opened
     } else if (activeTab === 'reviews') {
       fetchReviews();
     } else if (activeTab === 'reports') {
       fetchReports();
     }
   }, [activeTab]);
+
+  // Refetch products when product sub-tab changes
+  useEffect(() => {
+    if (activeTab === 'products') {
+      fetchProducts();
+    }
+  }, [activeProductTab]);
 
   return (
     <AdminRouteGuard>
@@ -1955,7 +2121,7 @@ export default function AdminPanel() {
               </div>
             </div>
           )}{' '}
-          {/* Products Tab Content */}{' '}
+          {/* Products Tab Content */}
           {activeTab === 'products' && (
             <div className={`space-y-6 ${isRTL ? 'mt-8' : 'mt-6'}`}>
               <div
@@ -1969,9 +2135,184 @@ export default function AdminPanel() {
                   {t('admin-products:description')}
                 </p>
 
+                {/* Search and Filter Controls */}
+                <div className="mb-6 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
+                  <div
+                    className={`flex flex-col gap-3 sm:flex-row sm:items-center ${isRTL ? 'sm:space-x-3 sm:space-x-reverse' : 'sm:space-x-3'}`}
+                  >
+                    <div className="flex-1">
+                      <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                        {t('admin-products:search.label')}
+                      </label>
+                      <div className="relative">
+                        <div
+                          className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} pointer-events-none flex items-center`}
+                        >
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder={t('admin-products:search.placeholder')}
+                          value={productSearchTerm}
+                          onChange={(e) => setProductSearchTerm(e.target.value)}
+                          className={`block w-full rounded-md border-gray-300 bg-white py-2.5 text-sm placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-indigo-400 dark:focus:ring-indigo-400 ${isRTL ? 'pr-10 text-right' : 'pl-10'}`}
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:w-48">
+                      <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                        {t('admin-products:filters.typeLabel')}
+                      </label>
+                      <select
+                        value={productTypeFilter}
+                        onChange={(e) => setProductTypeFilter(e.target.value)}
+                        className="block w-full rounded-md border-gray-300 bg-white py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
+                      >
+                        <option value="ALL">
+                          {t('admin-products:filters.allTypes')}
+                        </option>
+                        <option value="DIGITAL">
+                          {t('products.types.DIGITAL')}
+                        </option>
+                        <option value="PHYSICAL">
+                          {t('products.types.PHYSICAL')}
+                        </option>
+                        <option value="SERVICE">
+                          {t('products.types.SERVICE')}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Sub-tabs */}
+                <div
+                  className={`mb-6 flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+                >
+                  <nav
+                    className={`flex ${isRTL ? 'space-x-8 space-x-reverse' : 'space-x-8'}`}
+                    aria-label="Tabs"
+                  >
+                    <button
+                      onClick={() => setActiveProductTab('pending')}
+                      className={`whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium ${
+                        activeProductTab === 'pending'
+                          ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      {t('admin-products:tabs.pending')}
+                      {productCounts.pending > 0 && (
+                        <span
+                          className={`${isRTL ? 'mr-2' : 'ml-2'} rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:bg-indigo-800 dark:text-indigo-200`}
+                        >
+                          {productCounts.pending}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setActiveProductTab('approved')}
+                      className={`whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium ${
+                        activeProductTab === 'approved'
+                          ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      {t('admin-products:tabs.approved')}
+                      {productCounts.approved > 0 && (
+                        <span
+                          className={`${isRTL ? 'mr-2' : 'ml-2'} rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-600 dark:bg-green-800 dark:text-green-200`}
+                        >
+                          {productCounts.approved}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setActiveProductTab('rejected')}
+                      className={`whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium ${
+                        activeProductTab === 'rejected'
+                          ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      {t('admin-products:tabs.rejected')}
+                      {productCounts.rejected > 0 && (
+                        <span
+                          className={`${isRTL ? 'mr-2' : 'ml-2'} rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600 dark:bg-red-800 dark:text-red-200`}
+                        >
+                          {productCounts.rejected}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setActiveProductTab('deleted')}
+                      className={`whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium ${
+                        activeProductTab === 'deleted'
+                          ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      {t('admin-products:tabs.deleted')}
+                      {productCounts.deleted > 0 && (
+                        <span
+                          className={`${isRTL ? 'mr-2' : 'ml-2'} rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300`}
+                        >
+                          {productCounts.deleted}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setActiveProductTab('all')}
+                      className={`whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium ${
+                        activeProductTab === 'all'
+                          ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      {t('admin-products:tabs.all')}
+                      {productCounts.all > 0 && (
+                        <span
+                          className={`${isRTL ? 'mr-2' : 'ml-2'} rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300`}
+                        >
+                          {productCounts.all}
+                        </span>
+                      )}
+                    </button>
+                  </nav>
+
+                  {/* Refresh Button */}
+                  <button
+                    onClick={fetchProducts}
+                    disabled={productsLoading}
+                    className={`inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 ${
+                      productsLoading ? 'cursor-not-allowed' : ''
+                    }`}
+                    title={t('common:refresh')}
+                  >
+                    <RefreshCw
+                      className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} ${
+                        productsLoading ? 'animate-spin' : ''
+                      }`}
+                    />
+                    {t('common:refresh')}
+                  </button>
+                </div>
+
                 {productsLoading ? (
                   <LoadingSpinner text={t('admin-products:loading')} />
-                ) : products.length === 0 ? (
+                ) : filteredProducts.length === 0 ? (
                   <div className="py-12 text-center">
                     <svg
                       className="mx-auto h-12 w-12 text-gray-400"
@@ -1987,173 +2328,433 @@ export default function AdminPanel() {
                       />
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                      {t('admin-products:noProducts')}
-                    </h3>{' '}
+                      {productSearchTerm || productTypeFilter !== 'ALL'
+                        ? t('admin-products:empty.title')
+                        : t('admin-products:noProducts')}
+                    </h3>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      {t('admin-products:noProductsDescription')}
+                      {productSearchTerm || productTypeFilter !== 'ALL'
+                        ? t('admin-products:empty.description')
+                        : t('admin-products:noProductsDescription')}
                     </p>
                   </div>
                 ) : (
-                  <div
-                    className={`overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg ${isRTL ? 'mt-8' : 'mt-6'}`}
-                  >
-                    <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
-                      {' '}
-                      <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                          <th
-                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                  <div className="space-y-6 bg-gray-50 p-6 dark:bg-gray-800">
+                    {filteredProducts.map((product) => (
+                      <div
+                        key={product.id}
+                        className={`rounded-lg border bg-white shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-900 ${
+                          !product.isActive
+                            ? 'border-gray-300 opacity-60'
+                            : 'border-gray-200'
+                        }`}
+                      >
+                        <div className="p-6">
+                          {/* Header with Image and Basic Info */}
+                          <div
+                            className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
                           >
-                            {t('admin-products:table.product')}
-                          </th>
-                          <th
-                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
-                          >
-                            {t('admin-products:table.type')}
-                          </th>
-                          <th
-                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
-                          >
-                            {t('admin-products:table.seller')}
-                          </th>
-                          <th
-                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
-                          >
-                            {t('admin-products:table.visibility')}
-                          </th>
-                          <th
-                            className={`px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
-                          >
-                            {t('admin-products:table.actions')}
-                          </th>
-                        </tr>
-                      </thead>{' '}
-                      <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                        {products.map((product) => (
-                          <tr key={product.id}>
-                            {' '}
-                            <td
-                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            <div
+                              className={`relative flex-shrink-0 ${isRTL ? 'ml-0 mr-4' : 'ml-0 mr-4'}`}
                             >
-                              <div className="flex items-center">
-                                <div className="h-10 w-10 flex-shrink-0">
-                                  {product.imageUrl ? (
-                                    <img
-                                      className="h-10 w-10 rounded-lg object-cover"
-                                      src={product.imageUrl}
-                                      alt={product.title}
+                              {product.imageUrl ? (
+                                <img
+                                  className="h-32 w-32 rounded-lg border border-gray-200 object-cover dark:border-gray-600"
+                                  src={`http://localhost:3100${product.imageUrl}`}
+                                  alt={product.title}
+                                />
+                              ) : (
+                                <div className="flex h-32 w-32 items-center justify-center rounded-lg border border-gray-300 bg-gray-200 dark:border-gray-600 dark:bg-gray-700">
+                                  <svg
+                                    className="h-16 w-16 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"
                                     />
-                                  ) : (
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-300 dark:bg-gray-600">
-                                      <svg
-                                        className="h-6 w-6 text-gray-500"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                      </svg>
-                                    </div>
-                                  )}
-                                </div>{' '}
-                                <div className={isRTL ? 'mr-4' : 'ml-4'}>
-                                  <div
-                                    className={`text-sm font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+                                  </svg>
+                                </div>
+                              )}
+                              {/* Status overlays */}
+                              {product.status === 'REJECTED' && (
+                                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-red-500 bg-opacity-75">
+                                  <span className="text-xs font-bold text-white">
+                                    {t('admin-products:status.rejected')}
+                                  </span>
+                                </div>
+                              )}
+                              {!product.isActive && (
+                                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-gray-500 bg-opacity-75">
+                                  <span className="text-xs font-bold text-white">
+                                    {t('admin-products:status.deleted')}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div
+                              className={`min-w-0 flex-1 ${isRTL ? 'ml-auto mr-0' : 'ml-0 mr-auto'}`}
+                            >
+                              <div
+                                className={`flex items-start ${isRTL ? 'flex-row-reverse justify-between' : 'justify-between'}`}
+                              >
+                                <div className="flex-1">
+                                  <h3
+                                    className={`text-xl font-bold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
                                   >
                                     {product.title}
-                                  </div>
-                                  <div
-                                    className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                                  </h3>
+                                  <p
+                                    className={`mt-1 text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                                   >
-                                    {product.slug}
+                                    <span className="font-medium">Slug:</span>{' '}
+                                    {product.slug} |
+                                    <span className="font-medium">
+                                      {' '}
+                                      Seller:
+                                    </span>{' '}
+                                    @{product.username} |
+                                    <span className="font-medium"> ID:</span>{' '}
+                                    {product.id}
+                                  </p>
+                                  <div
+                                    className={`mt-3 flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+                                  >
+                                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                      {product.price} {product.currency}
+                                    </span>
+                                    <span
+                                      className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
+                                        product.type === 'DIGITAL'
+                                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100'
+                                          : product.type === 'PHYSICAL'
+                                            ? 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100'
+                                            : 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100'
+                                      }`}
+                                    >
+                                      {product.type === 'DIGITAL'
+                                        ? t('products.types.DIGITAL')
+                                        : product.type === 'PHYSICAL'
+                                          ? t('products.types.PHYSICAL')
+                                          : t('products.types.SERVICE')}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div
+                                  className={`flex flex-col gap-2 ${isRTL ? 'items-start' : 'items-end'}`}
+                                >
+                                  {/* Status badges */}
+                                  <div
+                                    className={`flex flex-col gap-1 ${isRTL ? 'items-start' : 'items-end'}`}
+                                  >
+                                    <span
+                                      className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
+                                        product.status === 'APPROVED'
+                                          ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                                          : product.status === 'REJECTED'
+                                            ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
+                                      }`}
+                                    >
+                                      {product.status === 'APPROVED'
+                                        ? t('admin-products:status.approved')
+                                        : product.status === 'REJECTED'
+                                          ? t('admin-products:status.rejected')
+                                          : t('admin-products:status.pending')}
+                                    </span>
+                                    {!product.isActive && (
+                                      <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                        {t('admin-products:status.deleted')}
+                                      </span>
+                                    )}
+                                    {product.status === 'APPROVED' &&
+                                      product.visible && (
+                                        <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                                          {t('admin-products:status.visible')}
+                                        </span>
+                                      )}
+                                    {product.status === 'APPROVED' &&
+                                      !product.visible && (
+                                        <span className="inline-flex rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-800 dark:bg-orange-800 dark:text-orange-100">
+                                          {t('admin-products:status.hidden')}
+                                        </span>
+                                      )}
                                   </div>
                                 </div>
                               </div>
-                            </td>{' '}
-                            <td
-                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
-                            >
-                              <span
-                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                                  product.type === 'DIGITAL'
-                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100'
-                                    : product.type === 'PHYSICAL'
-                                      ? 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100'
-                                      : 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100'
-                                }`}
+                            </div>
+                          </div>
+
+                          {/* Product Description */}
+                          {product.description && (
+                            <div className="mt-6">
+                              <h4
+                                className={`mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
                               >
-                                {product.type === 'DIGITAL'
-                                  ? t('products.types.DIGITAL')
-                                  : product.type === 'PHYSICAL'
-                                    ? t('products.types.PHYSICAL')
-                                    : t('products.types.SERVICE')}
-                              </span>
-                            </td>
-                            <td
-                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
-                            >
+                                {t('admin-products:details.description')}
+                              </h4>
                               <div
-                                className={`text-sm text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+                                className={`rounded-lg border bg-gray-50 p-4 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
                               >
-                                @{product.username}
+                                {product.description}
                               </div>
-                            </td>
-                            <td
-                              className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'px-8' : 'px-6'}`}
+                            </div>
+                          )}
+
+                          {/* Product Details Grid */}
+                          <div className="mt-6">
+                            <h4
+                              className={`mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
                             >
-                              <span
-                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                                  product.visible
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
-                                    : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
-                                }`}
-                              >
-                                {product.visible
-                                  ? t('admin-products:status.visible')
-                                  : t('admin-products:status.hidden')}
-                              </span>
-                            </td>{' '}
-                            <td
-                              className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${isRTL ? 'px-8' : 'px-6'}`}
-                            >
+                              {t('admin-products:details.information')}
+                            </h4>
+                            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                              <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                                <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                  {t('admin-products:details.location')}
+                                </span>
+                                <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+                                  {product.location}
+                                </p>
+                              </div>
+                              <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                                <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                  {t('admin-products:details.category')}
+                                </span>
+                                <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+                                  {product.category || 'N/A'}
+                                </p>
+                              </div>
+                              <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                                <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                  {t('admin-products:details.rating')}
+                                </span>
+                                <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+                                  {product.status === 'APPROVED'
+                                    ? product.averageRating > 0
+                                      ? `${product.averageRating.toFixed(1)}/5`
+                                      : 'No ratings'
+                                    : t('admin-products:details.notApproved')}
+                                  <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                    {product.status === 'APPROVED'
+                                      ? `${product.totalReviews} review${product.totalReviews !== 1 ? 's' : ''}`
+                                      : t(
+                                          'admin-products:details.ratingsOnlyForApproved'
+                                        )}
+                                  </span>
+                                </p>
+                              </div>
+                              <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                                <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                  {t('admin-products:details.created')}
+                                </span>
+                                <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+                                  {new Date(
+                                    product.createdAt
+                                  ).toLocaleDateString()}
+                                  <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                    {new Date(
+                                      product.createdAt
+                                    ).toLocaleTimeString()}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Approval Information for Approved Products */}
+                          {product.status === 'APPROVED' &&
+                            product.approvedBy && (
                               <div
-                                className={`flex ${isRTL ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}
+                                className={`mt-6 rounded-lg border-l-4 border-green-400 bg-green-50 p-4 dark:bg-green-900/20 ${isRTL ? 'border-l-0 border-r-4' : ''}`}
                               >
-                                <button
-                                  onClick={() =>
-                                    handleToggleProductVisibility(product.id)
-                                  }
-                                  disabled={actionLoading}
-                                  className={`inline-flex items-center rounded-md border border-transparent px-3 py-1 text-xs font-medium transition-colors ${
-                                    product.visible
-                                      ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-800 dark:text-red-100 dark:hover:bg-red-700'
-                                      : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-800 dark:text-green-100 dark:hover:bg-green-700'
-                                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                                <h4
+                                  className={`mb-3 text-sm font-semibold uppercase tracking-wide text-green-800 dark:text-green-300 ${isRTL ? 'text-right' : 'text-left'}`}
                                 >
-                                  {product.visible
-                                    ? t('admin-products:actions.hide')
-                                    : t('admin-products:actions.show')}
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    openDeleteProductModal(product)
-                                  }
-                                  disabled={actionLoading}
-                                  className="inline-flex items-center rounded-md border border-transparent bg-red-100 px-3 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-800 dark:text-red-100 dark:hover:bg-red-700"
+                                  {t('admin-products:approval.details')}
+                                </h4>
+                                <div
+                                  className={`grid grid-cols-1 gap-4 text-sm md:grid-cols-2 ${isRTL ? 'text-right' : 'text-left'}`}
                                 >
-                                  {t('admin-products:actions.delete')}
-                                </button>
+                                  <div>
+                                    <span className="font-medium text-green-600 dark:text-green-400">
+                                      {t('admin-products:approval.approvedBy')}:
+                                    </span>{' '}
+                                    <span className="font-semibold text-green-800 dark:text-green-300">
+                                      {product.approvedBy.firstName}{' '}
+                                      {product.approvedBy.lastName} (@
+                                      {product.approvedBy.username})
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-green-600 dark:text-green-400">
+                                      {t('admin-products:approval.approvedOn')}:
+                                    </span>{' '}
+                                    <span className="font-semibold text-green-800 dark:text-green-300">
+                                      {product.approvedAt
+                                        ? new Date(
+                                            product.approvedAt
+                                          ).toLocaleString()
+                                        : 'N/A'}
+                                    </span>
+                                  </div>
+                                  {product.approvalReason && (
+                                    <div className="col-span-2 rounded-md bg-green-100 p-3 dark:bg-green-900/40">
+                                      <span className="font-medium text-green-600 dark:text-green-400">
+                                        {t('admin-products:approval.reason')}:
+                                      </span>{' '}
+                                      <span className="font-medium text-green-800 dark:text-green-300">
+                                        {product.approvalReason}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            )}
+
+                          {/* Rejection Information for Rejected Products */}
+                          {product.status === 'REJECTED' &&
+                            product.rejectedBy && (
+                              <div
+                                className={`mt-6 rounded-lg border-l-4 border-red-400 bg-red-50 p-4 dark:bg-red-900/20 ${isRTL ? 'border-l-0 border-r-4' : ''}`}
+                              >
+                                <h4
+                                  className={`mb-3 text-sm font-semibold uppercase tracking-wide text-red-800 dark:text-red-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                                >
+                                  {t('admin-products:rejection.details')}
+                                </h4>
+                                <div
+                                  className={`grid grid-cols-1 gap-4 text-sm md:grid-cols-2 ${isRTL ? 'text-right' : 'text-left'}`}
+                                >
+                                  <div>
+                                    <span className="font-medium text-red-600 dark:text-red-400">
+                                      {t('admin-products:rejection.rejectedBy')}
+                                      :
+                                    </span>{' '}
+                                    <span className="font-semibold text-red-800 dark:text-red-300">
+                                      {product.rejectedBy.firstName}{' '}
+                                      {product.rejectedBy.lastName} (@
+                                      {product.rejectedBy.username})
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-red-600 dark:text-red-400">
+                                      {t('admin-products:rejection.rejectedOn')}
+                                      :
+                                    </span>{' '}
+                                    <span className="font-semibold text-red-800 dark:text-red-300">
+                                      {product.rejectedAt
+                                        ? new Date(
+                                            product.rejectedAt
+                                          ).toLocaleString()
+                                        : 'N/A'}
+                                    </span>
+                                  </div>
+                                  {product.approvalReason && (
+                                    <div className="col-span-2 rounded-md bg-red-100 p-3 dark:bg-red-900/40">
+                                      <span className="font-medium text-red-600 dark:text-red-400">
+                                        {t('admin-products:rejection.reason')}:
+                                      </span>{' '}
+                                      <span className="font-medium text-red-800 dark:text-red-300">
+                                        {product.approvalReason}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                          {/* Action Buttons */}
+                          <div
+                            className={`mt-8 flex flex-wrap gap-3 border-t border-gray-200 pt-4 dark:border-gray-700 ${isRTL ? 'justify-start' : 'justify-end'}`}
+                          >
+                            {product.isActive && (
+                              <>
+                                {/* Approval/Rejection buttons for pending products */}
+                                {product.status === 'PENDING' && (
+                                  <>
+                                    <button
+                                      onClick={() =>
+                                        openApprovalModal(product, 'approve')
+                                      }
+                                      disabled={actionLoading}
+                                      className="inline-flex items-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                      {t('admin-products:actions.approve')}
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        openApprovalModal(product, 'reject')
+                                      }
+                                      disabled={actionLoading}
+                                      className="inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                      {t('admin-products:actions.reject')}
+                                    </button>
+                                  </>
+                                )}
+                                {/* Re-approve button for rejected products */}
+                                {product.status === 'REJECTED' && (
+                                  <button
+                                    onClick={() =>
+                                      openApprovalModal(product, 'reapprove')
+                                    }
+                                    disabled={actionLoading}
+                                    className="inline-flex items-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {t('admin-products:actions.reapprove')}
+                                  </button>
+                                )}
+                                {/* Visibility toggle - only for approved products */}
+                                {product.status === 'APPROVED' && (
+                                  <button
+                                    onClick={() =>
+                                      handleToggleProductVisibility(product.id)
+                                    }
+                                    disabled={actionLoading}
+                                    className={`inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                                      product.visible
+                                        ? 'bg-orange-600 text-white hover:bg-orange-700 focus:ring-orange-500'
+                                        : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                                    }`}
+                                  >
+                                    {product.visible
+                                      ? t('admin-products:actions.hide')
+                                      : t('admin-products:actions.show')}
+                                  </button>
+                                )}
+                              </>
+                            )}
+                            {/* Restore button for deleted products */}
+                            {!product.isActive && (
+                              <button
+                                onClick={() => handleRestoreProduct(product.id)}
+                                disabled={actionLoading}
+                                className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {t('admin-products:actions.restore')}
+                              </button>
+                            )}
+                            {/* Delete button always available for all products */}
+                            <button
+                              onClick={() => openDeleteProductModal(product)}
+                              disabled={actionLoading}
+                              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-gray-700"
+                            >
+                              {!product.isActive
+                                ? t('admin-products:actions.deletePermanently')
+                                : t('admin-products:actions.delete')}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -3384,25 +3985,282 @@ export default function AdminPanel() {
           t={t}
         />
         {/* Delete Product Confirmation Modal */}
-        <ConfirmationModal
-          isOpen={showDeleteProductModal}
-          title={t('admin-products:modals.delete.title')}
-          message={
-            selectedProduct ? t('admin-products:modals.delete.message') : ''
-          }
-          warning={t('admin-products:modals.delete.warning')}
-          confirmText={t('admin-products:actions.delete')}
-          cancelText={t('admin-common:common.cancel')}
-          onConfirm={() =>
-            selectedProduct && handleDeleteProduct(selectedProduct.id)
-          }
-          onCancel={() => {
-            setShowDeleteProductModal(false);
-            setSelectedProduct(null);
-          }}
-          isLoading={actionLoading}
-          t={t}
-        />
+        {showDeleteProductModal && selectedProduct && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
+              <div
+                className="fixed inset-0 transition-opacity"
+                aria-hidden="true"
+              >
+                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              </div>
+              <span
+                className="hidden sm:inline-block sm:h-screen sm:align-middle"
+                aria-hidden="true"
+              >
+                &#8203;
+              </span>
+              <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all dark:bg-gray-800 sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+                <div className="bg-white px-4 pb-4 pt-5 dark:bg-gray-800 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900 sm:mx-0 sm:h-10 sm:w-10">
+                      <svg
+                        className="h-6 w-6 text-red-600 dark:text-red-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                      <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                        {t('admin-products:modals.delete.title')}
+                      </h3>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {t('admin-products:modals.delete.message')}
+                        </p>
+                        <p className="mt-2 text-sm font-medium text-red-600 dark:text-red-400">
+                          {t('admin-products:modals.delete.warning')}
+                        </p>
+                        <div className="mt-4">
+                          <label
+                            htmlFor="deletionReason"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                          >
+                            {t('admin-products:modals.delete.reasonLabel')}
+                          </label>
+                          <textarea
+                            id="deletionReason"
+                            value={deletionReason}
+                            onChange={(e) => setDeletionReason(e.target.value)}
+                            placeholder={t(
+                              'admin-products:modals.delete.reasonPlaceholder'
+                            )}
+                            rows={3}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-indigo-400 dark:focus:ring-indigo-400 sm:text-sm"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-50 px-4 py-3 dark:bg-gray-700 sm:flex sm:flex-row-reverse sm:px-6">
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteProduct(selectedProduct.id)}
+                    disabled={actionLoading || !deletionReason.trim()}
+                    className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-800 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    {actionLoading
+                      ? t('admin-products:actions.submitting')
+                      : t('admin-products:actions.delete')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDeleteProductModal(false);
+                      setSelectedProduct(null);
+                      setDeletionReason('');
+                    }}
+                    disabled={actionLoading}
+                    className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm"
+                  >
+                    {t('admin-common:common.cancel')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Product Approval Modal */}
+        {showApprovalModal && selectedProductForApproval && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
+              <div
+                className="fixed inset-0 transition-opacity"
+                aria-hidden="true"
+              >
+                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              </div>
+              <span
+                className="hidden sm:inline-block sm:h-screen sm:align-middle"
+                aria-hidden="true"
+              >
+                &#8203;
+              </span>
+              <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all dark:bg-gray-800 sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+                <div className="bg-white px-4 pb-4 pt-5 dark:bg-gray-800 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div
+                      className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 ${
+                        approvalAction === 'approve' ||
+                        approvalAction === 'reapprove'
+                          ? 'bg-green-100 dark:bg-green-900'
+                          : 'bg-red-100 dark:bg-red-900'
+                      }`}
+                    >
+                      {approvalAction === 'approve' ||
+                      approvalAction === 'reapprove' ? (
+                        <svg
+                          className="h-6 w-6 text-green-600 dark:text-green-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="h-6 w-6 text-red-600 dark:text-red-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                      <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                        {approvalAction === 'approve'
+                          ? t('admin-products:modals.approve.title')
+                          : approvalAction === 'reapprove'
+                            ? t('admin-products:modals.reapprove.title')
+                            : t('admin-products:modals.reject.title')}
+                      </h3>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {approvalAction === 'approve'
+                            ? t('admin-products:modals.approve.message', {
+                                title: selectedProductForApproval.title,
+                              })
+                            : approvalAction === 'reapprove'
+                              ? t('admin-products:modals.reapprove.message', {
+                                  title: selectedProductForApproval.title,
+                                })
+                              : t('admin-products:modals.reject.message', {
+                                  title: selectedProductForApproval.title,
+                                })}
+                        </p>
+                        <div className="mt-6">
+                          <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {approvalAction === 'approve'
+                              ? t('admin-products:modals.approve.reasonLabel')
+                              : approvalAction === 'reapprove'
+                                ? t(
+                                    'admin-products:modals.reapprove.reasonLabel'
+                                  )
+                                : t('admin-products:modals.reject.reasonLabel')}
+                          </label>
+                          <textarea
+                            value={approvalReason}
+                            onChange={(e) => setApprovalReason(e.target.value)}
+                            rows={6}
+                            className="block w-full rounded-lg border-gray-300 bg-gray-50 p-4 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
+                            placeholder={
+                              approvalAction === 'approve'
+                                ? t(
+                                    'admin-products:modals.approve.reasonPlaceholder'
+                                  )
+                                : approvalAction === 'reapprove'
+                                  ? t(
+                                      'admin-products:modals.reapprove.reasonPlaceholder'
+                                    )
+                                  : t(
+                                      'admin-products:modals.reject.reasonPlaceholder'
+                                    )
+                            }
+                            required={
+                              approvalAction === 'reject' ||
+                              approvalAction === 'reapprove'
+                            }
+                          />
+                          {(approvalAction === 'reject' ||
+                            approvalAction === 'reapprove') && (
+                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                              * This field is required
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-50 px-4 py-3 dark:bg-gray-700 sm:flex sm:flex-row-reverse sm:px-6">
+                  <button
+                    type="button"
+                    disabled={
+                      actionLoading ||
+                      (approvalAction === 'reject' && !approvalReason.trim()) ||
+                      (approvalAction === 'reapprove' && !approvalReason.trim())
+                    }
+                    className={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 sm:ml-3 sm:w-auto sm:text-sm ${
+                      approvalAction === 'approve' ||
+                      approvalAction === 'reapprove'
+                        ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+                        : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+                    } disabled:cursor-not-allowed`}
+                    onClick={() => {
+                      if (
+                        approvalAction === 'approve' ||
+                        approvalAction === 'reapprove'
+                      ) {
+                        handleApproveProduct(
+                          selectedProductForApproval.id,
+                          approvalReason
+                        );
+                      } else {
+                        handleRejectProduct(
+                          selectedProductForApproval.id,
+                          approvalReason
+                        );
+                      }
+                    }}
+                  >
+                    {actionLoading
+                      ? t('admin-common:common.processing')
+                      : approvalAction === 'approve'
+                        ? t('admin-products:actions.approve')
+                        : approvalAction === 'reapprove'
+                          ? t('admin-products:actions.reapprove')
+                          : t('admin-products:actions.reject')}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={actionLoading}
+                    className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm"
+                    onClick={() => {
+                      setShowApprovalModal(false);
+                      setSelectedProductForApproval(null);
+                      setApprovalAction(null);
+                      setApprovalReason('');
+                    }}
+                  >
+                    {t('admin-common:common.cancel')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Delete Review Confirmation Modal */}
         <ConfirmationModal
           isOpen={showDeleteReviewModal}

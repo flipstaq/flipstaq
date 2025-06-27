@@ -103,7 +103,11 @@
     "cannot_message_yourself": "You cannot message yourself",
     "chat_opened": "Chat opened with seller",
     "product_image": "Product Image",
-    "no_image_available": "No image available"
+    "no_image_available": "No image available",
+    "save_product": "Save Product",
+    "login_to_save": "Login to save this product",
+    "login_to_message": "Login to message the seller",
+    "login_to_review": "Login to leave a review"
   },
   "upload": {
     "upload_image": "Upload Product Image",

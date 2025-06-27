@@ -219,4 +219,27 @@ export class AuthController {
   ) {
     return this.authService.changePassword(req.user.sub, body.currentPassword, body.newPassword);
   }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiBody({
+    schema: {
+      properties: {
+        refreshToken: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid refresh token',
+  })
+  async refreshToken(@Body() body: { refreshToken: string }): Promise<AuthResponseDto> {
+    return this.authService.refreshTokens(body.refreshToken);
+  }
 }

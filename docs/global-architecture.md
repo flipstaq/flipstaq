@@ -1096,3 +1096,116 @@ GET /health/deps # External dependencies
   "correlationId": "req_456"
 }
 ```
+
+## Product Moderation and Approval Workflow
+
+### Overview
+
+Flipstaq implements a comprehensive product moderation system to ensure quality and compliance across the platform. All newly created products must be manually approved by staff members before becoming publicly visible.
+
+### Workflow Process
+
+1. **Product Creation**
+
+   - User creates a product through the frontend
+   - Product is automatically set to `status: PENDING`
+   - Product is stored in database but not visible to the public
+   - Seller can view their own pending products
+
+2. **Staff Review**
+
+   - Staff members access the admin panel
+   - Pending products are displayed in a dedicated moderation queue
+   - Staff can review product details, images, and descriptions
+   - Staff makes approval/rejection decision with optional reason
+
+3. **Approval Actions**
+
+   - **Approve**: Product becomes publicly visible (`status: APPROVED`)
+   - **Reject**: Product remains hidden with reason provided (`status: REJECTED`)
+
+4. **Email Notifications**
+   - Automated emails sent to sellers via Resend SDK
+   - Approval emails confirm product is live
+   - Rejection emails include detailed reason for rejection
+
+### Database Schema Changes
+
+```prisma
+enum ProductStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Product {
+  // ... existing fields
+  status        ProductStatus @default(PENDING)
+  approvedAt    DateTime?
+  approvedById  String?
+  approvedBy    User?        @relation("ProductApprovals", fields: [approvedById], references: [id])
+}
+
+model User {
+  // ... existing fields
+  approvedProducts Product[] @relation("ProductApprovals")
+}
+```
+
+### Security and Access Control
+
+- **Public Visibility**: Only approved products appear in:
+
+  - Homepage listings
+  - Search results
+  - Category pages
+  - Product detail pages (for non-owners)
+
+- **Staff Permissions**:
+
+  - `STAFF`: Can approve/reject products
+  - `HIGHER_STAFF`: Can approve/reject products
+  - `OWNER`: Can approve/reject products
+
+- **Seller Access**: Product owners can view their own products regardless of status
+
+### Technical Implementation
+
+#### Backend Services
+
+- **Product Service**: Handles CRUD operations and approval logic
+- **Mailer Service**: Sends email notifications via Resend
+- **API Gateway**: Exposes public and admin endpoints
+
+#### Frontend Components
+
+- **Admin Panel**: Product moderation interface for staff
+- **Product Listings**: Filtered to show only approved products
+- **Seller Dashboard**: Shows all products with status indicators
+
+#### Email Templates
+
+- **Approval**: Welcome message with product live confirmation
+- **Rejection**: Professional explanation with improvement suggestions
+
+### API Endpoints
+
+```
+GET  /api/products/admin/pending     - Get pending products (Admin only)
+PATCH /api/products/admin/:id/approve - Approve/reject product (Admin only)
+GET  /api/products                   - Public listings (approved only)
+GET  /api/products/@:username/:slug  - Product details (with approval checks)
+```
+
+### Quality Assurance
+
+The moderation system ensures:
+
+- Product descriptions are appropriate and accurate
+- Images are relevant and professional
+- Pricing is reasonable and clearly displayed
+- Location information is valid
+- Category assignment is correct
+- No prohibited items are listed
+
+This workflow maintains platform quality while providing clear feedback to sellers and ensuring a positive experience for buyers.

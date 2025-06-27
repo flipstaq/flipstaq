@@ -21,6 +21,23 @@ export interface ProductForAdmin {
   updatedAt: string;
   averageRating: number;
   totalReviews: number;
+  // Product approval fields
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  approvedAt?: string;
+  rejectedAt?: string;
+  approvedBy?: {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+  };
+  rejectedBy?: {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+  };
+  approvalReason?: string;
 }
 
 export interface ReviewForAdmin {
@@ -126,6 +143,33 @@ export const adminApi = {
     return apiClient.request<ProductForAdmin[]>('/products/admin/all');
   },
 
+  async getPendingProducts(): Promise<ProductForAdmin[]> {
+    return apiClient.request<ProductForAdmin[]>('/products/admin/pending');
+  },
+
+  async getApprovedProducts(): Promise<ProductForAdmin[]> {
+    return apiClient.request<ProductForAdmin[]>('/products/admin/approved');
+  },
+
+  async getRejectedProducts(): Promise<ProductForAdmin[]> {
+    return apiClient.request<ProductForAdmin[]>('/products/admin/rejected');
+  },
+
+  async getDeletedProducts(): Promise<ProductForAdmin[]> {
+    // Get all products and filter for deleted ones
+    const allProducts = await this.getAllProducts();
+    return allProducts.filter((product) => !product.isActive);
+  },
+
+  async restoreProduct(productId: string): Promise<{ message: string }> {
+    return apiClient.request<{ message: string }>(
+      `/products/admin/${productId}/restore`,
+      {
+        method: 'PATCH',
+      }
+    );
+  },
+
   async toggleProductVisibility(
     productId: string
   ): Promise<{ visible: boolean }> {
@@ -138,15 +182,57 @@ export const adminApi = {
   },
 
   async deleteProductPermanently(
-    productId: string
+    productId: string,
+    reason?: string
   ): Promise<{ message: string }> {
     return apiClient.request<{ message: string }>(
       `/products/admin/${productId}/permanent`,
       {
         method: 'DELETE',
+        body: reason ? JSON.stringify({ reason }) : undefined,
+        headers: reason ? { 'Content-Type': 'application/json' } : undefined,
       }
     );
   },
+
+  async approveProduct(
+    productId: string,
+    reason?: string
+  ): Promise<{
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    approvedAt?: string;
+    approvedById?: string;
+    emailSent: boolean;
+    message: string;
+  }> {
+    return apiClient.request(`/products/admin/${productId}/approve`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        status: 'APPROVED',
+        reason,
+      }),
+    });
+  },
+
+  async rejectProduct(
+    productId: string,
+    reason: string
+  ): Promise<{
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    approvedAt?: string;
+    approvedById?: string;
+    emailSent: boolean;
+    message: string;
+  }> {
+    return apiClient.request(`/products/admin/${productId}/approve`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        status: 'REJECTED',
+        reason,
+      }),
+    });
+  },
+
   // Review management
   async getAllReviews(): Promise<ReviewForAdmin[]> {
     return apiClient.request<ReviewForAdmin[]>('/products/reviews/admin/all');

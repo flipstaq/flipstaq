@@ -1022,7 +1022,8 @@ export class ProductGatewayController {
   @ApiResponse({ status: 404, description: "Product not found" })
   async deleteProductPermanently(
     @Param("id") productId: string,
-    @Request() req: any
+    @Request() req: any,
+    @Body() deleteProductDto?: { reason?: string }
   ) {
     const userId = req.user?.userId || req.user?.sub;
     const userRole = req.user?.role;
@@ -1042,6 +1043,47 @@ export class ProductGatewayController {
       "PRODUCT",
       `products/admin/${productId}/permanent`,
       "DELETE",
+      deleteProductDto || {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Patch("admin/:id/restore")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Restore deleted product" })
+  @ApiParam({
+    name: "id",
+    description: "Product ID",
+    type: "string",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Product restored successfully",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  @ApiResponse({ status: 404, description: "Product not found" })
+  async restoreProduct(
+    @Param("id") productId: string,
+    @Request() req: any
+  ): Promise<{ message: string }> {
+    const userId = req.user?.userId || req.user?.sub;
+
+    if (!userId) {
+      throw new BadRequestException("User ID is required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `products/admin/${productId}/restore`,
+      "PATCH",
       {},
       {
         "x-user-id": userId,
@@ -1218,6 +1260,148 @@ export class ProductGatewayController {
       "PRODUCT",
       `reviews/admin/${reviewId}/permanent`,
       "DELETE",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  // PRODUCT APPROVAL ENDPOINTS
+
+  @Get("admin/pending")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Get all pending products for approval" })
+  @ApiResponse({
+    status: 200,
+    description: "List of pending products",
+  })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  async getPendingProducts(@Request() req: any) {
+    const userId = req.user?.userId || req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Check admin role
+    if (!["OWNER", "HIGHER_STAFF", "STAFF"].includes(userRole)) {
+      throw new UnauthorizedException("Admin access required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "products/admin/pending",
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Patch("admin/:id/approve")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: "id", description: "Product ID to approve" })
+  @ApiOperation({ summary: "Admin: Approve a product" })
+  @ApiResponse({
+    status: 200,
+    description: "Product approved successfully",
+  })
+  @ApiResponse({ status: 404, description: "Product not found" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  async approveProduct(
+    @Param("id") productId: string,
+    @Body() approveProductDto: any,
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId || req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        "User authentication failed - no user ID found"
+      );
+    }
+
+    // Check admin role
+    if (!["OWNER", "HIGHER_STAFF", "STAFF"].includes(userRole)) {
+      throw new UnauthorizedException("Admin access required");
+    }
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      `products/${productId}/approve`,
+      "PATCH",
+      approveProductDto,
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("admin/approved")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Get all approved products" })
+  @ApiResponse({
+    status: 200,
+    description: "List of all approved products",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  async getApprovedProducts(@Request() req: any) {
+    const userId = req.user?.sub || req.user?.id;
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "products/admin/approved",
+      "GET",
+      {},
+      {
+        "x-user-id": userId,
+        "x-user-email": req.user.email,
+        "x-user-role": req.user.role,
+        "x-internal-service": "true",
+      }
+    );
+    return response.data;
+  }
+
+  @Get("admin/rejected")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Admin: Get all rejected products" })
+  @ApiResponse({
+    status: 200,
+    description: "List of all rejected products",
+  })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 403, description: "Admin access required" })
+  async getRejectedProducts(@Request() req: any) {
+    const userId = req.user?.sub || req.user?.id;
+
+    const response = await this.proxyService.forwardRequest(
+      "PRODUCT",
+      "products/admin/rejected",
+      "GET",
       {},
       {
         "x-user-id": userId,

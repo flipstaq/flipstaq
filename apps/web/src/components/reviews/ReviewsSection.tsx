@@ -5,6 +5,7 @@ import { ReviewList } from './ReviewList';
 import { ReviewForm } from './ReviewForm';
 import { useLanguage } from '../providers/LanguageProvider';
 import { useAuth } from '../providers/AuthProvider';
+import { useToast } from '../providers/ToastProvider';
 import { useProductReviews, useUserProductReview } from '@/hooks/useReviews';
 import { Star, Plus } from 'lucide-react';
 
@@ -12,15 +13,18 @@ interface ReviewsSectionProps {
   productId: string;
   productSlug: string;
   productOwnerId: string;
+  onLoginRequired?: (action: string) => void;
 }
 
 export function ReviewsSection({
   productId,
   productSlug,
   productOwnerId,
+  onLoginRequired,
 }: ReviewsSectionProps) {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { info } = useToast();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const {
     reviews: productReviews,
@@ -31,6 +35,19 @@ export function ReviewsSection({
 
   const canReview = user && user.id !== productOwnerId;
   const hasUserReviewed = !!userReview;
+
+  const handleReviewClick = () => {
+    if (!user) {
+      if (onLoginRequired) {
+        onLoginRequired(t('reviews.leave_review'));
+      } else {
+        info(t('products.detail.login_to_review'));
+      }
+      return;
+    }
+
+    setShowReviewForm(!showReviewForm);
+  };
 
   const handleReviewSuccess = () => {
     setShowReviewForm(false);
@@ -73,12 +90,12 @@ export function ReviewsSection({
           )}
         </div>
 
-        {/* Review Action Button */}
-        {canReview && (
+        {/* Review Action Button - Only show for users who are not the product owner */}
+        {user?.id !== productOwnerId && (
           <div>
-            {hasUserReviewed ? (
+            {canReview && hasUserReviewed ? (
               <button
-                onClick={() => setShowReviewForm(!showReviewForm)}
+                onClick={handleReviewClick}
                 className="flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 <Star className="h-4 w-4" />
@@ -86,7 +103,7 @@ export function ReviewsSection({
               </button>
             ) : (
               <button
-                onClick={() => setShowReviewForm(!showReviewForm)}
+                onClick={handleReviewClick}
                 className="flex items-center gap-2 rounded-md bg-primary-600 px-4 py-2 text-sm text-white transition-colors hover:bg-primary-700"
               >
                 <Plus className="h-4 w-4" />
@@ -123,15 +140,6 @@ export function ReviewsSection({
             onSuccess={handleReviewSuccess}
             onCancel={() => setShowReviewForm(false)}
           />
-        </div>
-      )}
-
-      {/* Login Prompt for Anonymous Users */}
-      {!user && (
-        <div className="rounded-lg border border-gray-200 py-4 text-center dark:border-gray-700">
-          <p className="text-gray-600 dark:text-gray-400">
-            {t('auth.loginRequired')} {t('reviews.leave_review').toLowerCase()}
-          </p>
         </div>
       )}
 
