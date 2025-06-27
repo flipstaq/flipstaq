@@ -10,7 +10,10 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Req,
+  Res,
 } from "@nestjs/common";
+import { Request, Response } from "express";
 import {
   ApiTags,
   ApiOperation,
@@ -101,11 +104,19 @@ export class AuthGatewayController {
   @ApiOperation({ summary: "Refresh JWT token" })
   @ApiResponse({ status: 200, description: "Token refreshed successfully" })
   @ApiResponse({ status: 401, description: "Invalid refresh token" })
-  async refreshToken(@Body() refreshData: any) {
+  async refreshToken(
+    @Body() refreshData: any,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
     const response = await this.proxyService.forwardAuthRequest(
       "refresh",
       "POST",
-      refreshData
+      refreshData,
+      {
+        cookie: req.headers.cookie || "", // Forward cookies
+      },
+      res
     );
     return response.data;
   }

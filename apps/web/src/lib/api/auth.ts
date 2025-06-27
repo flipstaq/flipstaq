@@ -90,7 +90,7 @@ class AuthApiClient {
             // Auto-logout user when account is deleted/inactive
             if (typeof window !== 'undefined') {
               localStorage.removeItem('authToken');
-              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('refreshToken'); // Still remove legacy storage
               localStorage.removeItem('user');
               // Redirect to login page
               window.location.href = '/auth/login?message=account_deleted';
@@ -129,7 +129,7 @@ class AuthApiClient {
               // If refresh fails, logout user
               if (typeof window !== 'undefined') {
                 localStorage.removeItem('authToken');
-                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('refreshToken'); // Still remove legacy storage
                 localStorage.removeItem('user');
                 window.location.href = '/auth/login?message=session_expired';
               }
@@ -168,10 +168,10 @@ class AuthApiClient {
       body: JSON.stringify(credentials),
     });
 
-    // Store tokens in localStorage (in production, use secure storage)
+    // Store only access token in localStorage (refresh token will be in HttpOnly cookie)
     if (typeof window !== 'undefined') {
       localStorage.setItem('authToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
+      // Don't store refresh token in localStorage for security - it's in HttpOnly cookie
       localStorage.setItem('user', JSON.stringify(response.user));
     }
 
@@ -184,10 +184,10 @@ class AuthApiClient {
       body: JSON.stringify(userData),
     });
 
-    // Store tokens in localStorage
+    // Store only access token in localStorage (refresh token will be in HttpOnly cookie)
     if (typeof window !== 'undefined') {
       localStorage.setItem('authToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
+      // Don't store refresh token in localStorage for security - it's in HttpOnly cookie
       localStorage.setItem('user', JSON.stringify(response.user));
     }
 
@@ -226,33 +226,24 @@ class AuthApiClient {
       }
     }
 
-    // Clear stored tokens
+    // Clear stored tokens (refresh token cookie will be cleared by server)
     if (typeof window !== 'undefined') {
       localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('refreshToken'); // Still remove in case of legacy storage
       localStorage.removeItem('user');
     }
   }
 
   async refreshToken(): Promise<AuthResponse> {
-    const refreshToken =
-      typeof window !== 'undefined'
-        ? localStorage.getItem('refreshToken')
-        : null;
-
-    if (!refreshToken) {
-      throw new Error('No refresh token found');
-    }
-
+    // Don't send refresh token in body - it's automatically sent as HttpOnly cookie
     const response = await this.request<AuthResponse>('/auth/refresh', {
       method: 'POST',
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({}), // Empty body since cookie contains refresh token
     });
 
-    // Update stored tokens
+    // Update stored access token and user info
     if (typeof window !== 'undefined') {
       localStorage.setItem('authToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
       localStorage.setItem('user', JSON.stringify(response.user));
     }
 

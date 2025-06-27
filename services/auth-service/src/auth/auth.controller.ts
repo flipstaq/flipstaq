@@ -8,7 +8,9 @@ import {
   Request,
   Get,
   Query,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -49,8 +51,21 @@ export class AuthController {
     status: 409,
     description: 'Conflict - email or username already exists',
   })
-  async signup(@Body() signupDto: SignupDto): Promise<AuthResponseDto> {
-    return this.authService.signup(signupDto);
+  async signup(
+    @Body() signupDto: SignupDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    const result = await this.authService.signup(signupDto);
+
+    // Set refresh token as HttpOnly cookie for security
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    return result;
   }
 
   @Post('login')
@@ -66,8 +81,21 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized - invalid credentials',
   })
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    const result = await this.authService.login(loginDto);
+
+    // Set refresh token as HttpOnly cookie for security
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    return result;
   }
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -76,7 +104,14 @@ export class AuthController {
     status: 204,
     description: 'User successfully logged out',
   })
-  async logout(@Request() req: any): Promise<void> {
+  async logout(@Request() req: any, @Res({ passthrough: true }) res: Response): Promise<void> {
+    // Clear the refresh token cookie
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
     // Try to extract user ID from token if present, but don't require it
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -239,7 +274,28 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized - invalid refresh token',
   })
-  async refreshToken(@Body() body: { refreshToken: string }): Promise<AuthResponseDto> {
-    return this.authService.refreshTokens(body.refreshToken);
+  async refreshToken(
+    @Body() body: { refreshToken?: string },
+    @Request() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    // Try to get refresh token from cookie first, then from body
+    const refreshToken = req.cookies?.refreshToken || body.refreshToken;
+
+    if (!refreshToken) {
+      throw new Error('Refresh token not provided');
+    }
+
+    const result = await this.authService.refreshTokens(refreshToken);
+
+    // Set new refresh token as HttpOnly cookie
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    return result;
   }
 }

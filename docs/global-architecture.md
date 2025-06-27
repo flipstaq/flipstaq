@@ -260,6 +260,44 @@ Each business domain is isolated into its own microservice:
 - **Read Status**: Message read/unread status tracking
 - **Blocking Integration**: Prevents messaging between blocked users
 - **Online Status**: Real-time user online/offline status tracking
+
+### ✅ Persistent Authentication System
+
+- **Modern Login Experience**: Users stay logged in indefinitely like Discord/YouTube
+- **Dual Token Strategy**:
+  - Short-lived access tokens (15 minutes) for API calls
+  - Long-lived refresh tokens (30 days) for session persistence
+- **Secure Cookie Storage**: Refresh tokens stored in HttpOnly cookies
+- **Automatic Token Refresh**: Seamless background token renewal
+- **No "Remember Me"**: All logins are persistent by default
+- **Security Features**:
+  - HttpOnly cookies prevent XSS attacks
+  - Secure cookies for HTTPS in production
+  - SameSite protection against CSRF
+  - Token rotation on refresh
+  - Database-backed token invalidation
+
+**Token Configuration:**
+
+```env
+# New persistent login strategy (all services)
+JWT_SECRET="supersupersecretCEMal"
+JWT_ACCESS_TOKEN_EXPIRY="15m"   # Short-lived for API calls
+JWT_REFRESH_TOKEN_EXPIRY="30d"  # Long-lived for persistence
+JWT_REFRESH_SECRET="your-super-secret-refresh-key"
+
+# Legacy variables (maintained for backward compatibility)
+JWT_EXPIRES_IN="15m"
+JWT_REFRESH_EXPIRES_IN="30d"
+```
+
+**Authentication Flow:**
+
+1. User logs in → receives access token + refresh token cookie
+2. Access token expires (15min) → automatically refreshes using cookie
+3. New tokens generated → user stays logged in seamlessly
+4. User explicitly logs out → tokens invalidated, cookies cleared
+
 - **CORS Configuration**: Restricted to specific origins
 - **Password Security**: Industry-standard bcrypt hashing
 - **Request Validation**: DTO validation with class-validator
@@ -314,6 +352,20 @@ model User {
   products        Product[]
   favorites       Favorite[]
   reviews         Review[]
+  refreshTokens   RefreshToken[] // For persistent login
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Product {

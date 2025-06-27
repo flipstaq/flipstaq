@@ -10,6 +10,7 @@ import {
 } from "../common/config/api-version.config";
 import { firstValueFrom } from "rxjs";
 import { AxiosResponse } from "axios";
+import { Response } from "express";
 
 @Injectable()
 export class ProxyService {
@@ -61,7 +62,8 @@ export class ProxyService {
     endpoint: string,
     method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
     data?: any,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
+    res?: Response
   ): Promise<AxiosResponse> {
     try {
       const serviceUrl = getServiceUrl("AUTH");
@@ -82,9 +84,18 @@ export class ProxyService {
           "x-forwarded-from": "api-gateway",
           ...headers,
         },
+        withCredentials: true, // Enable cookie forwarding
         ...(data && { data }),
       };
       const response = await firstValueFrom(this.httpService.request(config));
+
+      // Forward any cookies from auth service to client
+      if (res && response.headers["set-cookie"]) {
+        response.headers["set-cookie"].forEach((cookie: string) => {
+          res.setHeader("Set-Cookie", cookie);
+        });
+      }
+
       return response;
     } catch (error) {
       console.error(

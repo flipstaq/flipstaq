@@ -7,9 +7,13 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { join } from "path";
 import { existsSync, mkdirSync } from "fs";
 import * as express from "express";
+import * as cookieParser from "cookie-parser";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Enable cookie parsing
+  app.use(cookieParser());
 
   // Configure Express to handle larger payloads
   app.use(express.json({ limit: "10mb" }));
@@ -59,6 +63,7 @@ async function bootstrap() {
       "Cache-Control",
       "Pragma",
       "X-Requested-With",
+      "Cookie",
     ],
   });
 
