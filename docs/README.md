@@ -1,6 +1,13 @@
 # Flipstaq Documentation Structure
 
-This directory contains comprehensive documentation for the Flipstaq eCommerce platform, reflecting **only currently implemented features and services**.
+This directory contains comprehensive documentation for the Flipstaq eCommerce platform, reflecti5. **Legal Documents**: [Legal Service](legal-service/README.md) for document management and compliance 6. **Follow setup**: Development workflow in global architecture
+
+---
+
+**Documentation Status**: Current as of June 27, 2025  
+**Implemented Services**: API Gateway + Auth Service + Message Service + Legal Service  
+**Recent Updates**: Legal documents management system with multi-language support  
+**Next Documentation**: User Service (when implemented)y currently implemented features and services\*\*.
 
 ## 📁 Directory Structure
 
@@ -10,6 +17,9 @@ docs/
 │   └── README.md              # API Gateway implementation guide
 ├── auth-service/
 │   └── README.md              # Authentication service documentation
+├── legal-service/
+│   ├── README.md              # Legal service documentation
+│   └── api.md                 # Legal API endpoints and examples
 ├── message-service/
 │   ├── README.md              # Message service documentation
 │   └── api.md                 # Message API endpoints with file upload
@@ -63,6 +73,18 @@ docs/
 - User search and conversation initiation
 - Message read status tracking
 
+### ⚖️ [Legal Service](legal-service/README.md)
+
+**Legal documents management system with multi-language support**
+
+- Legal document management (Terms of Service, Privacy Policy, etc.)
+- Multi-language support (English, Arabic)
+- Version control and audit tracking
+- Role-based access control (Owners/Higher Staff only)
+- Public document serving for frontend consumption
+- Admin panel integration for document management
+- Automatic version incrementing and active document management
+
 ### 🎨 [Frontend Components](frontend/components.md)
 
 **React/Next.js frontend component documentation**
@@ -77,7 +99,7 @@ docs/
 
 ### ✅ What's Included
 
-- **Implemented Services**: Auth-service, message-service, and API gateway documented
+- **Implemented Services**: Auth-service, message-service, legal-service, and API gateway documented
 - **Working Features**: User registration, login, JWT authentication, direct messaging, file attachments
 - **Current Architecture**: API Gateway pattern with internal microservices
 - **Actual API Endpoints**: Only documented endpoints that exist and work

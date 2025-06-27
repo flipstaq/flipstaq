@@ -22,6 +22,7 @@ export const SERVICE_ENDPOINTS = {
   REVIEW: "review",
   NOTIFICATION: "notification",
   REPORT: "report",
+  LEGAL: "legal",
 } as const;
 
 // Service URLs from environment
@@ -37,6 +38,7 @@ export const getServiceUrl = (service: keyof typeof SERVICE_ENDPOINTS) => {
     NOTIFICATION:
       process.env.NOTIFICATION_SERVICE_URL || "http://localhost:3008",
     REPORT: process.env.REPORT_SERVICE_URL || "http://localhost:3009",
+    LEGAL: process.env.LEGAL_SERVICE_URL || "http://localhost:3010",
   };
   return urls[service];
 };

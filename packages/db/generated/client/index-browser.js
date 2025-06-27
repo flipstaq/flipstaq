@@ -257,6 +257,19 @@ exports.Prisma.ReportScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.LegalDocumentScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  language: 'language',
+  title: 'title',
+  content: 'content',
+  version: 'version',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -332,7 +345,8 @@ exports.Prisma.ModelName = {
   MessageAttachment: 'MessageAttachment',
   MessageReaction: 'MessageReaction',
   Block: 'Block',
-  Report: 'Report'
+  Report: 'Report',
+  LegalDocument: 'LegalDocument'
 };
 
 /**

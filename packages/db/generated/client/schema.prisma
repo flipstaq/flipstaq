@@ -93,6 +93,9 @@ model User {
   // Reporting relations
   submittedReports Report[] @relation("ReportSubmitter")
 
+  // Legal document relations
+  updatedLegalDocuments LegalDocument[]
+
   // Indexes for performance
   @@map("users")
 }
@@ -271,4 +274,24 @@ model Report {
   @@unique([reporterId, type, targetProductId])
   @@unique([reporterId, type, targetMessageId])
   @@map("reports")
+}
+
+model LegalDocument {
+  id          String   @id @default(cuid())
+  type        String // e.g., "tos", "privacy", "cookie_policy", "community_guidelines"
+  language    String // e.g., "en", "ar"
+  title       String // Document title
+  content     String   @db.Text // Markdown or rich text content
+  version     Int      @default(1)
+  isActive    Boolean  @default(true) // Whether this version is currently active
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  updatedById String // User who last updated this document
+
+  updatedBy User @relation(fields: [updatedById], references: [id], onDelete: Restrict)
+
+  // Ensure only one active document per type per language
+  @@unique([type, language, isActive])
+  @@index([type, language])
+  @@map("legal_documents")
 }

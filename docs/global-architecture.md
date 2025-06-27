@@ -195,6 +195,30 @@ Each business domain is isolated into its own microservice:
 - Message read status tracking
 - Integration with shared Prisma database schema
 
+### Legal Service (`services/legal-service/`)
+
+- **Purpose**: Legal documents management for platform compliance
+- **Port**: 3010 (Internal only - no direct external access)
+- **Technology**: NestJS 11.1.3 + TypeScript + Prisma
+- **Status**: ✅ **Implemented**
+- **Responsibilities**:
+  - Legal document management (Terms of Service, Privacy Policy, etc.)
+  - Multi-language document support (English, Arabic)
+  - Version control and audit tracking
+  - Role-based access control (Owners/Higher Staff only for admin operations)
+  - Public document serving for frontend consumption
+  - Internal-only API with security middleware
+
+**Key Features:**
+
+- Multi-language legal document support
+- Version control with automatic incrementing
+- Role-based access control for document management
+- Audit logging for all document changes
+- Active document management (one active version per type/language)
+- Public API for document retrieval and admin API for management
+- Integration with shared Prisma database schema
+
 ## Currently Implemented Features
 
 ### ✅ User Authentication System
@@ -301,6 +325,29 @@ JWT_REFRESH_EXPIRES_IN="30d"
 - **CORS Configuration**: Restricted to specific origins
 - **Password Security**: Industry-standard bcrypt hashing
 - **Request Validation**: DTO validation with class-validator
+
+### ✅ Legal Documents Management System
+
+- **Multi-language Documents**: Store legal documents in multiple languages (English, Arabic)
+- **Document Types**: Support for Terms of Service, Privacy Policy, Cookie Policy, Community Guidelines, etc.
+- **Version Control**: Automatic version incrementing when content changes
+- **Active Document Management**: Only one version per document type/language can be active
+- **Role-based Access Control**: Only Owners and Higher Staff can create/update/delete documents
+- **Audit Logging**: Track who created/updated documents and when
+- **Public API**: Publicly accessible endpoints for document retrieval
+- **Admin API**: Protected endpoints for document management
+- **Database Storage**: Legal documents stored in database with metadata
+- **Frontend Integration**: Dynamic legal document pages (/tos, /privacy, etc.)
+- **Admin Panel Integration**: Legal document management tab for administrators
+
+**Document Features:**
+
+- Rich text/markdown content support
+- Multiple language versions per document type
+- Version history and tracking
+- Active/inactive status management
+- Author attribution and timestamps
+- Flexible document type system (not limited to predefined types)
 
 ## Future Services (Not Yet Implemented)
 
@@ -878,6 +925,7 @@ The platform implements comprehensive rate limiting across all microservices usi
 | **Product Service** | 100 req/15min | All endpoints                    | Custom Middleware |
 | **Message Service** | 100 req/15min | Send Messages (20/min per user)  | Custom Middleware |
 | **Report Service**  | 100 req/15min | Submit Reports (5/hour per user) | Custom Middleware |
+| **Legal Service**   | 100 req/15min | All endpoints                    | NestJS Throttler  |
 
 ### Security Features
 

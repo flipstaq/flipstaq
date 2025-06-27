@@ -66,6 +66,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           adminProducts,
           adminReviews,
           adminReports,
+          adminLegal,
         ] = await Promise.all([
           import('../../../../../packages/locales/en/common.json'),
           import('../../../../../packages/locales/en/auth.json'),
@@ -82,6 +83,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           import('../../../../../packages/locales/en/admin/products.json'),
           import('../../../../../packages/locales/en/admin/reviews.json'),
           import('../../../../../packages/locales/en/admin/reports.json'),
+          import('../../../../../packages/locales/en/admin/legal.json'),
         ]);
         translationData = {
           common: common.default,
@@ -99,6 +101,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           'admin-products': adminProducts.default,
           'admin-reviews': adminReviews.default,
           'admin-reports': adminReports.default,
+          'admin-legal': adminLegal.default,
         };
       } else if (lang === 'ar') {
         // Import all Arabic translations
@@ -118,6 +121,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           adminProducts,
           adminReviews,
           adminReports,
+          adminLegal,
         ] = await Promise.all([
           import('../../../../../packages/locales/ar/common.json'),
           import('../../../../../packages/locales/ar/auth.json'),
@@ -134,6 +138,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           import('../../../../../packages/locales/ar/admin/products.json'),
           import('../../../../../packages/locales/ar/admin/reviews.json'),
           import('../../../../../packages/locales/ar/admin/reports.json'),
+          import('../../../../../packages/locales/ar/admin/legal.json'),
         ]);
         translationData = {
           common: common.default,
@@ -151,6 +156,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           'admin-products': adminProducts.default,
           'admin-reviews': adminReviews.default,
           'admin-reports': adminReports.default,
+          'admin-legal': adminLegal.default,
         };
       }
 

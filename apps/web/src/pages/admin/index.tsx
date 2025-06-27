@@ -9,6 +9,7 @@ import {
   ReviewForAdmin,
   ReportForAdmin,
 } from '@/lib/api/admin';
+import { legalApi, LegalDocument } from '@/lib/api/legal';
 import { UserInfo, User, PaginatedUsersResponse, UserRole } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { RefreshCw } from 'lucide-react';
@@ -559,7 +560,7 @@ export default function AdminPanel() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   // Tab management
   const [activeTab, setActiveTab] = useState<
-    'users' | 'products' | 'reviews' | 'reports'
+    'users' | 'products' | 'reviews' | 'reports' | 'legal'
   >('users');
   const [activeProductTab, setActiveProductTab] = useState<
     'pending' | 'approved' | 'rejected' | 'all' | 'deleted'
@@ -620,6 +621,18 @@ export default function AdminPanel() {
     resolvedBy: '',
   });
   const [exportLoading, setExportLoading] = useState(false);
+
+  // Legal documents state
+  const [legalDocuments, setLegalDocuments] = useState<LegalDocument[]>([]);
+  const [legalLoading, setLegalLoading] = useState(false);
+  const [selectedDocumentType, setSelectedDocumentType] = useState('tos');
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [editingDocument, setEditingDocument] = useState<LegalDocument | null>(
+    null
+  );
+  const [documentContent, setDocumentContent] = useState('');
+  const [showLegalEditor, setShowLegalEditor] = useState(false);
+  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
 
   // Toast helper functions
   const addToast = (type: 'success' | 'error' | 'info', message: string) => {
@@ -1331,6 +1344,156 @@ export default function AdminPanel() {
       setActionLoading(false);
     }
   };
+
+  // Legal documents management functions
+  const fetchLegalDocuments = async () => {
+    try {
+      setLegalLoading(true);
+      const response = await legalApi.getAllDocuments();
+      setLegalDocuments(response);
+    } catch (error) {
+      console.error('Error fetching legal documents:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+
+      if (errorMessage.includes('Invalid or expired token')) {
+        addToast(
+          'error',
+          'Authentication required. Please refresh the page and try again.'
+        );
+      } else {
+        addToast('error', t('admin-legal:messages.loadError'));
+      }
+    } finally {
+      setLegalLoading(false);
+    }
+  };
+
+  const fetchDocumentTypes = async () => {
+    try {
+      const types = await legalApi.getDocumentTypes();
+      setAvailableTypes(types);
+    } catch (error) {
+      console.error('Error fetching document types:', error);
+    }
+  };
+
+  const openLegalEditor = async (type: string, language: string) => {
+    try {
+      setLegalLoading(true);
+      setSelectedDocumentType(type);
+      setSelectedLanguage(language);
+
+      // Try to find existing document
+      const existingDoc = legalDocuments.find(
+        (doc) => doc.type === type && doc.language === language
+      );
+
+      if (existingDoc) {
+        setEditingDocument(existingDoc);
+        setDocumentContent(existingDoc.content);
+      } else {
+        setEditingDocument(null);
+        setDocumentContent('');
+      }
+
+      setShowLegalEditor(true);
+    } catch (error) {
+      console.error('Error opening legal editor:', error);
+      addToast('error', 'Failed to open legal editor');
+    } finally {
+      setLegalLoading(false);
+    }
+  };
+
+  const saveLegalDocument = async () => {
+    if (!documentContent.trim()) {
+      addToast('error', t('admin-legal:validation.contentRequired'));
+      return;
+    }
+
+    if (documentContent.trim().length < 10) {
+      addToast('error', t('admin-legal:validation.contentMinLength'));
+      return;
+    }
+
+    try {
+      setLegalLoading(true);
+
+      if (editingDocument) {
+        // Update existing document
+        await legalApi.updateDocument(editingDocument.id, {
+          content: documentContent,
+        });
+        addToast('success', t('admin-legal:messages.saveSuccess'));
+      } else {
+        // Create new document
+        const documentTitle = t(
+          `admin-legal:documentTypes.${selectedDocumentType}`
+        );
+        await legalApi.createDocument({
+          type: selectedDocumentType,
+          language: selectedLanguage,
+          title: documentTitle,
+          content: documentContent,
+        });
+        addToast('success', t('admin-legal:messages.saveSuccess'));
+      }
+
+      await fetchLegalDocuments();
+      setShowLegalEditor(false);
+      setDocumentContent('');
+      setEditingDocument(null);
+    } catch (error) {
+      console.error('Error saving legal document:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+
+      if (errorMessage.includes('Invalid or expired token')) {
+        addToast(
+          'error',
+          'Authentication required. Please refresh the page and try again.'
+        );
+      } else if (errorMessage.includes('Insufficient permissions')) {
+        addToast('error', 'You do not have permission to perform this action.');
+      } else {
+        addToast('error', t('admin-legal:messages.saveError'));
+      }
+    } finally {
+      setLegalLoading(false);
+    }
+  };
+
+  const deleteLegalDocument = async (documentId: string) => {
+    if (!confirm(t('admin-legal:messages.confirmDelete'))) {
+      return;
+    }
+
+    try {
+      setLegalLoading(true);
+      await legalApi.deleteDocument(documentId);
+      addToast('success', t('admin-legal:messages.deleteSuccess'));
+      await fetchLegalDocuments();
+    } catch (error) {
+      console.error('Error deleting legal document:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+
+      if (errorMessage.includes('Invalid or expired token')) {
+        addToast(
+          'error',
+          'Authentication required. Please refresh the page and try again.'
+        );
+      } else if (errorMessage.includes('Insufficient permissions')) {
+        addToast('error', 'You do not have permission to perform this action.');
+      } else {
+        addToast('error', t('admin-legal:messages.deleteError'));
+      }
+    } finally {
+      setLegalLoading(false);
+    }
+  };
+
   // Fetch data based on active tab
   useEffect(() => {
     if (activeTab === 'products') {
@@ -1340,6 +1503,9 @@ export default function AdminPanel() {
       fetchReviews();
     } else if (activeTab === 'reports') {
       fetchReports();
+    } else if (activeTab === 'legal') {
+      fetchLegalDocuments();
+      fetchDocumentTypes();
     }
   }, [activeTab]);
 
@@ -1364,30 +1530,34 @@ export default function AdminPanel() {
             <div className="flex h-16 items-center justify-between">
               <div className="flex items-center">
                 {' '}
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white sm:text-xl lg:text-2xl">
                   {t('admin-common:header.title')}
                 </h1>
               </div>{' '}
               <div
-                className={`flex items-center ${isRTL ? 'space-x-4 space-x-reverse' : 'space-x-4'}`}
+                className={`flex items-center ${isRTL ? 'space-x-2 space-x-reverse sm:space-x-4' : 'space-x-2 sm:space-x-4'}`}
               >
                 {/* Language Switcher */}
                 <div className="flex items-center">
                   <button
                     onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 sm:px-2.5"
                   >
-                    {language === 'en' ? '🇸🇦 AR' : '🇺🇸 EN'}
+                    <span className="hidden sm:inline">{language === 'en' ? '🇸🇦 AR' : '🇺🇸 EN'}</span>
+                    <span className="sm:hidden">{language === 'en' ? 'AR' : 'EN'}</span>
                   </button>
                 </div>{' '}
-                <span className="hidden text-sm text-gray-600 dark:text-gray-400 sm:block">
-                  {t('admin-common:header.welcome', {
-                    firstName: user?.firstName,
-                    lastName: user?.lastName,
-                  })}
-                </span>{' '}
-                <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-300">
-                  {t(`admin-users:roles.${user?.role}`)}
+                <div className="hidden md:block">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {t('admin-common:header.welcome', {
+                      firstName: user?.firstName,
+                      lastName: user?.lastName,
+                    })}
+                  </span>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-300 sm:px-2.5">
+                  <span className="hidden sm:inline">{t(`admin-users:roles.${user?.role}`)}</span>
+                  <span className="sm:hidden">{user?.role}</span>
                 </span>
               </div>
             </div>{' '}
@@ -1396,112 +1566,142 @@ export default function AdminPanel() {
         {/* Tab Navigation */}
         <div className="bg-white shadow dark:bg-gray-800">
           <div className="px-4 sm:px-6 lg:px-8">
-            <div
-              className={`flex ${isRTL ? 'space-x-8 space-x-reverse' : 'space-x-8'}`}
-              dir={isRTL ? 'rtl' : 'ltr'}
-            >
-              <button
-                onClick={() => setActiveTab('users')}
-                className={`${
-                  activeTab === 'users'
-                    ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
-                } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
+            <div className="overflow-x-auto">
+              <div
+                className={`flex min-w-max ${isRTL ? 'space-x-8 space-x-reverse' : 'space-x-8'}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
               >
-                <svg
-                  className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+                <button
+                  onClick={() => setActiveTab('users')}
+                  className={`${
+                    activeTab === 'users'
+                      ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
+                  } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
                 >
-                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                </svg>
-                {t('admin-common:tabs.users')}
-              </button>
+                  <svg
+                    className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                  </svg>
+                  <span className="hidden sm:inline">{t('admin-common:tabs.users')}</span>
+                  <span className="sm:hidden">Users</span>
+                </button>
 
-              {(user?.role === 'OWNER' || user?.role === 'HIGHER_STAFF') && (
-                <>
-                  <button
-                    onClick={() => setActiveTab('products')}
-                    className={`${
-                      activeTab === 'products'
-                        ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
-                    } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
-                  >
-                    <svg
-                      className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                {(user?.role === 'OWNER' || user?.role === 'HIGHER_STAFF') && (
+                  <>
+                    <button
+                      onClick={() => setActiveTab('products')}
+                      className={`${
+                        activeTab === 'products'
+                          ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
+                      } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                      />
-                    </svg>
-                    {t('admin-common:tabs.products')}
-                  </button>{' '}
-                  <button
-                    onClick={() => setActiveTab('reviews')}
-                    className={`${
-                      activeTab === 'reviews'
-                        ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
-                    } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
-                  >
-                    <svg
-                      className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      <svg
+                        className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">{t('admin-common:tabs.products')}</span>
+                      <span className="sm:hidden">Products</span>
+                    </button>{' '}
+                    <button
+                      onClick={() => setActiveTab('reviews')}
+                      className={`${
+                        activeTab === 'reviews'
+                          ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
+                      } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
-                    </svg>
-                    {t('admin-common:tabs.reviews')}
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('reports')}
-                    className={`${
-                      activeTab === 'reports'
-                        ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
-                    } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
-                  >
-                    <svg
-                      className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      <svg
+                        className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">{t('admin-common:tabs.reviews')}</span>
+                      <span className="sm:hidden">Reviews</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('reports')}
+                      className={`${
+                        activeTab === 'reports'
+                          ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
+                      } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"
-                      />
-                    </svg>
-                    {t('admin-common:tabs.reports')}
-                  </button>
-                </>
-              )}
+                      <svg
+                        className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">{t('admin-common:tabs.reports')}</span>
+                      <span className="sm:hidden">Reports</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('legal')}
+                      className={`${
+                        activeTab === 'legal'
+                          ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'
+                      } flex whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
+                    >
+                      <svg
+                        className={`${isRTL ? 'ml-2' : 'mr-2'} -mt-0.5 h-5 w-5`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">{t('admin-common:tabs.legal')}</span>
+                      <span className="sm:hidden">Legal</span>
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>{' '}
         <div
-          className={`px-4 py-8 sm:px-6 lg:px-8 ${isRTL ? 'space-y-8' : 'space-y-6'}`}
+          className={`px-4 py-6 sm:px-6 sm:py-8 lg:px-8 ${isRTL ? 'space-y-6 sm:space-y-8' : 'space-y-6 sm:space-y-8'}`}
         >
           {/* Users Tab Content */}
           {activeTab === 'users' && (
             <div className="space-y-6">
               {/* Stats Cards */}
-              <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5 xl:gap-6">
+              <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xl:gap-6">
                 <div className="overflow-hidden rounded-lg bg-white shadow-lg transition-shadow hover:shadow-xl dark:bg-gray-800">
                   <div className="p-4 sm:p-5">
                     <div className="flex items-center">
@@ -3910,7 +4110,648 @@ export default function AdminPanel() {
             canChangeRoleTo={canChangeRoleTo}
             isRTL={isRTL}
           />
-        </div>{' '}
+        </div>
+        {/* Legal Tab Content */}
+        {activeTab === 'legal' && (
+          <div className="space-y-6">
+            {/* Header Card */}
+            <div className="rounded-lg bg-white shadow-sm dark:bg-gray-800">
+              <div className="border-b border-gray-200 px-4 py-4 dark:border-gray-700 sm:px-6">
+                <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
+                      {t('admin-legal:title')}
+                    </h2>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      {t('admin-legal:description')}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-800 dark:text-green-100">
+                      {legalDocuments.length}{' '}
+                      <span className="hidden sm:inline">
+                        {legalDocuments.length === 1 ? 'Document' : 'Documents'}
+                      </span>
+                      <span className="sm:hidden">
+                        {legalDocuments.length === 1 ? 'Doc' : 'Docs'}
+                      </span>
+                    </span>
+                    <button
+                      onClick={() => {
+                        fetchLegalDocuments();
+                        fetchDocumentTypes();
+                      }}
+                      disabled={legalLoading}
+                      className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 sm:px-3"
+                    >
+                      <RefreshCw
+                        className={`h-4 w-4 ${legalLoading ? 'animate-spin' : ''}`}
+                      />
+                      <span className="ml-1 hidden sm:inline">Refresh</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-4 py-4 sm:px-6 sm:py-6">
+                {/* Document Editor Controls */}
+                <div className="mb-8">
+                  <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white sm:mb-6">
+                    {t('admin-legal:editor.createNew')}
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="document-type"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        {t('admin-legal:editor.selectType')}
+                      </label>
+                      <select
+                        id="document-type"
+                        value={selectedDocumentType}
+                        onChange={(e) =>
+                          setSelectedDocumentType(e.target.value)
+                        }
+                        className="block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-base shadow-sm transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-400 sm:text-sm"
+                      >
+                        <option value="tos">
+                          {t('admin-legal:documentTypes.tos')}
+                        </option>
+                        <option value="privacy">
+                          {t('admin-legal:documentTypes.privacy')}
+                        </option>
+                        <option value="cookies">
+                          {t('admin-legal:documentTypes.cookies')}
+                        </option>
+                        <option value="guidelines">
+                          {t('admin-legal:documentTypes.guidelines')}
+                        </option>
+                        <option value="data">
+                          {t('admin-legal:documentTypes.data')}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="document-language"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        {t('admin-legal:editor.selectLanguage')}
+                      </label>
+                      <select
+                        id="document-language"
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        className="block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-base shadow-sm transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-400 sm:text-sm"
+                      >
+                        <option value="en">
+                          {t('admin-legal:languages.en')}
+                        </option>
+                        <option value="ar">
+                          {t('admin-legal:languages.ar')}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-end">
+                      <button
+                        onClick={() =>
+                          openLegalEditor(
+                            selectedDocumentType,
+                            selectedLanguage
+                          )
+                        }
+                        disabled={legalLoading}
+                        className="inline-flex w-full items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-800"
+                      >
+                        {legalLoading ? (
+                          <LoadingSpinner size="sm" />
+                        ) : (
+                          <>
+                            <svg
+                              className="-ml-1 mr-2 h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                            {t('admin-legal:actions.edit')}
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* URL Info Section */}
+                <div className="mb-8">
+                  <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                    {t('admin-legal:urlInfo.title')}
+                  </h3>
+                  <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                    <p className="mb-4 text-sm text-blue-700 dark:text-blue-300">
+                      {t('admin-legal:urlInfo.description')}
+                    </p>
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <span className="font-medium text-blue-800 dark:text-blue-200">
+                          {t('admin-legal:urlInfo.baseUrl')}
+                        </span>{' '}
+                        <span className="font-mono text-blue-600 dark:text-blue-400">
+                          {typeof window !== 'undefined' ? window.location.origin : 'https://flipstaq.com'}/legal/
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        {['tos', 'privacy', 'cookies', 'guidelines', 'data'].map((type) => (
+                          <div
+                            key={type}
+                            className="flex flex-col space-y-2 rounded-md bg-white p-3 shadow-sm dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between sm:space-y-0"
+                          >
+                            <div className="flex items-center">
+                              <div className="mr-3 h-2 w-2 rounded-full bg-green-400"></div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {t(`admin-legal:documentTypes.${type}`)}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  /legal/{type}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => {
+                                  const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://flipstaq.com'}/legal/${type}`;
+                                  navigator.clipboard.writeText(url);
+                                  addToast('success', t('admin-legal:urlInfo.urlCopied'));
+                                }}
+                                className="flex-1 rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:bg-blue-800 dark:text-blue-200 dark:hover:bg-blue-700 sm:flex-initial"
+                                title={t('admin-legal:urlInfo.copyUrl')}
+                              >
+                                <div className="flex items-center justify-center">
+                                  <svg className="h-3 w-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                  </svg>
+                                  <span className="hidden sm:inline">Copy</span>
+                                </div>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  window.open(`/legal/${type}`, '_blank');
+                                }}
+                                className="flex-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 sm:flex-initial"
+                                title={t('admin-legal:urlInfo.viewPublic')}
+                              >
+                                <div className="flex items-center justify-center">
+                                  <svg className="h-3 w-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                  <span className="hidden sm:inline">View</span>
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Existing Documents List */}
+                {legalDocuments.length > 0 ? (
+                  <div>
+                    <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                      {t('admin-legal:existing.title')}
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                          <tr>
+                            <th
+                              className={`px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            >
+                              {t('admin-legal:table.type')}
+                            </th>
+                            <th
+                              className={`px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            >
+                              {t('admin-legal:table.language')}
+                            </th>
+                            <th
+                              className={`hidden px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 md:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                            >
+                              {t('admin-legal:table.lastUpdated')}
+                            </th>
+                            <th
+                              className={`hidden px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 lg:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                            >
+                              {t('admin-legal:table.updatedBy')}
+                            </th>
+                            <th
+                              className={`px-6 py-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            >
+                              {t('admin-legal:table.actions')}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                          {legalDocuments.map((doc) => (
+                            <tr
+                              key={doc.id}
+                              className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                              <td
+                                className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
+                                <div className="flex items-center">
+                                  <div className="mr-3 h-2 w-2 rounded-full bg-green-400"></div>
+                                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {t(`admin-legal:documentTypes.${doc.type}`)}
+                                  </span>
+                                </div>
+                              </td>
+                              <td
+                                className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
+                                <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                                  {t(`admin-legal:languages.${doc.language}`)}
+                                </span>
+                              </td>
+                              <td
+                                className={`hidden whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300 md:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
+                                <div>
+                                  <div className="font-medium">
+                                    {new Date(doc.updatedAt).toLocaleDateString(
+                                      language === 'ar' ? 'ar-SA' : 'en-US',
+                                      {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                      }
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-gray-400">
+                                    {new Date(doc.updatedAt).toLocaleTimeString(
+                                      language === 'ar' ? 'ar-SA' : 'en-US',
+                                      {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      }
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td
+                                className={`hidden whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300 lg:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
+                                <div className="flex items-center">
+                                  <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-600">
+                                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                      {doc.updatedBy
+                                        ? `${doc.updatedBy.firstName[0]}${doc.updatedBy.lastName[0]}`
+                                        : 'SY'}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-900 dark:text-white">
+                                      {doc.updatedBy
+                                        ? `${doc.updatedBy.firstName} ${doc.updatedBy.lastName}`
+                                        : 'System'}
+                                    </div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                      {doc.updatedBy?.username || 'system'}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td
+                                className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}
+                              >
+                                <div
+                                  className={`flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 ${isRTL ? 'sm:space-x-3 sm:space-x-reverse' : 'sm:space-x-3'}`}
+                                >
+                                  <button
+                                    onClick={() =>
+                                      openLegalEditor(doc.type, doc.language)
+                                    }
+                                    className="inline-flex items-center justify-center rounded-md bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-900 dark:text-indigo-200 dark:hover:bg-indigo-800"
+                                  >
+                                    <svg
+                                      className="mr-1 h-3 w-3"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                      />
+                                    </svg>
+                                    <span className="hidden sm:inline">{t('admin-legal:actions.edit')}</span>
+                                    <span className="sm:hidden">Edit</span>
+                                  </button>
+                                  <button
+                                    onClick={() => deleteLegalDocument(doc.id)}
+                                    className="inline-flex items-center justify-center rounded-md bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800"
+                                  >
+                                    <svg
+                                      className="mr-1 h-3 w-3"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                      />
+                                    </svg>
+                                    <span className="hidden sm:inline">{t('admin-legal:actions.delete')}</span>
+                                    <span className="sm:hidden">Delete</span>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  !legalLoading && (
+                    <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600">
+                      <svg
+                        className="mx-auto h-12 w-12 text-gray-400"
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 48 48"
+                      >
+                        <path
+                          d="M34 40h10v-4a6 6 0 00-10.712-3.714M34 40H14m20 0v-4a9.971 9.971 0 00-.712-3.714M14 40H4v-4a6 6 0 0110.713-3.714M14 40v-4c0-1.313.253-2.566.713-3.714m0 0A10.003 10.003 0 0124 26c4.21 0 7.813 2.602 9.288 6.286"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {t('admin-legal:empty.title')}
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {t('admin-legal:empty.description')}
+                      </p>
+                    </div>
+                  )
+                )}
+
+                {legalLoading && legalDocuments.length === 0 && (
+                  <div className="py-12 text-center">
+                    <LoadingSpinner size="lg" />
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                      {t('admin-legal:loading')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Legal Editor Modal */}
+        {showLegalEditor && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
+              <div
+                className="fixed inset-0 transition-opacity"
+                aria-hidden="true"
+                onClick={() => {
+                  setShowLegalEditor(false);
+                  setDocumentContent('');
+                  setEditingDocument(null);
+                }}
+              >
+                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              </div>
+              <div className="inline-block transform overflow-hidden rounded-xl bg-white text-left align-bottom shadow-xl transition-all dark:bg-gray-800 sm:my-8 sm:w-full sm:max-w-5xl sm:align-middle">
+                {/* Modal Header */}
+                <div className="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        {t('admin-legal:editor.title')}
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {editingDocument
+                          ? 'Edit existing legal document'
+                          : 'Create a new legal document'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowLegalEditor(false);
+                        setDocumentContent('');
+                        setEditingDocument(null);
+                      }}
+                      className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                    >
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Modal Body */}
+                <div className="bg-white px-6 py-6 dark:bg-gray-800">
+                  <div className="space-y-6">
+                    {/* Document Info */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-700">
+                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-legal:editor.selectType')}
+                        </label>
+                        <div className="flex items-center">
+                          <div className="mr-3 h-2 w-2 rounded-full bg-blue-500"></div>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {t(
+                              `admin-legal:documentTypes.${selectedDocumentType}`
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-700">
+                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('admin-legal:editor.selectLanguage')}
+                        </label>
+                        <div className="flex items-center">
+                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                            {t(`admin-legal:languages.${selectedLanguage}`)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content Editor */}
+                    <div>
+                      <label
+                        htmlFor="document-content"
+                        className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        {t('admin-legal:editor.content')}
+                        <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
+                          ({documentContent.length} characters)
+                        </span>
+                      </label>
+                      <div className="relative">
+                        <textarea
+                          id="document-content"
+                          value={documentContent}
+                          onChange={(e) => setDocumentContent(e.target.value)}
+                          placeholder={t(
+                            'admin-legal:editor.contentPlaceholder'
+                          )}
+                          rows={22}
+                          className="block w-full rounded-lg border-gray-300 shadow-sm transition-colors focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-indigo-400 sm:text-sm"
+                          dir={selectedLanguage === 'ar' ? 'rtl' : 'ltr'}
+                          style={{ resize: 'vertical', minHeight: '400px' }}
+                        />
+                        {documentContent.length === 0 && (
+                          <div className="absolute bottom-4 left-4 text-xs text-gray-400 dark:text-gray-500">
+                            {t('admin-legal:editor.contentPlaceholder')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Document Metadata */}
+                    {editingDocument && (
+                      <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                        <div className="flex items-start">
+                          <svg
+                            className="mr-3 mt-0.5 h-5 w-5 text-blue-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <div className="text-sm">
+                            <p className="text-blue-800 dark:text-blue-200">
+                              <strong>Last updated:</strong>{' '}
+                              {new Date(
+                                editingDocument.updatedAt
+                              ).toLocaleString(
+                                language === 'ar' ? 'ar-SA' : 'en-US',
+                                {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                }
+                              )}
+                            </p>
+                            <p className="mt-1 text-blue-600 dark:text-blue-300">
+                              <strong>Updated by:</strong>{' '}
+                              {editingDocument.updatedBy
+                                ? `${editingDocument.updatedBy.firstName} ${editingDocument.updatedBy.lastName}`
+                                : 'System'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-700 sm:flex sm:flex-row-reverse sm:px-6">
+                  <button
+                    type="button"
+                    onClick={saveLegalDocument}
+                    disabled={legalLoading || !documentContent.trim()}
+                    className="inline-flex w-full items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-800 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    {legalLoading ? (
+                      <>
+                        <LoadingSpinner size="sm" />
+                        <span className="ml-2">
+                          {t('admin-legal:editor.saving')}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="mr-2 h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        {t('admin-legal:editor.save')}
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLegalEditor(false);
+                      setDocumentContent('');
+                      setEditingDocument(null);
+                    }}
+                    className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800 sm:mt-0 sm:w-auto sm:text-sm"
+                  >
+                    <svg
+                      className="mr-2 h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    {t('admin-legal:editor.cancel')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Role Change Confirmation Modal */}
         <ConfirmationModal
           isOpen={showRoleModal}

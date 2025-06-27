@@ -12,6 +12,7 @@ import { ProductModule } from "./product/product.module";
 import { MessageModule } from "./message/message.module";
 import { TenorModule } from "./tenor/tenor.module";
 import { ReportModule } from "./report/report.module";
+import { LegalModule } from "./legal/legal.module";
 import { ProxyService } from "./proxy/proxy.service";
 import { JwtStrategy } from "./common/strategies/jwt.strategy";
 
@@ -51,6 +52,7 @@ import { JwtStrategy } from "./common/strategies/jwt.strategy";
     MessageModule,
     TenorModule,
     ReportModule,
+    LegalModule,
   ],
   controllers: [AuthGatewayController, UserGatewayController, PublicController],
   providers: [
