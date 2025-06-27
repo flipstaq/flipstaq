@@ -7,8 +7,11 @@ import {
   UseGuards,
   Request,
   Get,
+  Logger,
+  Ip,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { SignupDto } from '../dto/signup.dto';
 import { LoginDto } from '../dto/login.dto';
@@ -17,11 +20,15 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
+@SkipThrottle() // Skip throttling for most auth endpoints by default
 export class PublicAuthController {
+  private readonly logger = new Logger(PublicAuthController.name);
+
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { limit: 3, ttl: 300000 } }) // 3 requests per 5 minutes for signup endpoint
   @ApiOperation({ summary: 'Register a new user account' })
   @ApiBody({ type: SignupDto })
   @ApiResponse({
@@ -37,12 +44,27 @@ export class PublicAuthController {
     status: 409,
     description: 'Conflict - email or username already exists',
   })
-  async signup(@Body() signupDto: SignupDto): Promise<AuthResponseDto> {
-    return this.authService.signup(signupDto);
+  @ApiResponse({
+    status: 429,
+    description: 'Too many registration attempts. Please wait and try again.',
+  })
+  async signup(@Body() signupDto: SignupDto, @Ip() ip: string): Promise<AuthResponseDto> {
+    try {
+      this.logger.log(`Signup attempt for ${signupDto.email} from IP: ${ip}`);
+      const result = await this.authService.signup(signupDto);
+      this.logger.log(`Successful signup for ${signupDto.email} from IP: ${ip}`);
+      return result;
+    } catch (error) {
+      this.logger.warn(
+        `Failed signup attempt for ${signupDto.email} from IP: ${ip} - ${error.message}`,
+      );
+      throw error;
+    }
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 requests per 5 minutes for login endpoint
   @ApiOperation({ summary: 'Login with email/username and password' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({
@@ -54,8 +76,22 @@ export class PublicAuthController {
     status: 401,
     description: 'Unauthorized - invalid credentials',
   })
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.login(loginDto);
+  @ApiResponse({
+    status: 429,
+    description: 'Too many login attempts. Please wait and try again.',
+  })
+  async login(@Body() loginDto: LoginDto, @Ip() ip: string): Promise<AuthResponseDto> {
+    try {
+      this.logger.log(`Login attempt for ${loginDto.identifier} from IP: ${ip}`);
+      const result = await this.authService.login(loginDto);
+      this.logger.log(`Successful login for ${loginDto.identifier} from IP: ${ip}`);
+      return result;
+    } catch (error) {
+      this.logger.warn(
+        `Failed login attempt for ${loginDto.identifier} from IP: ${ip} - ${error.message}`,
+      );
+      throw error;
+    }
   }
 
   @Get('me')
@@ -113,6 +149,7 @@ export class PublicAuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute for refresh endpoint
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
   @ApiResponse({
     status: 200,
@@ -123,7 +160,22 @@ export class PublicAuthController {
     status: 401,
     description: 'Unauthorized - invalid refresh token',
   })
-  async refreshToken(@Body() body: { refreshToken: string }): Promise<AuthResponseDto> {
-    return this.authService.refreshTokens(body.refreshToken);
+  @ApiResponse({
+    status: 429,
+    description: 'Too many token refresh attempts. Please wait and try again.',
+  })
+  async refreshToken(
+    @Body() body: { refreshToken: string },
+    @Ip() ip: string,
+  ): Promise<AuthResponseDto> {
+    try {
+      this.logger.log(`Token refresh attempt from IP: ${ip}`);
+      const result = await this.authService.refreshTokens(body.refreshToken);
+      this.logger.log(`Successful token refresh from IP: ${ip}`);
+      return result;
+    } catch (error) {
+      this.logger.warn(`Failed token refresh attempt from IP: ${ip} - ${error.message}`);
+      throw error;
+    }
   }
 }

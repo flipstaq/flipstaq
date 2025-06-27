@@ -1129,7 +1129,7 @@ GET /health # Service health
 GET /health/db # Database connectivity
 GET /health/deps # External dependencies
 
-````
+```
 
 ### 2. Logging Strategy
 
@@ -1261,3 +1261,51 @@ The moderation system ensures:
 - No prohibited items are listed
 
 This workflow maintains platform quality while providing clear feedback to sellers and ensuring a positive experience for buyers.
+
+## 🔐 Security - Rate Limiting
+
+### Authentication Rate Limiting Strategy
+
+The platform implements a comprehensive rate limiting strategy to protect against authentication abuse:
+
+#### Multi-Layer Protection
+
+1. **API Gateway Level**: Broad rate limiting (20 req/min default)
+2. **Microservice Level**: Endpoint-specific rate limiting
+3. **IP-based Tracking**: All limits applied per client IP address
+
+#### Critical Endpoint Protection
+
+| Service | Endpoint | Limit | Window | Protection Against |
+|---------|----------|-------|--------|-------------------|
+| Auth Service | `/auth/refresh` | 5 requests | 1 minute | Token refresh abuse, replay attacks |
+| Auth Service | `/auth/login` | 5 requests | 5 minutes | Brute force, credential stuffing |
+| Auth Service | `/auth/signup` | 3 requests | 5 minutes | Automated account creation |
+
+#### Security Features
+
+- **Single-use refresh tokens**: Each refresh invalidates previous token
+- **Automatic token cleanup**: Expired tokens removed from database
+- **Comprehensive audit logging**: All attempts logged with IP tracking
+- **Graceful error handling**: Proper HTTP 429 responses
+- **Defense in depth**: Multiple layers of protection
+
+#### Configuration
+
+Rate limiting is configured via environment variables:
+```bash
+RATE_LIMIT_REFRESH_TOKENS="5_per_minute"
+RATE_LIMIT_DEFAULT="10_per_minute"
+```
+
+#### Monitoring
+
+All rate limiting events are logged for security monitoring:
+- Failed authentication attempts
+- Rate limit violations
+- Token refresh patterns
+- IP address tracking
+- Error trends and analysis
+
+For detailed implementation, see [Auth Service Rate Limiting Security](./auth-service/rate-limiting-security.md).
+````

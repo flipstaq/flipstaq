@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@nestjs/axios": "^3.1.2",
+    "@nestjs/throttler": "^6.4.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/multer": "^1.4.13",
     "axios": "^1.7.7",

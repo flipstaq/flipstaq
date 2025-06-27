@@ -102,7 +102,8 @@ Refresh access token using refresh token cookie.
 
 ```json
 {}
- // Empty body - refresh token sent via HttpOnly cookie
+
+// Empty body - refresh token sent via HttpOnly cookie
 ```
 
 **Response:** `200 OK`
@@ -271,6 +272,40 @@ X-XSS-Protection: 1; mode=block
 - Login attempts: 5 per minute per IP
 - Password reset: 3 per hour per email
 - Token refresh: 10 per minute per user
+
+## 🔐 Rate Limiting
+
+The Auth Service implements comprehensive rate limiting to protect against abuse:
+
+### Endpoints and Limits
+
+| Endpoint             | Limit      | Window    | Purpose                     |
+| -------------------- | ---------- | --------- | --------------------------- |
+| `POST /auth/refresh` | 5 requests | 1 minute  | Prevent token refresh abuse |
+| `POST /auth/login`   | 5 requests | 5 minutes | Prevent brute force attacks |
+| `POST /auth/signup`  | 3 requests | 5 minutes | Prevent automated signups   |
+
+### Rate Limit Response
+
+When rate limits are exceeded, the API returns:
+
+```json
+{
+  "statusCode": 429,
+  "message": "Too many requests, please try again later.",
+  "error": "Too Many Requests"
+}
+```
+
+### Security Logging
+
+All rate-limited endpoints include comprehensive audit logging:
+
+- Successful attempts with IP tracking
+- Failed attempts with error details and IP tracking
+- Rate limit violations with automatic warnings
+
+For detailed security analysis, see [Rate Limiting Security Review](./rate-limiting-security.md).
 
 ## Environment Variables
 

@@ -4,6 +4,7 @@ import {
   ConflictException,
   BadRequestException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -17,6 +18,8 @@ import { AuthResponseDto, UserInfoDto } from '../dto/auth-response.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -182,12 +185,13 @@ export class AuthService {
 
   async refreshTokens(refreshToken: string): Promise<AuthResponseDto> {
     // Verify refresh token
-    let payload;
+    let payload: any;
     try {
       payload = await this.jwtService.verifyAsync(refreshToken, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
     } catch (error) {
+      this.logger.warn(`Invalid refresh token verification attempt: ${error.message}`);
       throw new UnauthorizedException('Invalid refresh token');
     }
 
@@ -197,13 +201,19 @@ export class AuthService {
       include: { user: true },
     });
 
-    if (!storedToken || storedToken.expiresAt < new Date()) {
-      throw new UnauthorizedException('Refresh token expired or not found');
+    if (!storedToken || !storedToken.user) {
+      this.logger.warn(`Refresh token not found in database or user not found`);
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
-    // Check if user is still active
-    if (!storedToken.user.isActive || storedToken.user.deletedAt) {
-      throw new UnauthorizedException('User account is inactive');
+    // Check if token is expired
+    if (storedToken.expiresAt < new Date()) {
+      this.logger.warn(`Expired refresh token used for user: ${storedToken.userId}`);
+      // Clean up expired token
+      await this.prisma.refreshToken.delete({
+        where: { token: refreshToken },
+      });
+      throw new UnauthorizedException('Refresh token expired');
     }
 
     // Generate new tokens
@@ -213,13 +223,28 @@ export class AuthService {
       storedToken.user.role,
     );
 
-    // Store new refresh token and remove old one
-    await this.storeRefreshToken(storedToken.user.id, tokens.refreshToken);
+    // Replace old refresh token with new one
+    await this.prisma.refreshToken.delete({
+      where: { token: refreshToken },
+    });
+    await this.storeRefreshToken(storedToken.userId, tokens.refreshToken);
+
+    this.logger.log(`Tokens refreshed successfully for user: ${storedToken.userId}`);
 
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-      user: this.mapToUserInfo(storedToken.user),
+      user: {
+        id: storedToken.user.id,
+        email: storedToken.user.email,
+        username: storedToken.user.username,
+        firstName: storedToken.user.firstName,
+        lastName: storedToken.user.lastName,
+        role: storedToken.user.role,
+        country: storedToken.user.country,
+        createdAt: storedToken.user.createdAt,
+        emailVerified: storedToken.user.emailVerified || false,
+      },
     };
   }
 

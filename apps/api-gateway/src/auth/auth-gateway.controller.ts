@@ -12,6 +12,8 @@ import {
   HttpStatus,
   Req,
   Res,
+  Logger,
+  Ip,
 } from "@nestjs/common";
 import { Request, Response } from "express";
 import {
@@ -20,11 +22,15 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from "@nestjs/swagger";
+import { Throttle, SkipThrottle } from "@nestjs/throttler";
 import { ProxyService } from "../proxy/proxy.service";
 
 @ApiTags("Authentication")
 @Controller("auth")
+@SkipThrottle() // Skip default throttling, apply specific limits per endpoint
 export class AuthGatewayController {
+  private readonly logger = new Logger(AuthGatewayController.name);
+
   constructor(private readonly proxyService: ProxyService) {}
 
   @Post("signup")
@@ -101,24 +107,39 @@ export class AuthGatewayController {
   }
 
   @Post("refresh")
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute for refresh endpoint
   @ApiOperation({ summary: "Refresh JWT token" })
   @ApiResponse({ status: 200, description: "Token refreshed successfully" })
   @ApiResponse({ status: 401, description: "Invalid refresh token" })
+  @ApiResponse({
+    status: 429,
+    description: "Too many token refresh attempts. Please wait and try again.",
+  })
   async refreshToken(
     @Body() refreshData: any,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
+    @Ip() ip: string
   ) {
-    const response = await this.proxyService.forwardAuthRequest(
-      "refresh",
-      "POST",
-      refreshData,
-      {
-        cookie: req.headers.cookie || "", // Forward cookies
-      },
-      res
-    );
-    return response.data;
+    try {
+      this.logger.log(`API Gateway: Token refresh attempt from IP: ${ip}`);
+      const response = await this.proxyService.forwardAuthRequest(
+        "refresh",
+        "POST",
+        refreshData,
+        {
+          cookie: req.headers.cookie || "", // Forward cookies
+        },
+        res
+      );
+      this.logger.log(`API Gateway: Successful token refresh from IP: ${ip}`);
+      return response.data;
+    } catch (error) {
+      this.logger.warn(
+        `API Gateway: Failed token refresh attempt from IP: ${ip} - ${error.message}`
+      );
+      throw error;
+    }
   }
 
   @Post("forgot-password")

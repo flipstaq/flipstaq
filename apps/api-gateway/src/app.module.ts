@@ -3,6 +3,8 @@ import { HttpModule } from "@nestjs/axios";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
+import { APP_GUARD } from "@nestjs/core";
 import { AuthGatewayController } from "./auth/auth-gateway.controller";
 import { UserGatewayController } from "./user/user-gateway.controller";
 import { PublicController } from "./public/public.controller";
@@ -18,6 +20,12 @@ import { JwtStrategy } from "./common/strategies/jwt.strategy";
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 20, // 20 requests per minute default (higher for gateway)
+      },
+    ]),
     HttpModule.register({
       timeout: 5000,
       maxRedirects: 5,
@@ -31,7 +39,10 @@ import { JwtStrategy } from "./common/strategies/jwt.strategy";
           "your-super-secret-jwt-key-change-this-in-production"
         ),
         signOptions: {
-          expiresIn: configService.get<string>("JWT_EXPIRES_IN", "15m"),
+          expiresIn: configService.get<string>(
+            "JWT_ACCESS_TOKEN_EXPIRY",
+            "15m"
+          ),
         },
       }),
       inject: [ConfigService],
@@ -42,6 +53,13 @@ import { JwtStrategy } from "./common/strategies/jwt.strategy";
     ReportModule,
   ],
   controllers: [AuthGatewayController, UserGatewayController, PublicController],
-  providers: [ProxyService, JwtStrategy],
+  providers: [
+    ProxyService,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
