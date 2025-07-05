@@ -11,6 +11,10 @@ dist/
 build/
 out/
 
+# Database generated files
+packages/db/generated/
+**/generated/
+
 # Next.js specific
 .next/
 apps/web/.next/
@@ -24,7 +28,16 @@ apps/*/dist/
 services/*/dist/
 
 # Environment variables
-# Skip for now
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
 
 # Logs - comprehensive patterns
 logs/
