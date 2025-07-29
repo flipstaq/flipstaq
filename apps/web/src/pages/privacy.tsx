@@ -4,18 +4,43 @@ import { legalApi, LegalDocument } from '@/lib/api/legal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export default function PrivacyPolicy() {
-  const { language, isRTL } = useLanguage();
+  const { language, isRTL, setLanguage } = useLanguage();
   const [document, setDocument] = useState<LegalDocument | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fallbackUsed, setFallbackUsed] = useState(false);
 
   useEffect(() => {
     const fetchDocument = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await legalApi.getDocumentByType('privacy', language);
-        setDocument(response);
+        setFallbackUsed(false);
+
+        // Try to fetch in current language
+        let response;
+        try {
+          response = await legalApi.getDocumentByType('privacy', language);
+        } catch (primaryErr) {
+          // If document not found and current language is Arabic, try English fallback
+          if (language === 'ar') {
+            try {
+              response = await legalApi.getDocumentByType('privacy', 'en');
+              if (response) {
+                setFallbackUsed(true);
+              }
+            } catch (fallbackErr) {
+              console.error('Error fetching fallback document:', fallbackErr);
+              // If both Arabic and English fail, set error
+              setError('Failed to load privacy policy document');
+            }
+          } else {
+            // If English fails, set error
+            setError('Failed to load privacy policy document');
+          }
+        }
+
+        setDocument(response || null);
       } catch (err) {
         console.error('Error fetching privacy policy:', err);
         setError('Failed to load privacy policy document');
@@ -26,7 +51,6 @@ export default function PrivacyPolicy() {
 
     fetchDocument();
   }, [language]);
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -54,8 +78,8 @@ export default function PrivacyPolicy() {
           </h2>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {language === 'ar'
-              ? 'سياسة الخصوصية غير متاحة باللغة المحددة.'
-              : 'Privacy Policy is not available in the selected language.'}
+              ? 'سياسة الخصوصية غير متاحة.'
+              : 'Privacy Policy is not available.'}
           </p>
         </div>
       </div>
@@ -70,6 +94,60 @@ export default function PrivacyPolicy() {
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-lg bg-white shadow-lg dark:bg-gray-800">
           <div className="px-6 py-8 sm:px-8 sm:py-10">
+            {/* Language Toggle */}
+            <div className="mb-6 flex justify-center">
+              <div className="inline-flex rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+                <button
+                  onClick={() => setLanguage('en')}
+                  className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                    language === 'en'
+                      ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-600 dark:text-white'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => setLanguage('ar')}
+                  className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                    language === 'ar'
+                      ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-600 dark:text-white'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                  }`}
+                >
+                  العربية
+                </button>
+              </div>
+            </div>
+
+            {/* Fallback Notice */}
+            {fallbackUsed && (
+              <div className="mb-6 rounded-lg bg-yellow-50 p-4 dark:bg-yellow-900/20">
+                <div className="flex">
+                  <svg
+                    className="h-5 w-5 text-yellow-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <div className="ml-3">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      النسخة العربية غير متاحة حالياً. يتم عرض النسخة
+                      الإنجليزية.
+                      <br />
+                      Arabic version is currently unavailable. Showing English
+                      version
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="mb-8 text-center">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
@@ -92,7 +170,7 @@ export default function PrivacyPolicy() {
                 dangerouslySetInnerHTML={{
                   __html: document.content.replace(/\n/g, '<br>'),
                 }}
-                className="whitespace-pre-wrap"
+                className="whitespace-pre-wrap text-gray-900 dark:text-gray-100"
               />
             </div>
 

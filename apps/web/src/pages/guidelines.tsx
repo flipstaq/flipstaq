@@ -3,7 +3,7 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 import { legalApi, LegalDocument } from '@/lib/api/legal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-export default function TermsOfService() {
+export default function CommunityGuidelines() {
   const { language, isRTL, setLanguage } = useLanguage();
   const [document, setDocument] = useState<LegalDocument | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,30 +20,30 @@ export default function TermsOfService() {
         // Try to fetch in current language
         let response;
         try {
-          response = await legalApi.getDocumentByType('tos', language);
+          response = await legalApi.getDocumentByType('guidelines', language);
         } catch (primaryErr) {
           // If document not found and current language is Arabic, try English fallback
           if (language === 'ar') {
             try {
-              response = await legalApi.getDocumentByType('tos', 'en');
+              response = await legalApi.getDocumentByType('guidelines', 'en');
               if (response) {
                 setFallbackUsed(true);
               }
             } catch (fallbackErr) {
               console.error('Error fetching fallback document:', fallbackErr);
               // If both Arabic and English fail, set error
-              setError('Failed to load terms of service document');
+              setError('Failed to load community guidelines document');
             }
           } else {
             // If English fails, set error
-            setError('Failed to load terms of service document');
+            setError('Failed to load community guidelines document');
           }
         }
 
         setDocument(response || null);
       } catch (err) {
-        console.error('Error fetching terms of service:', err);
-        setError('Failed to load terms of service document');
+        console.error('Error fetching community guidelines:', err);
+        setError('Failed to load community guidelines document');
       } finally {
         setLoading(false);
       }
@@ -51,6 +51,7 @@ export default function TermsOfService() {
 
     fetchDocument();
   }, [language]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -78,8 +79,8 @@ export default function TermsOfService() {
           </h2>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {language === 'ar'
-              ? 'شروط الخدمة غير متاحة.'
-              : 'Terms of Service is not available.'}
+              ? 'إرشادات المجتمع غير متاحة.'
+              : 'Community Guidelines is not available.'}
           </p>
         </div>
       </div>
@@ -150,7 +151,7 @@ export default function TermsOfService() {
 
             <div className="mb-8 text-center">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {language === 'ar' ? 'شروط الخدمة' : 'Terms of Service'}
+                {language === 'ar' ? 'إرشادات المجتمع' : 'Community Guidelines'}
               </h1>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {language === 'ar'

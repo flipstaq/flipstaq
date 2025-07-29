@@ -3,7 +3,7 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 import { legalApi, LegalDocument } from '@/lib/api/legal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-export default function TermsOfService() {
+export default function DataPolicy() {
   const { language, isRTL, setLanguage } = useLanguage();
   const [document, setDocument] = useState<LegalDocument | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,30 +20,30 @@ export default function TermsOfService() {
         // Try to fetch in current language
         let response;
         try {
-          response = await legalApi.getDocumentByType('tos', language);
+          response = await legalApi.getDocumentByType('data', language);
         } catch (primaryErr) {
           // If document not found and current language is Arabic, try English fallback
           if (language === 'ar') {
             try {
-              response = await legalApi.getDocumentByType('tos', 'en');
+              response = await legalApi.getDocumentByType('data', 'en');
               if (response) {
                 setFallbackUsed(true);
               }
             } catch (fallbackErr) {
               console.error('Error fetching fallback document:', fallbackErr);
               // If both Arabic and English fail, set error
-              setError('Failed to load terms of service document');
+              setError('Failed to load data policy document');
             }
           } else {
             // If English fails, set error
-            setError('Failed to load terms of service document');
+            setError('Failed to load data policy document');
           }
         }
 
         setDocument(response || null);
       } catch (err) {
-        console.error('Error fetching terms of service:', err);
-        setError('Failed to load terms of service document');
+        console.error('Error fetching data policy:', err);
+        setError('Failed to load data policy document');
       } finally {
         setLoading(false);
       }
@@ -78,8 +78,8 @@ export default function TermsOfService() {
           </h2>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {language === 'ar'
-              ? 'شروط الخدمة غير متاحة.'
-              : 'Terms of Service is not available.'}
+              ? 'سياسة البيانات غير متاحة.'
+              : 'Data Policy is not available.'}
           </p>
         </div>
       </div>
@@ -150,7 +150,7 @@ export default function TermsOfService() {
 
             <div className="mb-8 text-center">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {language === 'ar' ? 'شروط الخدمة' : 'Terms of Service'}
+                {language === 'ar' ? 'سياسة البيانات' : 'Data Policy'}
               </h1>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {language === 'ar'

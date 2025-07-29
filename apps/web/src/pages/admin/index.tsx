@@ -4126,50 +4126,18 @@ export default function AdminPanel() {
             canChangeRoleTo={canChangeRoleTo}
             isRTL={isRTL}
           />
-        </div>
-        {/* Legal Tab Content */}
-        {activeTab === 'legal' && (
-          <div className="space-y-6">
-            {/* Header Card */}
-            <div className="rounded-lg bg-white shadow-sm dark:bg-gray-800">
-              <div className="border-b border-gray-200 px-4 py-4 dark:border-gray-700 sm:px-6">
-                <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
-                      {t('admin-legal:title')}
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      {t('admin-legal:description')}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-800 dark:text-green-100">
-                      {legalDocuments.length}{' '}
-                      <span className="hidden sm:inline">
-                        {legalDocuments.length === 1 ? 'Document' : 'Documents'}
-                      </span>
-                      <span className="sm:hidden">
-                        {legalDocuments.length === 1 ? 'Doc' : 'Docs'}
-                      </span>
-                    </span>
-                    <button
-                      onClick={() => {
-                        fetchLegalDocuments();
-                        fetchDocumentTypes();
-                      }}
-                      disabled={legalLoading}
-                      className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 sm:px-3"
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 ${legalLoading ? 'animate-spin' : ''}`}
-                      />
-                      <span className="ml-1 hidden sm:inline">Refresh</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="px-4 py-4 sm:px-6 sm:py-6">
+          {/* Legal Tab Content */}
+          {activeTab === 'legal' && (
+            <div className={`space-y-6 ${isRTL ? 'mt-8' : 'mt-6'}`}>
+              <div
+                className={`rounded-lg bg-white shadow dark:bg-gray-800 ${isRTL ? 'p-8' : 'p-6'}`}
+              >
+                <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                  {t('admin-legal:title')}
+                </h2>
+                <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+                  {t('admin-legal:description')}
+                </p>
                 {/* Document Editor Controls */}
                 <div className="mb-8">
                   <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white sm:mb-6">
@@ -4577,8 +4545,8 @@ export default function AdminPanel() {
                 )}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
         {/* Legal Editor Modal */}
         {showLegalEditor && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
