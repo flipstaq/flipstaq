@@ -55,13 +55,6 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
     }).format(price);
   };
 
-  const formatDate = (date: string) => {
-    return new Intl.DateTimeFormat(language === 'ar' ? 'ar-AE' : 'en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(new Date(date));
-  };
   const handleClick = () => {
     if (onProductClick) {
       onProductClick(product.username, product.slug);
@@ -152,7 +145,7 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
           )}
         </div>
         {/* Product Meta */}
-        <div className="mt-4 flex items-center justify-between text-sm text-secondary-500 dark:text-secondary-400">
+        <div className="mt-4 flex items-center text-sm text-secondary-500 dark:text-secondary-400">
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
             {/* User Avatar */}
             <Avatar
@@ -165,7 +158,6 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
             <span>•</span>
             <span>{product.location}</span>
           </div>
-          <span>{formatDate(product.createdAt)}</span>
         </div>
         {/* View Product Link */}
         <div className="mt-4">
