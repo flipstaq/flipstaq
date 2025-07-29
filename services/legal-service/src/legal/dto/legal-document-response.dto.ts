@@ -37,6 +37,7 @@ export class LegalDocumentResponseDto {
       username: "admin",
       firstName: "Admin",
       lastName: "User",
+      avatarUrl: "https://example.com/avatar.jpg",
     },
   })
   updatedBy: {
@@ -44,5 +45,6 @@ export class LegalDocumentResponseDto {
     username: string;
     firstName: string;
     lastName: string;
+    avatarUrl?: string | null;
   };
 }

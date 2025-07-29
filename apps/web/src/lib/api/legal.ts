@@ -11,6 +11,7 @@ export interface LegalDocument {
     username: string;
     firstName: string;
     lastName: string;
+    avatarUrl?: string | null;
   };
   createdAt: string;
   updatedAt: string;
@@ -68,7 +69,7 @@ export const legalApi = {
     id: string,
     data: UpdateLegalDocumentDto
   ): Promise<LegalDocument> => {
-    return await apiClient.put<LegalDocument>(`/legal/documents/${id}`, data);
+    return await apiClient.patch<LegalDocument>(`/legal/documents/${id}`, data);
   },
 
   deleteDocument: async (id: string): Promise<void> => {
