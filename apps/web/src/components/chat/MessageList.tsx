@@ -14,12 +14,13 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useWebSocket } from '@/contexts/WebSocketContext';
-import { Message } from '@/types/chat';
+import { Message, Conversation } from '@/types/chat';
 import ProductCoverAttachment from './ProductCoverAttachment';
 import MessageContextMenu from './MessageContextMenu';
 import EditableMessage from './EditableMessage';
 import MessageReactions from './MessageReactions';
 import EmojiReactionButton from './EmojiReactionButton';
+import Avatar from '@/components/ui/Avatar';
 
 interface MessageListProps {
   messages: Message[];
@@ -36,6 +37,7 @@ interface MessageListProps {
   hasMoreMessages?: boolean;
   isLoadingOlder?: boolean;
   highlightedMessageId?: string | null;
+  conversation?: Conversation;
 }
 
 export default function MessageList({
@@ -50,6 +52,7 @@ export default function MessageList({
   hasMoreMessages = false,
   isLoadingOlder = false,
   highlightedMessageId,
+  conversation,
 }: MessageListProps) {
   const { t } = useLanguage();
   const { editMessage, onMessageReaction } = useWebSocket();
@@ -351,6 +354,19 @@ export default function MessageList({
                 }`}
                 id={`message-${message.id}`}
               >
+                {/* User Avatar for incoming messages */}
+                {!isOwnMessage && conversation && (
+                  <div
+                    className={`mr-3 flex-shrink-0 ${isPreviousMessageFromSameSender ? 'invisible' : ''}`}
+                  >
+                    <Avatar
+                      src={conversation.participant.avatar}
+                      size="sm"
+                      alt={`${conversation.participant.firstName} ${conversation.participant.lastName}`}
+                    />
+                  </div>
+                )}
+
                 <div
                   className={`max-w-xs lg:max-w-md ${isOwnMessage ? 'order-2' : 'order-1'}`}
                 >

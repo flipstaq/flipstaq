@@ -59,6 +59,7 @@ model User {
   password          String     // Hashed password
   dateOfBirth       DateTime
   country           String
+  avatarUrl         String?    // Profile picture URL, null means use default
   role              UserRole   @default(USER)
   status            UserStatus @default(ACTIVE)
   isActive          Boolean    @default(true)

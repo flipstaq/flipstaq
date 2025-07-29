@@ -4,6 +4,7 @@ interface User {
   username: string;
   firstName: string;
   lastName: string;
+  avatarUrl?: string | null;
   role: string;
   status: string;
   isActive: boolean;

@@ -25,6 +25,7 @@ import InlineMessageComposer from '@/components/chat/InlineMessageComposer';
 import { BlockButton } from '@/components/common/BlockButton';
 import { useBlockStatus } from '@/hooks/useBlockStatus';
 import ReportModal from '@/components/report/ReportModal';
+import Avatar from '@/components/ui/Avatar';
 import Link from 'next/link';
 import Head from 'next/head';
 import { ProductType } from '@/types';
@@ -41,6 +42,9 @@ interface ProductDetail {
   username: string;
   userId: string;
   imageUrl?: string | null;
+  userAvatarUrl?: string | null;
+  userFirstName?: string;
+  userLastName?: string;
   type: ProductType;
   createdAt: string;
   updatedAt: string;
@@ -442,9 +446,14 @@ export function ProductDetailPage({
                   {/* Seller Info */}
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-                        <User className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                      </div>
+                      <Avatar
+                        src={product.userAvatarUrl}
+                        size="md"
+                        alt={
+                          `${product.userFirstName || ''} ${product.userLastName || ''}`.trim() ||
+                          product.username
+                        }
+                      />
                       <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
                         <p className="text-sm text-secondary-500 dark:text-secondary-400">
                           {t('products.detail.posted_by')}

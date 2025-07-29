@@ -79,6 +79,27 @@ export class ProductResponseDto {
   username: string;
 
   @ApiProperty({
+    description: 'Avatar URL of the product owner',
+    example: '/uploads/avatars/user-avatar.jpg',
+    nullable: true,
+  })
+  userAvatarUrl?: string | null;
+
+  @ApiProperty({
+    description: 'First name of the product owner',
+    example: 'John',
+    required: false,
+  })
+  userFirstName?: string;
+
+  @ApiProperty({
+    description: 'Last name of the product owner',
+    example: 'Doe',
+    required: false,
+  })
+  userLastName?: string;
+
+  @ApiProperty({
     description: 'Whether the product is active',
     example: true,
   })

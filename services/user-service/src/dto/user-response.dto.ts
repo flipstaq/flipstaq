@@ -23,6 +23,14 @@ export class UserResponseDto {
   country: string;
 
   @ApiProperty({
+    example: '/uploads/avatars/user-123-avatar.jpg',
+    description: 'User avatar URL, null for default avatar',
+    required: false,
+    nullable: true,
+  })
+  avatarUrl?: string | null;
+
+  @ApiProperty({
     example: 'USER',
     description: 'User role',
     enum: ['USER', 'STAFF', 'HIGHER_STAFF', 'OWNER'],

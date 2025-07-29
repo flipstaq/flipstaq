@@ -11,7 +11,12 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { extname } from "path";
 import {
   ApiTags,
   ApiBearerAuth,
@@ -21,6 +26,7 @@ import {
   ApiParam,
 } from "@nestjs/swagger";
 import { ProxyService } from "../proxy/proxy.service";
+import { getServiceUrl } from "../common/config/api-version.config";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { RolesGuard } from "../common/guards/roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
@@ -177,6 +183,37 @@ export class UserGatewayController {
         error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  @Delete("avatar")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({ summary: "Remove user avatar (reset to default)" })
+  @ApiResponse({
+    status: 200,
+    description: "Avatar removed successfully",
+    schema: {
+      type: "object",
+      properties: {
+        message: { type: "string" },
+      },
+    },
+  })
+  async removeAvatar(@Req() req: any) {
+    const response = await this.proxyService.forwardRequest(
+      "USER",
+      "users/avatar",
+      "DELETE",
+      null,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+        "x-user-email": req.user?.email || "",
+        "x-user-role": req.user?.role || "",
+        "x-api-gateway": "flipstaq-gateway",
+        "x-internal-service": "true",
+        "x-forwarded-from": "api-gateway",
+      }
+    );
+    return response.data;
   }
 
   @Delete(":id")
@@ -455,6 +492,132 @@ export class UserGatewayController {
     const response = await this.proxyService.forwardRequest(
       "USER",
       `users/blocks/status/${targetUserId}`,
+      "GET",
+      null,
+      {
+        "x-user-id": req.user?.sub || req.user?.userId,
+      }
+    );
+    return response.data;
+  }
+
+  @Post("avatar")
+  @UseInterceptors(
+    FileInterceptor("avatar", {
+      storage: diskStorage({
+        destination: "./uploads/avatars",
+        filename: (req, file, cb) => {
+          const userId = (req as any).user?.sub || (req as any).user?.userId;
+          const extension = extname(file.originalname);
+          const filename = `${userId}-${Date.now()}${extension}`;
+          cb(null, filename);
+        },
+      }),
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = [
+          "image/png",
+          "image/jpg",
+          "image/jpeg",
+          "image/webp",
+        ];
+        if (allowedTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new HttpException(
+              "Only PNG, JPG, JPEG, and WebP files are allowed",
+              HttpStatus.BAD_REQUEST
+            ),
+            false
+          );
+        }
+      },
+    })
+  )
+  @ApiOperation({ summary: "Upload user avatar" })
+  @ApiResponse({
+    status: 200,
+    description: "Avatar uploaded successfully",
+    schema: {
+      type: "object",
+      properties: {
+        avatarUrl: { type: "string" },
+        message: { type: "string" },
+      },
+    },
+  })
+  async uploadAvatar(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: any
+  ) {
+    if (!file) {
+      throw new HttpException(
+        "Avatar file is required",
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    // Import necessary modules for file forwarding
+    const FormData = require("form-data");
+    const fs = require("fs");
+    const axios = require("axios");
+
+    try {
+      const formData = new FormData();
+      formData.append("avatar", fs.createReadStream(file.path), {
+        filename: file.originalname,
+        contentType: file.mimetype,
+      });
+
+      const serviceUrl = getServiceUrl("USER");
+      const response = await axios.post(
+        `${serviceUrl}/internal/users/avatar`,
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+            "x-user-id": req.user?.sub || req.user?.userId,
+            "x-api-gateway": "flipstaq-gateway",
+            "x-internal-service": "true",
+            "x-forwarded-from": "api-gateway",
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error forwarding file upload:",
+        error.response?.data || error.message
+      );
+      throw new HttpException(
+        error.response?.data?.message || "Failed to upload avatar",
+        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    } finally {
+      // Clean up the uploaded file
+      try {
+        fs.unlinkSync(file.path);
+      } catch (cleanupError) {
+        console.warn("Failed to clean up file:", cleanupError);
+      }
+    }
+  }
+
+  @Get("me")
+  @ApiOperation({ summary: "Get current user profile" })
+  @ApiResponse({
+    status: 200,
+    description: "Current user profile retrieved successfully",
+    type: UserResponseDto,
+  })
+  async getCurrentUser(@Req() req: any) {
+    const response = await this.proxyService.forwardRequest(
+      "USER",
+      `users/${req.user?.sub || req.user?.userId}`,
       "GET",
       null,
       {

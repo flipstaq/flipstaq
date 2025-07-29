@@ -46,6 +46,14 @@ export class UserInfoDto {
   country: string;
 
   @ApiProperty({
+    description: 'User avatar URL',
+    example: 'https://example.com/avatars/user123.jpg',
+    required: false,
+    nullable: true,
+  })
+  avatarUrl?: string | null;
+
+  @ApiProperty({
     description: 'Account creation date',
     example: '2024-01-15T10:30:00Z',
   })

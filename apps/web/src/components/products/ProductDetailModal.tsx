@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Avatar from '@/components/ui/Avatar';
 import { ProductType } from '@/types';
 
 interface ProductDetail {
@@ -23,6 +24,9 @@ interface ProductDetail {
   category: string | null;
   slug: string;
   username: string;
+  userAvatarUrl?: string | null;
+  userFirstName?: string;
+  userLastName?: string;
   imageUrl?: string | null;
   type: ProductType;
   createdAt: string;
@@ -220,6 +224,12 @@ export function ProductDetailModal({
                         <span className="text-sm text-secondary-600 dark:text-secondary-400">
                           {t('products.modal.postedBy')}
                         </span>
+                        {/* User Avatar */}
+                        <Avatar
+                          src={product.userAvatarUrl}
+                          alt={`${product.userFirstName} ${product.userLastName}`}
+                          size="xs"
+                        />
                         <span className="font-medium text-secondary-900 dark:text-secondary-100">
                           @{product.username}
                         </span>

@@ -13,7 +13,12 @@ import {
   HttpStatus,
   Headers,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import {
   ApiTags,
   ApiOperation,
@@ -101,6 +106,26 @@ export class UserController {
     @Request() req: any,
   ): Promise<UserResponseDto> {
     return this.userService.update(id, updateUserDto, req.user);
+  }
+
+  @Delete('avatar')
+  @ApiOperation({ summary: 'Remove user avatar (reset to default)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Avatar removed successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string' },
+      },
+    },
+  })
+  async removeAvatar(@Headers('x-user-id') userId: string): Promise<{ message: string }> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    return this.userService.removeAvatar(userId);
   }
 
   @Delete(':id')
@@ -344,5 +369,57 @@ export class UserController {
     }
 
     return this.userService.getBlockStatus(userId, targetUserId);
+  }
+
+  @Post('avatar')
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/avatars',
+        filename: (req, file, cb) => {
+          const userId = req.headers['x-user-id'] as string;
+          const extension = extname(file.originalname);
+          const filename = `${userId}-${Date.now()}${extension}`;
+          cb(null, filename);
+        },
+      }),
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp'];
+        if (allowedTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('Only PNG, JPG, JPEG, and WebP files are allowed'), false);
+        }
+      },
+    }),
+  )
+  @ApiOperation({ summary: 'Upload user avatar' })
+  @ApiResponse({
+    status: 200,
+    description: 'Avatar uploaded successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        avatarUrl: { type: 'string' },
+        message: { type: 'string' },
+      },
+    },
+  })
+  async uploadAvatar(
+    @Headers('x-user-id') userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ avatarUrl: string; message: string }> {
+    if (!userId || userId.trim() === '') {
+      throw new BadRequestException('User ID is required and cannot be empty');
+    }
+
+    if (!file) {
+      throw new BadRequestException('Avatar file is required');
+    }
+
+    return this.userService.updateAvatar(userId, file);
   }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { User } from '../../types';
 import { useLanguage } from '../providers/LanguageProvider';
+import Avatar from '../ui/Avatar';
 
 interface UserTableProps {
   users: User[];
@@ -129,12 +130,11 @@ export const UserTable: React.FC<UserTableProps> = ({
                 <td className="whitespace-nowrap px-6 py-4">
                   <div className="flex items-center">
                     <div className="h-10 w-10 flex-shrink-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                          {user.firstName[0]}
-                          {user.lastName[0]}
-                        </span>
-                      </div>
+                      <Avatar
+                        src={user.avatarUrl}
+                        alt={`${user.firstName} ${user.lastName}`}
+                        size="md"
+                      />
                     </div>
                     <div className="ml-4 rtl:ml-0 rtl:mr-4">
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-100">

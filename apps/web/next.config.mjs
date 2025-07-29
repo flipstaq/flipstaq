@@ -12,6 +12,11 @@ const nextConfig = {
         source: '/locales/:path*',
         destination: '/api/locales/:path*',
       },
+      // Rewrite avatar uploads to API route
+      {
+        source: '/uploads/avatars/:filename',
+        destination: '/api/uploads/avatars/:filename',
+      },
     ];
   },
 };

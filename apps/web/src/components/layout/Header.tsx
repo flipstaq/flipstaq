@@ -24,6 +24,7 @@ import { useState, useRef, useEffect } from 'react';
 import ChatDrawer from '@/components/chat/ChatDrawer';
 import { useChat } from '@/contexts/ChatContext';
 import { useUnreadCount } from '@/hooks/useUnreadCount';
+import Avatar from '@/components/ui/Avatar';
 
 export function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -127,7 +128,12 @@ export function Header() {
                       }
                       className="flex items-center space-x-2 rounded-lg bg-secondary-100 px-3 py-2 text-sm text-secondary-700 transition-colors duration-200 hover:bg-secondary-200 dark:bg-secondary-800 dark:text-secondary-300 dark:hover:bg-secondary-700 rtl:space-x-reverse"
                     >
-                      <User className="h-4 w-4" />
+                      {/* Avatar */}
+                      <Avatar
+                        src={user?.avatarUrl}
+                        alt={`${user?.firstName} ${user?.lastName}`}
+                        size="xs"
+                      />
                       <span>
                         {user?.firstName} {user?.lastName}
                       </span>
@@ -165,7 +171,7 @@ export function Header() {
                         </Link>
                         {/* Settings link */}
                         <Link
-                          href="/settings/security"
+                          href="/settings"
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="flex items-center space-x-2 px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-700 rtl:space-x-reverse"
                         >
@@ -268,7 +274,7 @@ export function Header() {
                       )}
                     </button>
                     <Link
-                      href="/settings/security"
+                      href="/settings"
                       className="btn-secondary block w-full text-center"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >

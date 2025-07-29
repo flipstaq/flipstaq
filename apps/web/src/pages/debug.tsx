@@ -16,16 +16,19 @@ export default function DebugPage() {
 
   const testApiCall = async () => {
     try {
-      const response = await fetch('http://localhost:3100/api/v1/users', {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3100'}/api/v1/users`,
+        {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log('Test API call response:', response.status, response.ok);
       const data = await response.text();
       console.log('Response data:', data);

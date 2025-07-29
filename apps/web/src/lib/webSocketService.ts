@@ -117,9 +117,7 @@ class WebSocketService {
 
       // Only log connection attempts in development
       if (process.env.NODE_ENV === 'development') {
-        console.log('Connecting to WebSocket:', wsUrl);
       }
-
       this.ws = new WebSocket(wsUrl);
       this.ws.onopen = () => {
         if (process.env.NODE_ENV === 'development') {

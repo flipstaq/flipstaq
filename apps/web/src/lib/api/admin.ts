@@ -14,6 +14,9 @@ export interface ProductForAdmin {
   type: ProductType;
   userId: string;
   username: string;
+  userAvatarUrl?: string | null;
+  userFirstName: string;
+  userLastName: string;
   isActive: boolean;
   isSold: boolean;
   visible: boolean;

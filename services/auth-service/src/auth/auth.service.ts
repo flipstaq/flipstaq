@@ -376,6 +376,7 @@ export class AuthService {
       lastName: user.lastName,
       role: user.role,
       country: user.country,
+      avatarUrl: user.avatarUrl || null,
       emailVerified: user.emailVerified || false,
       createdAt: user.createdAt,
     };

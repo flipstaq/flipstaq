@@ -15,6 +15,7 @@ export interface User {
   lastName: string;
   dateOfBirth: string;
   country: string;
+  avatarUrl?: string | null;
   role: UserRole;
   status: UserStatus;
   isActive: boolean;
@@ -97,6 +98,7 @@ export interface UserInfo {
   lastName: string;
   role: 'OWNER' | 'HIGHER_STAFF' | 'STAFF' | 'USER';
   country: string;
+  avatarUrl?: string | null;
   emailVerified: boolean;
   createdAt: Date;
 }

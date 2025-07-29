@@ -206,6 +206,7 @@ export class MessageService {
             username: true,
             firstName: true,
             lastName: true,
+            avatarUrl: true,
             isOnline: true,
             lastSeen: true,
           },

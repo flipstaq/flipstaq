@@ -11,6 +11,8 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserResponseDto, PaginatedUsersResponseDto } from '../dto/user-response.dto';
 import { GetUsersQueryDto, UserRole, UserStatus } from '../dto/get-users-query.dto';
 import { CreateBlockDto, BlockResponseDto, BlockListResponseDto } from '../dto/block.dto';
+import { unlink } from 'fs/promises';
+import { join } from 'path';
 
 @Injectable()
 export class UserService {
@@ -79,6 +81,7 @@ export class UserService {
         firstName: true,
         lastName: true,
         country: true,
+        avatarUrl: true,
         role: true,
         status: true,
         isActive: true,
@@ -117,6 +120,7 @@ export class UserService {
         firstName: true,
         lastName: true,
         country: true,
+        avatarUrl: true,
         role: true,
         status: true,
         isActive: true,
@@ -312,6 +316,7 @@ export class UserService {
         firstName: true,
         lastName: true,
         country: true,
+        avatarUrl: true,
         role: true,
         status: true,
         isActive: true,
@@ -533,6 +538,74 @@ export class UserService {
     return {
       isBlocked,
       isBlockedBy,
+    };
+  }
+
+  async updateAvatar(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<{ avatarUrl: string; message: string }> {
+    // Check if user exists
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      // Clean up uploaded file if user doesn't exist
+      await unlink(file.path).catch(() => {});
+      throw new NotFoundException('User not found');
+    }
+
+    // If user has existing custom avatar, delete the old file
+    if (user.avatarUrl && !user.avatarUrl.includes('default-avatar')) {
+      const oldFilePath = join(
+        process.cwd(),
+        'uploads',
+        'avatars',
+        user.avatarUrl.split('/').pop()!,
+      );
+      await unlink(oldFilePath).catch(() => {});
+    }
+
+    // Generate the URL for the uploaded file
+    const avatarUrl = `/uploads/avatars/${file.filename}`;
+
+    // Update user's avatar URL in database
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+    });
+
+    return {
+      avatarUrl,
+      message: 'Avatar updated successfully',
+    };
+  }
+
+  async removeAvatar(userId: string): Promise<{ message: string }> {
+    // Check if user exists
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // If user has custom avatar, delete the file
+    if (user.avatarUrl && !user.avatarUrl.includes('default-avatar')) {
+      const filePath = join(process.cwd(), 'uploads', 'avatars', user.avatarUrl.split('/').pop()!);
+      await unlink(filePath).catch(() => {});
+    }
+
+    // Reset avatar to null (will use default)
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: null },
+    });
+
+    return {
+      message: 'Avatar removed successfully',
     };
   }
 }

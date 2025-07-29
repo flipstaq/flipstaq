@@ -33,6 +33,7 @@ import { useBlockStatus } from '@/hooks/useBlockStatus';
 import { useVerificationCheck } from '@/hooks/useVerificationCheck';
 import VerificationPrompt from '@/components/auth/VerificationPrompt';
 import { useToast } from '@/components/providers/ToastProvider';
+import Avatar from '@/components/ui/Avatar';
 
 interface ChatDrawerProps {
   isOpen: boolean;
@@ -63,6 +64,7 @@ const convertApiConversation = (
       username: otherParticipant.username,
       firstName: otherParticipant.firstName,
       lastName: otherParticipant.lastName,
+      avatar: otherParticipant.avatarUrl || undefined,
       isOnline: otherParticipant.isOnline || false,
       lastSeen: otherParticipant.lastSeen
         ? new Date(otherParticipant.lastSeen)
@@ -1409,9 +1411,7 @@ export default function ChatDrawer({
                           className="w-full p-4 text-left transition-colors hover:bg-secondary-50 dark:hover:bg-secondary-800"
                         >
                           <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-                              <User className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                            </div>
+                            <Avatar src={user.avatarUrl} size="md" />
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-sm font-medium text-secondary-900 dark:text-secondary-100">
                                 {user.firstName} {user.lastName}
@@ -1521,6 +1521,7 @@ export default function ChatDrawer({
                     hasMoreMessages={hasMoreMessages}
                     isLoadingOlder={isLoadingOlder}
                     highlightedMessageId={highlightedMessageId}
+                    conversation={selectedConversation}
                   />
                 </div>
               </div>{' '}

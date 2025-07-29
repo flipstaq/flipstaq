@@ -15,6 +15,7 @@ import { authService } from '@/lib/auth';
 import { EditProductModal } from './EditProductModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Avatar from '@/components/ui/Avatar';
 import {
   formatNumber,
   formatCurrency,
@@ -31,6 +32,9 @@ interface Product {
   location: string;
   slug: string;
   username: string;
+  userAvatarUrl?: string | null;
+  userFirstName?: string;
+  userLastName?: string;
   imageUrl?: string | null;
   category: string | null;
   type: ProductType;
@@ -430,6 +434,8 @@ export function MyProducts() {
                 {/* Product Meta */}
                 <div className="mt-4 flex items-center justify-between text-sm text-secondary-500 dark:text-secondary-400">
                   <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    {/* User Avatar */}
+                    <Avatar src={product.userAvatarUrl} size="xs" />
                     <span>@{product.username}</span>
                     <span>•</span>
                     <span>{product.location}</span>

@@ -14,6 +14,9 @@ interface ProductDetail {
   username: string;
   userId: string;
   imageUrl?: string | null;
+  userAvatarUrl?: string | null;
+  userFirstName?: string;
+  userLastName?: string;
   type: ProductType;
   createdAt: string;
   updatedAt: string;

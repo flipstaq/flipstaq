@@ -1,6 +1,7 @@
 import React from 'react';
 import { ProductForAdmin } from '@/lib/api/admin';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import Avatar from '@/components/ui/Avatar';
 
 interface ProductCardProps {
   product: ProductForAdmin;
@@ -79,8 +80,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 <h3 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
                   {product.title}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Slug: {product.slug} | Seller: @{product.username}
+                <p className="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <span>Slug: {product.slug} | Seller:</span>
+                  {/* User Avatar */}
+                  <Avatar
+                    src={product.userAvatarUrl}
+                    size="xs"
+                    className="mx-2"
+                  />
+                  <span>@{product.username}</span>
                 </p>
                 <div className="mt-2 flex items-center space-x-4">
                   <span className="text-xl font-bold text-green-600 dark:text-green-400">

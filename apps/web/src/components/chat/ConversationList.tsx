@@ -5,6 +5,7 @@ import { User, Circle } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useUserOnlineStatus, useWebSocket } from '@/contexts/WebSocketContext';
+import Avatar from '@/components/ui/Avatar';
 import { Conversation } from '@/types/chat';
 
 interface ConversationListProps {
@@ -120,23 +121,11 @@ export default function ConversationList({
               <div className="flex items-start space-x-3 rtl:space-x-reverse">
                 {/* Avatar */}
                 <div className="relative flex-shrink-0">
-                  <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 group-hover:scale-105 ${
-                      conversation.participant.avatar
-                        ? 'bg-transparent'
-                        : 'bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800'
-                    }`}
-                  >
-                    {conversation.participant.avatar ? (
-                      <img
-                        src={conversation.participant.avatar}
-                        alt={`${conversation.participant.firstName} ${conversation.participant.lastName}`}
-                        className="h-12 w-12 rounded-full object-cover shadow-sm ring-2 ring-white dark:ring-secondary-700"
-                      />
-                    ) : (
-                      <User className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-                    )}
-                  </div>
+                  <Avatar
+                    src={conversation.participant.avatar}
+                    size="lg"
+                    className="shadow-sm ring-2 ring-white dark:ring-secondary-700"
+                  />
                   {/* Enhanced online indicator with real WebSocket status */}
                   <div
                     className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white transition-all duration-200 dark:border-secondary-800 ${

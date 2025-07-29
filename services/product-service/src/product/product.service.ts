@@ -81,6 +81,9 @@ export class ProductService {
         user: {
           select: {
             username: true,
+            avatarUrl: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },
@@ -99,6 +102,9 @@ export class ProductService {
       imageUrl: product.imageUrl,
       userId: product.userId,
       username: product.user.username,
+      userAvatarUrl: product.user.avatarUrl,
+      userFirstName: product.user.firstName,
+      userLastName: product.user.lastName,
       isActive: product.isActive,
       isSold: product.isSold || false,
       status: product.status,
@@ -152,6 +158,9 @@ export class ProductService {
         user: {
           select: {
             username: true,
+            avatarUrl: true,
+            firstName: true,
+            lastName: true,
           },
         },
         reviews: {
@@ -189,6 +198,9 @@ export class ProductService {
         imageUrl: product.imageUrl,
         userId: product.userId,
         username: product.user.username,
+        userAvatarUrl: product.user.avatarUrl,
+        userFirstName: product.user.firstName,
+        userLastName: product.user.lastName,
         isActive: product.isActive,
         isSold: product.isSold || false,
         status: product.status,
@@ -233,6 +245,9 @@ export class ProductService {
           select: {
             id: true,
             username: true,
+            avatarUrl: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },
@@ -270,6 +285,9 @@ export class ProductService {
       imageUrl: product.imageUrl,
       userId: product.userId,
       username: product.user.username,
+      userAvatarUrl: product.user.avatarUrl,
+      userFirstName: product.user.firstName,
+      userLastName: product.user.lastName,
       isActive: product.isActive,
       isSold: product.isSold || false,
       status: product.status,
@@ -292,6 +310,9 @@ export class ProductService {
         user: {
           select: {
             username: true,
+            avatarUrl: true,
+            firstName: true,
+            lastName: true,
           },
         },
         approvedBy: {
@@ -342,6 +363,9 @@ export class ProductService {
         imageUrl: product.imageUrl,
         userId: product.userId,
         username: product.user.username,
+        userAvatarUrl: product.user.avatarUrl,
+        userFirstName: product.user.firstName,
+        userLastName: product.user.lastName,
         isActive: product.isActive,
         isSold: product.isSold || false,
         status: product.status,
@@ -454,6 +478,9 @@ export class ProductService {
         user: {
           select: {
             username: true,
+            avatarUrl: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },
@@ -472,6 +499,9 @@ export class ProductService {
       imageUrl: updatedProduct.imageUrl,
       userId: updatedProduct.userId,
       username: updatedProduct.user.username,
+      userAvatarUrl: updatedProduct.user.avatarUrl,
+      userFirstName: updatedProduct.user.firstName,
+      userLastName: updatedProduct.user.lastName,
       isActive: updatedProduct.isActive,
       isSold: updatedProduct.isSold || false,
       status: updatedProduct.status,
@@ -616,6 +646,9 @@ export class ProductService {
         user: {
           select: {
             username: true,
+            avatarUrl: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },
@@ -634,6 +667,9 @@ export class ProductService {
       imageUrl: updatedProduct.imageUrl,
       userId: updatedProduct.userId,
       username: updatedProduct.user.username,
+      userAvatarUrl: updatedProduct.user.avatarUrl,
+      userFirstName: updatedProduct.user.firstName,
+      userLastName: updatedProduct.user.lastName,
       isActive: updatedProduct.isActive,
       isSold: updatedProduct.isSold,
       status: updatedProduct.status,
@@ -653,6 +689,9 @@ export class ProductService {
         user: {
           select: {
             username: true,
+            avatarUrl: true,
+            firstName: true,
+            lastName: true,
           },
         },
         reviews: {
@@ -687,6 +726,9 @@ export class ProductService {
         imageUrl: product.imageUrl,
         userId: product.userId,
         username: product.user.username,
+        userAvatarUrl: product.user.avatarUrl,
+        userFirstName: product.user.firstName,
+        userLastName: product.user.lastName,
         isActive: product.isActive,
         isSold: product.isSold || false,
         visible: product.visible,
@@ -911,6 +953,9 @@ export class ProductService {
         user: {
           select: {
             username: true,
+            avatarUrl: true,
+            firstName: true,
+            lastName: true,
           },
         },
         _count: {
@@ -939,6 +984,9 @@ export class ProductService {
       imageUrl: product.imageUrl,
       userId: product.userId,
       username: product.user.username,
+      userAvatarUrl: product.user.avatarUrl,
+      userFirstName: product.user.firstName,
+      userLastName: product.user.lastName,
       isActive: product.isActive,
       isSold: product.isSold,
       status: product.status,
@@ -972,6 +1020,7 @@ export class ProductService {
             firstName: true,
             lastName: true,
             email: true,
+            avatarUrl: true,
           },
         },
         approvedBy: {
@@ -1051,6 +1100,7 @@ export class ProductService {
             firstName: true,
             lastName: true,
             email: true,
+            avatarUrl: true,
           },
         },
         approvedBy: {

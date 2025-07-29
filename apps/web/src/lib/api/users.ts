@@ -100,7 +100,8 @@ class UserApiClient {
   async getUsers(
     params: UsersQueryParams = {}
   ): Promise<PaginatedUsersResponse> {
-    const searchParams = new URLSearchParams();    if (params.page) searchParams.append('page', params.page.toString());
+    const searchParams = new URLSearchParams();
+    if (params.page) searchParams.append('page', params.page.toString());
     if (params.limit) searchParams.append('limit', params.limit.toString());
     if (params.role) searchParams.append('role', params.role);
     if (params.status) searchParams.append('status', params.status);
@@ -135,6 +136,10 @@ class UserApiClient {
     return this.request<User>(`/users/${id}/restore`, {
       method: 'PATCH',
     });
+  }
+
+  async getCurrentUser(): Promise<User> {
+    return this.request<User>('/users/me');
   }
 }
 

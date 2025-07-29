@@ -67,7 +67,6 @@ class AuthApiClient {
     };
 
     try {
-      console.log('Auth API request to:', url);
       const response = await fetch(url, config);
       if (!response.ok) {
         let errorData;
@@ -149,12 +148,10 @@ class AuthApiClient {
         response.status === 204 ||
         !contentType?.includes('application/json')
       ) {
-        console.log('Auth API response: No content (204)');
         return null as T;
       }
 
       const data = await response.json();
-      console.log('Auth API response:', data);
       return data;
     } catch (error) {
       console.error('Auth API error:', error);

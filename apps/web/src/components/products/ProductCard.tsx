@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ExternalLink, Image as ImageIcon, Star } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { FavoriteButton } from './FavoriteButton';
+import Avatar from '@/components/ui/Avatar';
 import { ProductType } from '@/types';
 
 interface Product {
@@ -16,6 +17,9 @@ interface Product {
   location: string;
   slug: string;
   username: string;
+  userAvatarUrl?: string | null;
+  userFirstName?: string;
+  userLastName?: string;
   imageUrl?: string | null;
   type: ProductType;
   createdAt: string;
@@ -150,6 +154,13 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
         {/* Product Meta */}
         <div className="mt-4 flex items-center justify-between text-sm text-secondary-500 dark:text-secondary-400">
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            {/* User Avatar */}
+            <Avatar
+              src={product.userAvatarUrl}
+              alt={`${product.userFirstName} ${product.userLastName}`}
+              size="xs"
+              className="h-5 w-5"
+            />
             <span>@{product.username}</span>
             <span>•</span>
             <span>{product.location}</span>

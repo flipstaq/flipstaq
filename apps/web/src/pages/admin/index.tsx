@@ -12,6 +12,7 @@ import {
 import { legalApi, LegalDocument } from '@/lib/api/legal';
 import { UserInfo, User, PaginatedUsersResponse, UserRole } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Avatar from '@/components/ui/Avatar';
 import { RefreshCw } from 'lucide-react';
 
 // Toast notification interface
@@ -220,18 +221,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           <div className="bg-white px-4 pt-5 dark:bg-gray-800 sm:px-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-full shadow-lg ${
-                    isDeleted
-                      ? 'bg-gradient-to-r from-gray-400 to-gray-500'
-                      : 'bg-gradient-to-r from-blue-500 to-purple-600'
-                  }`}
-                >
-                  <span className="text-lg font-bold text-white">
-                    {user.firstName.charAt(0)}
-                    {user.lastName.charAt(0)}
-                  </span>
-                </div>{' '}
+                <Avatar src={user.avatarUrl} size="lg" className="shadow-lg" />{' '}
                 <div className={isRTL ? 'mr-4' : 'ml-4'}>
                   <h3
                     className={`text-lg font-medium leading-6 ${
@@ -2121,20 +2111,11 @@ export default function AdminPanel() {
                                 className={`whitespace-nowrap px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}
                               >
                                 <div className="flex items-center">
-                                  <div className="h-10 w-10 flex-shrink-0 sm:h-12 sm:w-12">
-                                    <div
-                                      className={`flex h-10 w-10 items-center justify-center rounded-full shadow-lg sm:h-12 sm:w-12 ${
-                                        isDeleted
-                                          ? 'bg-gradient-to-r from-gray-400 to-gray-500'
-                                          : 'bg-gradient-to-r from-blue-500 to-purple-600'
-                                      }`}
-                                    >
-                                      <span className="text-sm font-bold text-white sm:text-lg">
-                                        {tableUser.firstName.charAt(0)}
-                                        {tableUser.lastName.charAt(0)}
-                                      </span>
-                                    </div>
-                                  </div>
+                                  <Avatar
+                                    src={tableUser.avatarUrl}
+                                    size="lg"
+                                    className="shadow-lg"
+                                  />
                                   <div className={isRTL ? 'mr-4' : 'ml-4'}>
                                     <div
                                       className={`text-sm font-semibold ${
@@ -2576,7 +2557,10 @@ export default function AdminPanel() {
                               {product.imageUrl ? (
                                 <img
                                   className="h-32 w-32 rounded-lg border border-gray-200 object-cover dark:border-gray-600"
-                                  src={`http://localhost:3100${product.imageUrl}`}
+                                  src={`${
+                                    process.env.NEXT_PUBLIC_API_URL ||
+                                    'http://localhost:3100'
+                                  }${product.imageUrl}`}
                                   alt={product.title}
                                 />
                               ) : (
@@ -4430,12 +4414,20 @@ export default function AdminPanel() {
                                 className={`hidden whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300 lg:table-cell ${isRTL ? 'text-right' : 'text-left'}`}
                               >
                                 <div className="flex items-center">
-                                  <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-600">
-                                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                                      {doc.updatedBy
-                                        ? `${doc.updatedBy.firstName[0]}${doc.updatedBy.lastName[0]}`
-                                        : 'SY'}
-                                    </span>
+                                  <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full">
+                                    {doc.updatedBy ? (
+                                      <Avatar
+                                        src={doc.updatedBy.avatarUrl}
+                                        alt={`${doc.updatedBy.firstName} ${doc.updatedBy.lastName}`}
+                                        size="sm"
+                                      />
+                                    ) : (
+                                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-600">
+                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                          SY
+                                        </span>
+                                      </div>
+                                    )}
                                   </div>
                                   <div>
                                     <div className="font-medium text-gray-900 dark:text-white">
