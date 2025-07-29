@@ -1543,8 +1543,12 @@ export default function AdminPanel() {
                     onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
                     className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 sm:px-2.5"
                   >
-                    <span className="hidden sm:inline">{language === 'en' ? '🇸🇦 AR' : '🇺🇸 EN'}</span>
-                    <span className="sm:hidden">{language === 'en' ? 'AR' : 'EN'}</span>
+                    <span className="hidden sm:inline">
+                      {language === 'en' ? '🇸🇦 AR' : '🇺🇸 EN'}
+                    </span>
+                    <span className="sm:hidden">
+                      {language === 'en' ? 'AR' : 'EN'}
+                    </span>
                   </button>
                 </div>{' '}
                 <div className="hidden md:block">
@@ -1556,7 +1560,9 @@ export default function AdminPanel() {
                   </span>
                 </div>
                 <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-300 sm:px-2.5">
-                  <span className="hidden sm:inline">{t(`admin-users:roles.${user?.role}`)}</span>
+                  <span className="hidden sm:inline">
+                    {t(`admin-users:roles.${user?.role}`)}
+                  </span>
                   <span className="sm:hidden">{user?.role}</span>
                 </span>
               </div>
@@ -1586,7 +1592,9 @@ export default function AdminPanel() {
                   >
                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                   </svg>
-                  <span className="hidden sm:inline">{t('admin-common:tabs.users')}</span>
+                  <span className="hidden sm:inline">
+                    {t('admin-common:tabs.users')}
+                  </span>
                   <span className="sm:hidden">Users</span>
                 </button>
 
@@ -1613,7 +1621,9 @@ export default function AdminPanel() {
                           d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                         />
                       </svg>
-                      <span className="hidden sm:inline">{t('admin-common:tabs.products')}</span>
+                      <span className="hidden sm:inline">
+                        {t('admin-common:tabs.products')}
+                      </span>
                       <span className="sm:hidden">Products</span>
                     </button>{' '}
                     <button
@@ -1637,7 +1647,9 @@ export default function AdminPanel() {
                           d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                         />
                       </svg>
-                      <span className="hidden sm:inline">{t('admin-common:tabs.reviews')}</span>
+                      <span className="hidden sm:inline">
+                        {t('admin-common:tabs.reviews')}
+                      </span>
                       <span className="sm:hidden">Reviews</span>
                     </button>
                     <button
@@ -1661,7 +1673,9 @@ export default function AdminPanel() {
                           d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"
                         />
                       </svg>
-                      <span className="hidden sm:inline">{t('admin-common:tabs.reports')}</span>
+                      <span className="hidden sm:inline">
+                        {t('admin-common:tabs.reports')}
+                      </span>
                       <span className="sm:hidden">Reports</span>
                     </button>
                     <button
@@ -1685,7 +1699,9 @@ export default function AdminPanel() {
                           d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
                       </svg>
-                      <span className="hidden sm:inline">{t('admin-common:tabs.legal')}</span>
+                      <span className="hidden sm:inline">
+                        {t('admin-common:tabs.legal')}
+                      </span>
                       <span className="sm:hidden">Legal</span>
                     </button>
                   </>
@@ -4266,11 +4282,20 @@ export default function AdminPanel() {
                           {t('admin-legal:urlInfo.baseUrl')}
                         </span>{' '}
                         <span className="font-mono text-blue-600 dark:text-blue-400">
-                          {typeof window !== 'undefined' ? window.location.origin : 'https://flipstaq.com'}/legal/
+                          {typeof window !== 'undefined'
+                            ? window.location.origin
+                            : 'https://flipstaq.com'}
+                          /
                         </span>
                       </div>
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                        {['tos', 'privacy', 'cookies', 'guidelines', 'data'].map((type) => (
+                        {[
+                          'tos',
+                          'privacy',
+                          'cookies',
+                          'guidelines',
+                          'data',
+                        ].map((type) => (
                           <div
                             key={type}
                             className="flex flex-col space-y-2 rounded-md bg-white p-3 shadow-sm dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between sm:space-y-0"
@@ -4282,37 +4307,60 @@ export default function AdminPanel() {
                                   {t(`admin-legal:documentTypes.${type}`)}
                                 </div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                                  /legal/{type}
+                                  /{type}
                                 </div>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => {
-                                  const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://flipstaq.com'}/legal/${type}`;
+                                  const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://flipstaq.com'}/${type}`;
                                   navigator.clipboard.writeText(url);
-                                  addToast('success', t('admin-legal:urlInfo.urlCopied'));
+                                  addToast(
+                                    'success',
+                                    t('admin-legal:urlInfo.urlCopied')
+                                  );
                                 }}
                                 className="flex-1 rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:bg-blue-800 dark:text-blue-200 dark:hover:bg-blue-700 sm:flex-initial"
                                 title={t('admin-legal:urlInfo.copyUrl')}
                               >
                                 <div className="flex items-center justify-center">
-                                  <svg className="h-3 w-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                  <svg
+                                    className="h-3 w-3 sm:mr-1"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                    />
                                   </svg>
                                   <span className="hidden sm:inline">Copy</span>
                                 </div>
                               </button>
                               <button
                                 onClick={() => {
-                                  window.open(`/legal/${type}`, '_blank');
+                                  window.open(`/${type}`, '_blank');
                                 }}
                                 className="flex-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 sm:flex-initial"
                                 title={t('admin-legal:urlInfo.viewPublic')}
                               >
                                 <div className="flex items-center justify-center">
-                                  <svg className="h-3 w-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  <svg
+                                    className="h-3 w-3 sm:mr-1"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                    />
                                   </svg>
                                   <span className="hidden sm:inline">View</span>
                                 </div>
@@ -4458,7 +4506,9 @@ export default function AdminPanel() {
                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                       />
                                     </svg>
-                                    <span className="hidden sm:inline">{t('admin-legal:actions.edit')}</span>
+                                    <span className="hidden sm:inline">
+                                      {t('admin-legal:actions.edit')}
+                                    </span>
                                     <span className="sm:hidden">Edit</span>
                                   </button>
                                   <button
@@ -4478,7 +4528,9 @@ export default function AdminPanel() {
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                       />
                                     </svg>
-                                    <span className="hidden sm:inline">{t('admin-legal:actions.delete')}</span>
+                                    <span className="hidden sm:inline">
+                                      {t('admin-legal:actions.delete')}
+                                    </span>
                                     <span className="sm:hidden">Delete</span>
                                   </button>
                                 </div>

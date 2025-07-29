@@ -20,7 +20,7 @@ export function Footer() {
       links: [
         { name: t('help'), href: '/help' },
         { name: t('privacy'), href: '/privacy' },
-        { name: t('terms'), href: '/terms' },
+        { name: t('terms'), href: '/tos' },
       ],
     },
   ];
