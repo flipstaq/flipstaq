@@ -505,7 +505,7 @@ export class UserGatewayController {
   @UseInterceptors(
     FileInterceptor("avatar", {
       storage: diskStorage({
-        destination: "./uploads/avatars",
+        destination: "./src/uploads/avatars",
         filename: (req, file, cb) => {
           const userId = (req as any).user?.sub || (req as any).user?.userId;
           const extension = extname(file.originalname);

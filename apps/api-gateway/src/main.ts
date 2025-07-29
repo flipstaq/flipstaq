@@ -32,6 +32,12 @@ async function bootstrap() {
     mkdirSync(uploadsPath, { recursive: true });
   }
 
+  // Ensure avatars directory exists
+  const avatarsPath = join(__dirname, "..", "src", "uploads", "avatars");
+  if (!existsSync(avatarsPath)) {
+    mkdirSync(avatarsPath, { recursive: true });
+  }
+
   // Serve static files for uploads (from src/uploads in development, dist/uploads in production)
   const staticPath =
     process.env.NODE_ENV === "production"
