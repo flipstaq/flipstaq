@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import {
   X,
   User,
@@ -230,9 +231,13 @@ export function ProductDetailModal({
                           alt={`${product.userFirstName} ${product.userLastName}`}
                           size="xs"
                         />
-                        <span className="font-medium text-secondary-900 dark:text-secondary-100">
+                        <Link
+                          href={`/@${product.username}`}
+                          className="font-medium text-secondary-900 hover:text-primary-600 hover:underline dark:text-secondary-100 dark:hover:text-primary-400"
+                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        >
                           @{product.username}
-                        </span>
+                        </Link>
                       </div>
 
                       {/* Location */}

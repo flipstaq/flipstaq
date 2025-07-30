@@ -7,8 +7,9 @@ import { useChat } from '@/contexts/ChatContext';
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal';
 import VerificationPrompt from '@/components/auth/VerificationPrompt';
 import { useVerificationCheck } from '@/hooks/useVerificationCheck';
+import { Layout } from '@/components/layout/Layout';
 import Avatar from '@/components/ui/Avatar';
-import { ArrowLeft, Star, Package, Calendar, ArrowRight, MessageCircle } from 'lucide-react';
+import { Star, Package, Calendar, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { ProductType } from '@/types';
@@ -70,12 +71,13 @@ export default function DynamicPage({
 }: ProductPageProps) {
   const { t, language } = useLanguage();
   const { user, isAuthenticated } = useAuth();
-  const { openChatWith } = useChat();
-  const { 
-    checkVerification, 
-    showVerificationPrompt, 
-    blockedFeature, 
-    closePrompt 
+  const { openChatWith, isChatOpen, closeChat, startConversationWith } =
+    useChat();
+  const {
+    checkVerification,
+    showVerificationPrompt,
+    blockedFeature,
+    closePrompt,
   } = useVerificationCheck();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginAction, setLoginAction] = useState('');
@@ -116,7 +118,7 @@ export default function DynamicPage({
 
   if (pageType === 'profile') {
     return (
-      <>
+      <Layout>
         <Head>
           <title>
             {userProfile
@@ -135,27 +137,7 @@ export default function DynamicPage({
         </Head>
 
         <div className="min-h-screen bg-gray-50 dark:bg-secondary-900">
-          {/* Header with Back Button */}
-          <div className="border-b border-gray-200 bg-white dark:border-secondary-700 dark:bg-secondary-800">
-            <div className="container mx-auto px-4 py-4">
-              <div className="flex items-center justify-between">
-                <Link
-                  href="/"
-                  className={`inline-flex items-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 ${isRTL ? 'flex-row-reverse' : ''}`}
-                >
-                  {isRTL ? (
-                    <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-                  ) : (
-                    <ArrowLeft className="mr-2 h-4 w-4 md:h-5 md:w-5" />
-                  )}
-                  <span className="text-sm md:text-base">
-                    {t('common.back')}
-                  </span>
-                </Link>
-              </div>
-            </div>
-          </div>
-
+          {/* Header with Back Button - Remove since Layout provides header */}
           <div className="container mx-auto px-4 py-6 md:py-8">
             {userProfile ? (
               <div>
@@ -241,12 +223,14 @@ export default function DynamicPage({
                             onClick={handleMessageUser}
                             className="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
                           >
-                            <MessageCircle className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                            <MessageCircle
+                              className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                            />
                             {t('chat.message_user')}
                           </button>
                         </div>
                       )}
-                      
+
                       {/* Message Button for non-authenticated users */}
                       {!isAuthenticated && (
                         <div className="mt-6">
@@ -254,7 +238,9 @@ export default function DynamicPage({
                             onClick={handleMessageUser}
                             className="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
                           >
-                            <MessageCircle className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                            <MessageCircle
+                              className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                            />
                             {t('chat.message_user')}
                           </button>
                         </div>
@@ -344,7 +330,7 @@ export default function DynamicPage({
           onClose={closePrompt}
           feature={blockedFeature}
         />
-      </>
+      </Layout>
     );
   }
 

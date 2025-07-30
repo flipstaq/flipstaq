@@ -154,7 +154,13 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
               size="xs"
               className="h-5 w-5"
             />
-            <span>@{product.username}</span>
+            <Link
+              href={`/@${product.username}`}
+              onClick={handleLinkClick}
+              className="hover:text-primary-600 dark:hover:text-primary-400"
+            >
+              @{product.username}
+            </Link>
             <span>•</span>
             <span>{product.location}</span>
           </div>

@@ -395,9 +395,12 @@ export function ProductDetailPage({
                 </li>
                 <li className="px-2">/</li>
                 <li>
-                  <span className="font-medium text-secondary-900 dark:text-secondary-100">
+                  <Link
+                    href={`/@${product.username}`}
+                    className="font-medium hover:text-primary-600 dark:hover:text-primary-400"
+                  >
                     @{product.username}
-                  </span>
+                  </Link>
                 </li>
                 <li className="px-2">/</li>
                 <li>
@@ -458,9 +461,12 @@ export function ProductDetailPage({
                         <p className="text-sm text-secondary-500 dark:text-secondary-400">
                           {t('products.detail.posted_by')}
                         </p>
-                        <p className="font-semibold text-secondary-900 dark:text-secondary-100">
+                        <Link
+                          href={`/@${product.username}`}
+                          className="font-semibold text-secondary-900 hover:text-primary-600 hover:underline dark:text-secondary-100 dark:hover:text-primary-400"
+                        >
                           @{product.username}
-                        </p>
+                        </Link>
                       </div>
                     </div>{' '}
                     {/* Block Button and Report Button - Only show for other users */}

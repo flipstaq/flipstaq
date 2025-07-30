@@ -184,6 +184,23 @@ export default function ChatDrawer({
     conversationsRef.current = conversations;
   }, [conversations]);
 
+  // Deduplicate conversations if any duplicates exist
+  useEffect(() => {
+    const uniqueConversations = conversations.filter(
+      (conv, index, arr) =>
+        arr.findIndex((c) => c.participant.id === conv.participant.id) === index
+    );
+
+    // Only update if duplicates were found to avoid infinite loops
+    if (uniqueConversations.length !== conversations.length) {
+      console.log(
+        '🧹 Removing duplicate conversations:',
+        conversations.length - uniqueConversations.length
+      );
+      setConversations(uniqueConversations);
+    }
+  }, [conversations]);
+
   useEffect(() => {
     selectedConversationRef.current = selectedConversation;
   }, [selectedConversation]);
@@ -654,7 +671,15 @@ export default function ChatDrawer({
       const conversations = apiConversations.map((conv) =>
         convertApiConversation(conv, user?.id || '')
       );
-      setConversations(conversations);
+
+      // Deduplicate conversations by participant ID to prevent duplicates
+      const uniqueConversations = conversations.filter(
+        (conv, index, arr) =>
+          arr.findIndex((c) => c.participant.id === conv.participant.id) ===
+          index
+      );
+
+      setConversations(uniqueConversations);
 
       // Prefetch messages for the first 3 conversations for better UX
       const topConversations = conversations.slice(0, 3);
@@ -1083,14 +1108,26 @@ export default function ChatDrawer({
       const conversation = convertApiConversation(
         apiConversation,
         user?.id || ''
-      ); // Check if conversation already exists in list
+      );
+
+      // Check if conversation already exists in list by participant ID (more reliable than conversation ID)
       const existingConversation = conversations.find(
-        (conv) => conv.id === conversation.id
+        (conv) => conv.participant.id === conversation.participant.id
       );
       if (existingConversation) {
         setSelectedConversation(existingConversation);
       } else {
-        setConversations((prev) => [conversation, ...prev]);
+        // Use functional update with deduplication to prevent race conditions
+        setConversations((prev) => {
+          // Double-check for duplicates before adding
+          const isDuplicate = prev.some(
+            (conv) => conv.participant.id === conversation.participant.id
+          );
+          if (isDuplicate) {
+            return prev;
+          }
+          return [conversation, ...prev];
+        });
         setSelectedConversation(conversation);
       }
       setIsNewChatMode(false);
