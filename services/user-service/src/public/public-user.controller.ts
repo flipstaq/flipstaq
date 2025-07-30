@@ -1,5 +1,5 @@
-import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Query, BadRequestException, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { UserService } from '../user/user.service';
 import { UserResponseDto } from '../dto/user-response.dto';
 
@@ -43,5 +43,24 @@ export class PublicUserController {
 
     // Public search - no current user to exclude
     return this.userService.searchForMessaging(query.trim(), maxLimit);
+  }
+
+  @Get('profile/:username')
+  @ApiOperation({ summary: 'Get public user profile by username' })
+  @ApiParam({
+    name: 'username',
+    description: 'Username of the user to get profile for',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile found successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found or profile not available',
+  })
+  async getPublicProfile(@Param('username') username: string) {
+    return this.userService.getPublicProfile(username);
   }
 }

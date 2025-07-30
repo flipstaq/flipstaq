@@ -46,6 +46,13 @@
   "unfavoriteSuccess": "تم إزالة المنتج من المحفوظة",
   "online": "متصل",
   "offline": "غير متصل",
+  "joined": "انضم",
+  "unknown": "غير معروف",
+  "userNotFound": "المستخدم غير موجود",
+  "userProfileNotExists": "هذا الملف الشخصي غير موجود",
+  "noProductsYet": "لا توجد منتجات بعد",
+  "hasNotPostedProducts": "لم ينشر أي منتجات بعد",
+  "backToHome": "العودة للرئيسية",
   "auth": {
     "loginRequired": "تسجيل الدخول مطلوب",
     "redirectingToLogin": "جاري إعادة توجيهك إلى صفحة تسجيل الدخول..."

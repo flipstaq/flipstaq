@@ -608,4 +608,95 @@ export class UserService {
       message: 'Avatar removed successfully',
     };
   }
+
+  async getPublicProfile(username: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        username,
+        isActive: true,
+        status: 'ACTIVE',
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        avatarUrl: true,
+        createdAt: true,
+        products: {
+          where: {
+            status: 'APPROVED',
+            isActive: true,
+            visible: true,
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            price: true,
+            currency: true,
+            location: true,
+            slug: true,
+            imageUrl: true,
+            type: true,
+            createdAt: true,
+            reviews: {
+              where: {
+                visible: true,
+              },
+              select: {
+                rating: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found or profile not available');
+    }
+
+    // Calculate average rating and total reviews for each product
+    const productsWithRatings = user.products.map((product) => {
+      const reviews = product.reviews;
+      const totalReviews = reviews.length;
+      const averageRating =
+        totalReviews > 0
+          ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+          : 0;
+
+      const { reviews: _, ...productWithoutReviews } = product;
+      return {
+        ...productWithoutReviews,
+        averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal
+        totalReviews,
+      };
+    });
+
+    // Calculate overall user rating from all product reviews
+    const allReviews = user.products.flatMap((product) => product.reviews);
+    const totalUserReviews = allReviews.length;
+    const userAverageRating =
+      totalUserReviews > 0
+        ? allReviews.reduce((sum, review) => sum + review.rating, 0) / totalUserReviews
+        : 0;
+
+    return {
+      id: user.id,
+      username: user.username,
+      fullName: `${user.firstName} ${user.lastName}`,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatarUrl: user.avatarUrl,
+      joinedAt: user.createdAt,
+      averageRating: Math.round(userAverageRating * 10) / 10, // Round to 1 decimal
+      totalReviews: totalUserReviews,
+      products: productsWithRatings,
+    };
+  }
 }

@@ -162,7 +162,9 @@ export function Header() {
                           <span>{t('common:favorites')}</span>
                         </Link>
                         <Link
-                          href="/profile"
+                          href={
+                            user?.username ? `/@${user.username}` : '/profile'
+                          }
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="flex items-center space-x-2 px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-700 rtl:space-x-reverse"
                         >
@@ -251,7 +253,7 @@ export function Header() {
                       {t('common:postProduct')}
                     </Link>{' '}
                     <Link
-                      href="/profile"
+                      href={user?.username ? `/@${user.username}` : '/profile'}
                       className="btn-secondary block w-full text-center"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >

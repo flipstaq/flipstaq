@@ -4,8 +4,15 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  Param,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from "@nestjs/swagger";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiParam,
+} from "@nestjs/swagger";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { ConfigService } from "@nestjs/config";
@@ -72,6 +79,52 @@ export class PublicController {
       console.error("❌ Error calling user service:", error.message);
       throw new HttpException(
         error.response?.data || "Failed to search users",
+        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  @Get("users/profile/:username")
+  @ApiOperation({ summary: "Get public user profile by username" })
+  @ApiParam({
+    name: "username",
+    description: "Username of the user to fetch profile for",
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "User profile retrieved successfully",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "User not found",
+  })
+  async getPublicProfile(@Param("username") username: string) {
+    try {
+      const userServiceUrl = this.configService.get<string>(
+        "USER_SERVICE_URL",
+        "http://localhost:3003"
+      );
+      const url = `${userServiceUrl}/users/profile/${username}`;
+
+      console.log(`🔄 Making direct request to user service: ${url}`);
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error("❌ Error calling user service:", error.message);
+      if (error.response?.status === 404) {
+        throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException(
+        error.response?.data || "Failed to fetch user profile",
         error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
       );
     }

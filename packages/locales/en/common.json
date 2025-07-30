@@ -46,6 +46,13 @@
   "unfavoriteSuccess": "Product removed from saved",
   "online": "Online",
   "offline": "Offline",
+  "joined": "Joined",
+  "unknown": "Unknown",
+  "userNotFound": "User Not Found",
+  "userProfileNotExists": "This user profile does not exist",
+  "noProductsYet": "No products yet",
+  "hasNotPostedProducts": "hasn't posted any products yet",
+  "backToHome": "Back to Home",
   "auth": {
     "loginRequired": "Login Required",
     "redirectingToLogin": "Redirecting to login page..."

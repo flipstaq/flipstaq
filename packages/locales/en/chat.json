@@ -1,5 +1,6 @@
 {
   "messages": "Messages",
+  "message_user": "Message",
   "new_message": "New Message",
   "new_chat": "New Chat",
   "type_message": "Type your message...",

@@ -1,10 +1,11 @@
-import { Controller, Get, Query, UseGuards, Req } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards, Req, Param } from "@nestjs/common";
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiQuery,
+  ApiParam,
 } from "@nestjs/swagger";
 import { ProxyService } from "../proxy/proxy.service";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
@@ -49,6 +50,32 @@ export class PublicUserController {
       {
         "x-user-id": "3", // Hard-coded for testing
       }
+    );
+    return response.data;
+  }
+
+  @Get("profile/:username")
+  @ApiOperation({ summary: "Get public user profile by username" })
+  @ApiParam({
+    name: "username",
+    description: "Username of the user to fetch profile for",
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "User profile retrieved successfully",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "User not found",
+  })
+  async getPublicProfile(@Param("username") username: string) {
+    const response = await this.proxyService.forwardRequest(
+      "USER",
+      `public/profile/${username}`,
+      "GET",
+      null,
+      {}
     );
     return response.data;
   }
