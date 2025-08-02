@@ -27,22 +27,25 @@ async function bootstrap() {
     }
     next();
   }); // Ensure uploads directory exists
-  const uploadsPath = join(__dirname, "..", "src", "uploads", "products");
+  const uploadsPath = join(__dirname, "..", "uploads", "products");
   if (!existsSync(uploadsPath)) {
     mkdirSync(uploadsPath, { recursive: true });
   }
 
   // Ensure avatars directory exists
-  const avatarsPath = join(__dirname, "..", "src", "uploads", "avatars");
+  const avatarsPath = join(__dirname, "..", "uploads", "avatars");
   if (!existsSync(avatarsPath)) {
     mkdirSync(avatarsPath, { recursive: true });
   }
 
-  // Serve static files for uploads (from src/uploads in development, dist/uploads in production)
-  const staticPath =
-    process.env.NODE_ENV === "production"
-      ? join(__dirname, "uploads")
-      : join(__dirname, "..", "src", "uploads");
+  // Ensure messages directory exists
+  const messagesPath = join(__dirname, "..", "uploads", "messages");
+  if (!existsSync(messagesPath)) {
+    mkdirSync(messagesPath, { recursive: true });
+  }
+
+  // Serve static files for uploads (consistent path for all environments)
+  const staticPath = join(__dirname, "..", "uploads");
 
   app.useStaticAssets(staticPath, {
     prefix: "/uploads/",

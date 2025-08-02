@@ -42,11 +42,8 @@ export class ProductGatewayController {
     FileInterceptor("image", {
       storage: diskStorage({
         destination: (req, file, callback) => {
-          // Use src/uploads in development, dist/uploads in production
-          const uploadPath =
-            process.env.NODE_ENV === "production"
-              ? join(process.cwd(), "dist", "uploads", "products")
-              : join(process.cwd(), "src", "uploads", "products");
+          // Use consistent uploads directory outside src
+          const uploadPath = join(process.cwd(), "uploads", "products");
           callback(null, uploadPath);
         },
         filename: (req, file, callback) => {
@@ -304,11 +301,8 @@ export class ProductGatewayController {
     FileInterceptor("image", {
       storage: diskStorage({
         destination: (req, file, callback) => {
-          // Use src/uploads in development, dist/uploads in production
-          const uploadPath =
-            process.env.NODE_ENV === "production"
-              ? join(process.cwd(), "dist", "uploads", "products")
-              : join(process.cwd(), "src", "uploads", "products");
+          // Use consistent uploads directory outside src
+          const uploadPath = join(process.cwd(), "uploads", "products");
           callback(null, uploadPath);
         },
         filename: (req, file, callback) => {

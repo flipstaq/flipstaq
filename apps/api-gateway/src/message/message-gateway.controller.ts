@@ -167,7 +167,7 @@ export class MessageGatewayController {
     FileInterceptor("file", {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          cb(null, join(process.cwd(), "src", "uploads", "messages"));
+          cb(null, join(process.cwd(), "uploads", "messages"));
         },
         filename: (req, file, cb) => {
           const uniqueSuffix =
