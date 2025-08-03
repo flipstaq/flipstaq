@@ -17,6 +17,7 @@ import {
   Delete,
   Patch,
 } from "@nestjs/common";
+import * as fs from "fs";
 import {
   ApiTags,
   ApiOperation,
@@ -91,31 +92,60 @@ export class ProductGatewayController {
       throw new UnauthorizedException(
         "User authentication failed - no user ID found"
       );
-    } // Add image URL to product data if image was uploaded
-    let productWithImage = { ...productData };
-
-    // Transform string values to proper types for validation
-    if (productWithImage.price && typeof productWithImage.price === "string") {
-      productWithImage.price = parseFloat(productWithImage.price);
     }
 
-    if (image) {
-      productWithImage.imageUrl = `/uploads/products/${image.filename}`;
-    }
+    try {
+      let productWithImage = { ...productData };
 
-    const response = await this.proxyService.forwardProductRequest(
-      "",
-      "POST",
-      productWithImage,
-      {
-        "x-user-id": userId,
-        "x-user-email": req.user.email,
-        "x-user-role": req.user.role,
-        "x-internal-service": "true",
+      // Transform string values to proper types for validation
+      if (
+        productWithImage.price &&
+        typeof productWithImage.price === "string"
+      ) {
+        productWithImage.price = parseFloat(productWithImage.price);
       }
-    );
-    return response.data;
+
+      // If image is uploaded, keep it in API Gateway and provide URL to service
+      if (image) {
+        // Generate the full image URL that will be accessible through API Gateway
+        const apiGatewayUrl =
+          process.env.API_GATEWAY_URL || "http://localhost:3100";
+        const imageUrl = `${apiGatewayUrl}/uploads/products/${image.filename}`;
+        productWithImage.imageUrl = imageUrl;
+
+        console.log(
+          `Product image uploaded: ${image.filename}, accessible at: ${imageUrl}`
+        );
+      }
+
+      const response = await this.proxyService.forwardProductRequest(
+        "",
+        "POST",
+        productWithImage,
+        {
+          "x-user-id": userId,
+          "x-user-email": req.user.email,
+          "x-user-role": req.user.role,
+          "x-internal-service": "true",
+        }
+      );
+      return response.data;
+    } catch (error) {
+      // If there's an error, clean up the uploaded file
+      if (image) {
+        try {
+          fs.unlinkSync(image.path);
+        } catch (cleanupError) {
+          console.warn(
+            "Failed to clean up product image after error:",
+            cleanupError
+          );
+        }
+      }
+      throw error;
+    }
   }
+
   @Get()
   @ApiOperation({ summary: "Get all products" })
   @ApiResponse({ status: 200, description: "List of all active products" })
@@ -353,30 +383,77 @@ export class ProductGatewayController {
       );
     }
 
-    // Add image URL to product data if image was uploaded
-    let productWithImage = { ...productData };
+    // Import necessary modules for file forwarding
+    const FormData = require("form-data");
+    const fs = require("fs");
+    const axios = require("axios");
 
-    // Transform string values to proper types for validation
-    if (productWithImage.price && typeof productWithImage.price === "string") {
-      productWithImage.price = parseFloat(productWithImage.price);
-    }
+    try {
+      let productWithImage = { ...productData };
 
-    if (image) {
-      productWithImage.imageUrl = `/uploads/products/${image.filename}`;
-    }
-
-    const response = await this.proxyService.forwardProductRequest(
-      slug,
-      "PUT",
-      productWithImage,
-      {
-        "x-user-id": userId,
-        "x-user-email": req.user.email,
-        "x-user-role": req.user.role,
-        "x-internal-service": "true",
+      // Transform string values to proper types for validation
+      if (
+        productWithImage.price &&
+        typeof productWithImage.price === "string"
+      ) {
+        productWithImage.price = parseFloat(productWithImage.price);
       }
-    );
-    return response.data;
+
+      // If image is uploaded, forward it to the product service
+      if (image) {
+        try {
+          const imageFormData = new FormData();
+          imageFormData.append("image", fs.createReadStream(image.path), {
+            filename: image.originalname,
+            contentType: image.mimetype,
+          });
+
+          // Forward image to Product Service
+          const imageResponse = await this.proxyService.forwardRequest(
+            "PRODUCT",
+            "products/upload-image",
+            "POST",
+            imageFormData,
+            {
+              "x-user-id": userId,
+              "x-user-email": req.user.email,
+              "x-user-role": req.user.role,
+              "x-internal-service": "true",
+              "x-api-gateway": "flipstaq-gateway",
+              "x-forwarded-from": "api-gateway",
+              ...imageFormData.getHeaders(),
+            }
+          );
+
+          productWithImage.imageUrl = imageResponse.data.imageUrl;
+        } catch (imageError) {
+          console.error("Error uploading image:", imageError);
+          throw new BadRequestException("Failed to upload product image");
+        }
+      }
+
+      const response = await this.proxyService.forwardProductRequest(
+        slug,
+        "PUT",
+        productWithImage,
+        {
+          "x-user-id": userId,
+          "x-user-email": req.user.email,
+          "x-user-role": req.user.role,
+          "x-internal-service": "true",
+        }
+      );
+      return response.data;
+    } finally {
+      // Clean up the uploaded file
+      if (image) {
+        try {
+          fs.unlinkSync(image.path);
+        } catch (cleanupError) {
+          console.warn("Failed to clean up product image:", cleanupError);
+        }
+      }
+    }
   }
 
   @Delete(":slug")

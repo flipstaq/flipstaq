@@ -84,6 +84,8 @@ export default function Avatar({
           }
         }}
         priority={size === 'xl' || size === '2xl'}
+        quality={100} // Maximum quality to preserve image clarity
+        unoptimized={!!(src && src.includes('/uploads/avatars/'))} // Disable optimization for uploaded avatars
       />
     </div>
   );

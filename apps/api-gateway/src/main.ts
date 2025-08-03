@@ -45,7 +45,9 @@ async function bootstrap() {
   }
 
   // Serve static files for uploads (consistent path for all environments)
-  const staticPath = join(__dirname, "..", "uploads");
+  const staticPath = join(process.cwd(), "uploads");
+
+  console.log(`📁 Setting up static file serving from: ${staticPath}`);
 
   app.useStaticAssets(staticPath, {
     prefix: "/uploads/",

@@ -16,7 +16,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
-import { extname } from "path";
+import { extname, join } from "path";
 import {
   ApiTags,
   ApiBearerAuth,
@@ -505,7 +505,11 @@ export class UserGatewayController {
   @UseInterceptors(
     FileInterceptor("avatar", {
       storage: diskStorage({
-        destination: "./uploads/avatars",
+        destination: (req, file, callback) => {
+          // Use consistent uploads directory
+          const uploadPath = join(process.cwd(), "uploads", "avatars");
+          callback(null, uploadPath);
+        },
         filename: (req, file, cb) => {
           const userId = (req as any).user?.sub || (req as any).user?.userId;
           const extension = extname(file.originalname);
@@ -560,50 +564,48 @@ export class UserGatewayController {
       );
     }
 
-    // Import necessary modules for file forwarding
-    const FormData = require("form-data");
-    const fs = require("fs");
-    const axios = require("axios");
-
     try {
-      const formData = new FormData();
-      formData.append("avatar", fs.createReadStream(file.path), {
-        filename: file.originalname,
-        contentType: file.mimetype,
-      });
+      // Generate the avatar URL that will be accessible through API Gateway
+      // Include full URL so frontend knows where to fetch from
+      const apiGatewayUrl =
+        process.env.API_GATEWAY_URL || "http://localhost:3100";
+      const avatarUrl = `${apiGatewayUrl}/uploads/avatars/${file.filename}`;
 
-      const serviceUrl = getServiceUrl("USER");
-      const response = await axios.post(
-        `${serviceUrl}/internal/users/avatar`,
-        formData,
+      console.log(
+        `Avatar uploaded: ${file.filename}, accessible at: ${avatarUrl}`
+      );
+
+      // Forward the avatar URL to User Service for database update
+      const response = await this.proxyService.forwardUserRequest(
+        "avatar",
+        "POST",
+        { avatarUrl },
         {
-          headers: {
-            ...formData.getHeaders(),
-            "x-user-id": req.user?.sub || req.user?.userId,
-            "x-api-gateway": "flipstaq-gateway",
-            "x-internal-service": "true",
-            "x-forwarded-from": "api-gateway",
-          },
+          "x-user-id": req.user?.sub || req.user?.userId,
+          "x-internal-service": "true",
         }
       );
 
-      return response.data;
+      return {
+        avatarUrl,
+        fileName: file.originalname,
+        fileSize: file.size,
+        message: "Avatar uploaded successfully",
+      };
     } catch (error) {
-      console.error(
-        "Error forwarding file upload:",
-        error.response?.data || error.message
-      );
-      throw new HttpException(
-        error.response?.data?.message || "Failed to upload avatar",
-        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    } finally {
-      // Clean up the uploaded file
+      // If there's an error, clean up the uploaded file
       try {
+        const fs = require("fs");
         fs.unlinkSync(file.path);
       } catch (cleanupError) {
-        console.warn("Failed to clean up file:", cleanupError);
+        console.warn("Failed to clean up avatar after error:", cleanupError);
       }
+
+      console.error("Error updating avatar:", error);
+      throw new HttpException(
+        "Failed to upload avatar",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 

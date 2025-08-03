@@ -12,6 +12,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -21,7 +23,11 @@ import {
   ApiQuery,
   ApiBody,
   ApiBearerAuth,
+  ApiConsumes,
 } from "@nestjs/swagger";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { extname, join } from "path";
 import { MessageService } from "./message.service";
 import {
   CreateConversationDto,
@@ -562,5 +568,92 @@ export class MessageController {
       query.trim(),
       limit || 100
     );
+  }
+
+  @Post("upload")
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor("file", {
+      storage: diskStorage({
+        destination: "./uploads/messages",
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + "-" + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = [
+          "image/jpeg",
+          "image/jpg",
+          "image/png",
+          "image/webp",
+          "image/gif",
+          "application/pdf",
+          "text/plain",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "application/vnd.ms-excel",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ];
+
+        if (allowedTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException("File type not allowed"), false);
+        }
+      },
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+      },
+    })
+  )
+  @ApiOperation({ summary: "Upload a file for messaging" })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        file: {
+          type: "string",
+          format: "binary",
+          description: "File to upload (max 10MB)",
+        },
+      },
+      required: ["file"],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: "File uploaded successfully",
+    schema: {
+      type: "object",
+      properties: {
+        fileUrl: { type: "string" },
+        fileName: { type: "string" },
+        fileType: { type: "string" },
+        fileSize: { type: "number" },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Bad request - invalid file type or size too large",
+  })
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException("No file uploaded");
+    }
+
+    // Create the file URL that will be accessible through the API Gateway
+    // Return relative URL since files should be served through API Gateway
+    const fileUrl = `/uploads/messages/${file.filename}`;
+
+    return {
+      fileUrl,
+      fileName: file.originalname,
+      fileType: file.mimetype,
+      fileSize: file.size,
+    };
   }
 }

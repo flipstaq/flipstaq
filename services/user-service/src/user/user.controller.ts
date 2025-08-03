@@ -372,34 +372,10 @@ export class UserController {
   }
 
   @Post('avatar')
-  @UseInterceptors(
-    FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: './uploads/avatars',
-        filename: (req, file, cb) => {
-          const userId = req.headers['x-user-id'] as string;
-          const extension = extname(file.originalname);
-          const filename = `${userId}-${Date.now()}${extension}`;
-          cb(null, filename);
-        },
-      }),
-      limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB
-      },
-      fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp'];
-        if (allowedTypes.includes(file.mimetype)) {
-          cb(null, true);
-        } else {
-          cb(new BadRequestException('Only PNG, JPG, JPEG, and WebP files are allowed'), false);
-        }
-      },
-    }),
-  )
-  @ApiOperation({ summary: 'Upload user avatar' })
+  @ApiOperation({ summary: 'Update user avatar URL' })
   @ApiResponse({
     status: 200,
-    description: 'Avatar uploaded successfully',
+    description: 'Avatar URL updated successfully',
     schema: {
       type: 'object',
       properties: {
@@ -408,18 +384,18 @@ export class UserController {
       },
     },
   })
-  async uploadAvatar(
+  async updateAvatarUrl(
     @Headers('x-user-id') userId: string,
-    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { avatarUrl: string },
   ): Promise<{ avatarUrl: string; message: string }> {
     if (!userId || userId.trim() === '') {
       throw new BadRequestException('User ID is required and cannot be empty');
     }
 
-    if (!file) {
-      throw new BadRequestException('Avatar file is required');
+    if (!body.avatarUrl) {
+      throw new BadRequestException('Avatar URL is required');
     }
 
-    return this.userService.updateAvatar(userId, file);
+    return this.userService.updateAvatarUrl(userId, body.avatarUrl);
   }
 }

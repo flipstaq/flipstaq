@@ -13,8 +13,20 @@ import {
   Delete,
   Patch,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiConsumes,
+} from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
 import { ProductService } from './product.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { ProductResponseDto } from '../dto/product-response.dto';
@@ -539,5 +551,79 @@ export class ProductController {
     }
 
     return this.productService.getRejectedProducts(userId, userRole as UserRole);
+  }
+
+  @Post('upload-image')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/products',
+        filename: (req, file, cb) => {
+          const name = file.originalname.split('.')[0];
+          const fileExtName = extname(file.originalname);
+          const randomName = Array(4)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          cb(null, `${name}-${randomName}${fileExtName}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|webp)$/)) {
+          return cb(new BadRequestException('Only image files are allowed!'), false);
+        }
+        cb(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
+  )
+  @ApiOperation({ summary: 'Upload a product image' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Product image to upload (max 5MB)',
+        },
+      },
+      required: ['image'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Image uploaded successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        imageUrl: { type: 'string' },
+        fileName: { type: 'string' },
+        fileSize: { type: 'number' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid file type or size too large',
+  })
+  async uploadImage(@UploadedFile() image: Express.Multer.File) {
+    if (!image) {
+      throw new BadRequestException('No image uploaded');
+    }
+
+    // Create the image URL that will be accessible through the API Gateway
+    // Return relative URL since files should be served through API Gateway
+    const imageUrl = `/uploads/products/${image.filename}`;
+
+    return {
+      imageUrl,
+      fileName: image.originalname,
+      fileSize: image.size,
+    };
   }
 }

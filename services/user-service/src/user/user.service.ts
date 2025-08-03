@@ -582,6 +582,31 @@ export class UserService {
     };
   }
 
+  async updateAvatarUrl(
+    userId: string,
+    avatarUrl: string,
+  ): Promise<{ avatarUrl: string; message: string }> {
+    // Check if user exists
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Update user's avatar URL in database
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+    });
+
+    return {
+      avatarUrl,
+      message: 'Avatar updated successfully',
+    };
+  }
+
   async removeAvatar(userId: string): Promise<{ message: string }> {
     // Check if user exists
     const user = await this.prisma.user.findUnique({

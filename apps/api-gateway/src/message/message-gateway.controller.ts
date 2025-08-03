@@ -241,15 +241,32 @@ export class MessageGatewayController {
       throw new BadRequestException("No file uploaded");
     }
 
-    // Create the file URL relative to the API gateway
-    const fileUrl = `/uploads/messages/${file.filename}`;
+    try {
+      // Generate the full file URL that will be accessible through API Gateway
+      const apiGatewayUrl =
+        process.env.API_GATEWAY_URL || "http://localhost:3100";
+      const fileUrl = `${apiGatewayUrl}/uploads/messages/${file.filename}`;
 
-    return {
-      fileUrl,
-      fileName: file.originalname,
-      fileType: file.mimetype,
-      fileSize: file.size,
-    };
+      console.log(
+        `Message file uploaded: ${file.filename}, accessible at: ${fileUrl}`
+      );
+
+      return {
+        fileUrl,
+        fileName: file.originalname,
+        fileType: file.mimetype,
+        fileSize: file.size,
+      };
+    } catch (error) {
+      // If there's an error, clean up the uploaded file
+      try {
+        const fs = require("fs");
+        fs.unlinkSync(file.path);
+      } catch (cleanupError) {
+        console.warn("Failed to clean up file after error:", cleanupError);
+      }
+      throw new BadRequestException("Failed to process uploaded file");
+    }
   }
   @Post()
   @HttpCode(HttpStatus.CREATED)
