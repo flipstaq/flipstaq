@@ -337,7 +337,11 @@ export function ProductDetailPage({
         {product.imageUrl && (
           <meta
             property="og:image"
-            content={`http://localhost:3100${product.imageUrl}`}
+            content={
+              product.imageUrl.startsWith('http')
+                ? product.imageUrl
+                : `http://localhost:3100${product.imageUrl}`
+            }
           />
         )}
         <meta
@@ -352,7 +356,11 @@ export function ProductDetailPage({
         {product.imageUrl && (
           <meta
             name="twitter:image"
-            content={`http://localhost:3100${product.imageUrl}`}
+            content={
+              product.imageUrl.startsWith('http')
+                ? product.imageUrl
+                : `http://localhost:3100${product.imageUrl}`
+            }
           />
         )}
         <link rel="canonical" href={getCanonicalUrl()} />
@@ -416,7 +424,11 @@ export function ProductDetailPage({
               <div className="relative overflow-hidden bg-secondary-100 dark:bg-secondary-700">
                 {product.imageUrl ? (
                   <img
-                    src={`http://localhost:3100${product.imageUrl}`}
+                    src={
+                      product.imageUrl.startsWith('http')
+                        ? product.imageUrl
+                        : `http://localhost:3100${product.imageUrl}`
+                    }
                     alt={t('products.productImage', { title: product.title })}
                     className="max-h-[400px] w-full rounded-t-lg object-cover"
                   />

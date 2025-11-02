@@ -41,6 +41,20 @@ class AuthService {
   async logout(): Promise<void> {
     return authApi.logout();
   }
+
+  async refreshToken(): Promise<AuthResponse> {
+    const response = await authApi.refreshToken();
+
+    // Transform the response to ensure createdAt is a Date object
+    return {
+      ...response,
+      user: {
+        ...response.user,
+        createdAt: new Date(response.user.createdAt),
+      },
+    };
+  }
+
   async validateToken(): Promise<UserInfo> {
     // Make an API call to get the latest user data from the server
     try {

@@ -307,7 +307,11 @@ export function MyProducts() {
               <div className="relative h-48 w-full overflow-hidden bg-secondary-100 dark:bg-secondary-700">
                 {product.imageUrl ? (
                   <img
-                    src={`http://localhost:3100${product.imageUrl}`}
+                    src={
+                      product.imageUrl.startsWith('http')
+                        ? product.imageUrl
+                        : `http://localhost:3100${product.imageUrl}`
+                    }
                     alt={product.title}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />

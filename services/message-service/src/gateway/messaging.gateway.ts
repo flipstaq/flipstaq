@@ -158,6 +158,28 @@ export class MessagingGateway {
         `✅ User ${client.username} (${payload.sub}) connected to messaging`
       );
 
+      // Mark user as online in database
+      await this.markUserOnlineInDatabase(payload.sub);
+
+      // Send list of all currently online users to the newly connected user
+      const onlineUsersList = Array.from(this.connectedUsers.keys())
+        .filter((userId) => userId !== payload.sub) // Exclude the current user
+        .map((userId) => {
+          const sockets = this.connectedUsers.get(userId);
+          const socket = sockets && sockets[0]; // Get first socket for username
+          return {
+            userId,
+            username: socket?.username || "Unknown",
+            isOnline: true,
+          };
+        });
+
+      // Send the list of currently online users to the new connection
+      this.sendToClient(client, {
+        event: "onlineUsersList",
+        data: onlineUsersList,
+      });
+
       // Notify other users that this user is online
       this.broadcastToAllExcept(client, "userOnline", {
         userId: payload.sub,
@@ -793,6 +815,24 @@ export class MessagingGateway {
   // Public method to get online users count
   getOnlineUsersCount(): number {
     return this.connectedUsers.size;
+  }
+
+  // Mark user online in database
+  private async markUserOnlineInDatabase(userId: string): Promise<void> {
+    try {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          isOnline: true,
+          lastSeen: new Date(),
+        },
+      });
+    } catch (error) {
+      this.logger.error(
+        "Failed to mark user online in database:",
+        error.message
+      );
+    }
   }
 
   // Mark user offline in database

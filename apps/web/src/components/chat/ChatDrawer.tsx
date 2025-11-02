@@ -119,6 +119,8 @@ export default function ChatDrawer({
     onMessageEdited,
     onMessageReadStatusChanged,
     onConversationReadStatusChanged,
+    onUserStatusChanged,
+    onlineUsers,
     typingUsers,
   } = useWebSocket();
 
@@ -541,6 +543,54 @@ export default function ChatDrawer({
       };
     }
   }, [isOpen, user?.id, isConnected, connect]);
+
+  // Listen for online status changes and update conversations
+  useEffect(() => {
+    if (!isOpen || !user?.id) return;
+
+    const unsubscribeUserStatus = onUserStatusChanged((status) => {
+      console.log('👤 User status changed:', status);
+
+      // Update the selected conversation if it's the user whose status changed
+      if (selectedConversation?.participant.id === status.userId) {
+        setSelectedConversation((prev) => {
+          if (!prev || prev.participant.id !== status.userId) return prev;
+          return {
+            ...prev,
+            participant: {
+              ...prev.participant,
+              isOnline: status.isOnline,
+            },
+          };
+        });
+      }
+
+      // Also update the conversations list
+      setConversations((prevConversations) => {
+        return prevConversations.map((conv) => {
+          if (conv.participant.id === status.userId) {
+            return {
+              ...conv,
+              participant: {
+                ...conv.participant,
+                isOnline: status.isOnline,
+              },
+            };
+          }
+          return conv;
+        });
+      });
+    });
+
+    return () => {
+      unsubscribeUserStatus();
+    };
+  }, [
+    isOpen,
+    user?.id,
+    selectedConversation?.participant.id,
+    onUserStatusChanged,
+  ]);
 
   // Handle page visibility change to mark messages as read when user returns
   useEffect(() => {
@@ -1283,13 +1333,15 @@ export default function ChatDrawer({
               >
                 <Circle
                   className={`h-2 w-2 transition-colors duration-200 ${
-                    selectedConversation.participant.isOnline
+                    (onlineUsers.get(selectedConversation.participant.id)
+                      ?.isOnline ?? selectedConversation.participant.isOnline)
                       ? 'fill-current text-green-500'
                       : 'fill-current text-secondary-400'
                   }`}
                 />{' '}
                 <span className="text-xs text-secondary-500">
-                  {selectedConversation.participant.isOnline
+                  {(onlineUsers.get(selectedConversation.participant.id)
+                    ?.isOnline ?? selectedConversation.participant.isOnline)
                     ? t('common:online')
                     : t('common:offline')}
                 </span>

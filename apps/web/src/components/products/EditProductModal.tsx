@@ -55,7 +55,11 @@ export function EditProductModal({
 
   useEffect(() => {
     if (product.imageUrl) {
-      setImagePreview(`http://localhost:3100${product.imageUrl}`);
+      setImagePreview(
+        product.imageUrl.startsWith('http')
+          ? product.imageUrl
+          : `http://localhost:3100${product.imageUrl}`
+      );
     }
   }, [product.imageUrl]);
 

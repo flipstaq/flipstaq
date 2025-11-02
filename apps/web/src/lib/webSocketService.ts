@@ -260,6 +260,10 @@ class WebSocketService {
       case 'conversationReadStatusChanged':
         this.emit('conversationReadStatusChanged', eventData);
         break;
+      case 'onlineUsersList':
+        // Handle initial bulk list of online users
+        this.emit('onlineUsersList', eventData);
+        break;
       case 'userOnline':
         this.emit('userOnline', eventData);
         break;

@@ -230,7 +230,25 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       setConnectionState('error');
     };
 
-    // User status management
+    // User status management - bulk initial list
+    const handleOnlineUsersList = (
+      users: Array<{ userId: string; username: string; isOnline: boolean }>
+    ) => {
+      console.log('📋 Received initial online users list:', users);
+      setOnlineUsers((prev) => {
+        const updated = new Map(prev);
+        users.forEach((user) => {
+          updated.set(user.userId, {
+            userId: user.userId,
+            username: user.username,
+            isOnline: user.isOnline,
+          });
+        });
+        return updated;
+      });
+    };
+
+    // User status management - individual updates
     const handleUserOnline = (data: { userId: string; username: string }) => {
       setOnlineUsers((prev) => {
         const updated = new Map(prev);
@@ -272,6 +290,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     webSocketService.on('connected', handleConnected);
     webSocketService.on('disconnected', handleDisconnected);
     webSocketService.on('error', handleError);
+    webSocketService.on('onlineUsersList', handleOnlineUsersList);
     webSocketService.on('userOnline', handleUserOnline);
     webSocketService.on('userOffline', handleUserOffline);
     webSocketService.on('userTyping', handleUserTyping);
@@ -285,6 +304,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       webSocketService.off('connected', handleConnected);
       webSocketService.off('disconnected', handleDisconnected);
       webSocketService.off('error', handleError);
+      webSocketService.off('onlineUsersList', handleOnlineUsersList);
       webSocketService.off('userOnline', handleUserOnline);
       webSocketService.off('userOffline', handleUserOffline);
       webSocketService.off('userTyping', handleUserTyping);

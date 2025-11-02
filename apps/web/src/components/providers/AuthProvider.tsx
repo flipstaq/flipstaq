@@ -28,18 +28,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const hasAdminAccess =
     user?.role === 'OWNER' ||
     user?.role === 'HIGHER_STAFF' ||
-    user?.role === 'STAFF'; // Validate token on app start
+    user?.role === 'STAFF'; // Validate token on app start - with automatic refresh if expired
   useEffect(() => {
     const validateCurrentUser = async () => {
       try {
+        // Check if there's a stored token before attempting validation
+        const storedToken = authService.getAccessToken();
+
+        if (!storedToken) {
+          // No token found - user is not logged in, this is normal for public pages
+          setLoading(false);
+          return;
+        }
+
+        // Token exists, try to validate it
         const userInfo = await authService.validateToken();
         setUser(userInfo);
       } catch (error) {
-        console.warn('Token validation failed:', error);
-        // Clear any stored data if validation fails
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('user');
+        console.warn(
+          'Token validation failed, attempting to refresh...',
+          error
+        );
+
+        // Token validation failed (likely expired), try to refresh using the refresh token cookie
+        try {
+          const response = await authService.refreshToken();
+          setUser(response.user);
+          console.log('Token refreshed successfully on app load');
+        } catch (refreshError) {
+          console.warn(
+            'Token refresh also failed, user needs to log in again:',
+            refreshError
+          );
+          // Both validation and refresh failed - clear stored data
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+          }
         }
       } finally {
         setLoading(false);

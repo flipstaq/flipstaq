@@ -48,6 +48,55 @@ export interface UserInfo {
 class AuthApiClient {
   private isRefreshing = false;
   private refreshPromise: Promise<AuthResponse> | null = null;
+  private memoryToken: string | null = null; // Store access token in memory for security
+
+  /**
+   * Get the access token - prioritize memory, fallback to localStorage
+   */
+  private getAccessToken(): string | null {
+    // First, check memory (most secure)
+    if (this.memoryToken) {
+      return this.memoryToken;
+    }
+
+    // Fallback to localStorage for backwards compatibility
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('authToken');
+      if (storedToken) {
+        // Move it to memory and remove from localStorage for security
+        this.memoryToken = storedToken;
+        return storedToken;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Set the access token - store in memory and optionally in localStorage
+   */
+  private setAccessToken(
+    token: string,
+    persistToStorage: boolean = true
+  ): void {
+    // Always store in memory (secure)
+    this.memoryToken = token;
+
+    // Optionally persist to localStorage (for page refresh recovery)
+    if (persistToStorage && typeof window !== 'undefined') {
+      localStorage.setItem('authToken', token);
+    }
+  }
+
+  /**
+   * Clear the access token from both memory and storage
+   */
+  private clearAccessToken(): void {
+    this.memoryToken = null;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('authToken');
+    }
+  }
 
   private async request<T>(
     endpoint: string,
@@ -55,14 +104,23 @@ class AuthApiClient {
   ): Promise<T> {
     const url = `${API_BASE_URL}/api/v1${endpoint}`;
 
+    // Get access token and add to headers if available
+    const token = this.getAccessToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...(options.headers as Record<string, string>),
+    };
+
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const config: RequestInit = {
       mode: 'cors',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        ...options.headers,
-      },
+      headers,
       ...options,
     };
 
@@ -88,7 +146,7 @@ class AuthApiClient {
           ) {
             // Auto-logout user when account is deleted/inactive
             if (typeof window !== 'undefined') {
-              localStorage.removeItem('authToken');
+              this.clearAccessToken();
               localStorage.removeItem('refreshToken'); // Still remove legacy storage
               localStorage.removeItem('user');
               // Redirect to login page
@@ -99,40 +157,36 @@ class AuthApiClient {
 
           // Attempt token refresh if not already refreshing and not a refresh request
           if (
-            !this.isRefreshing &&
             !endpoint.includes('/auth/refresh') &&
             !endpoint.includes('/auth/login') &&
             !endpoint.includes('/auth/signup')
           ) {
             try {
-              if (!this.refreshPromise) {
+              // If already refreshing, wait for the existing refresh to complete
+              if (this.refreshPromise) {
+                await this.refreshPromise;
+              } else {
+                // Start a new refresh
                 this.isRefreshing = true;
                 this.refreshPromise = this.refreshToken();
+                await this.refreshPromise;
               }
 
-              await this.refreshPromise;
-              this.isRefreshing = false;
-              this.refreshPromise = null;
-
-              // Retry original request with new token
-              const newToken = this.getStoredToken();
-              if (newToken && options.headers) {
-                (options.headers as any)['Authorization'] =
-                  `Bearer ${newToken}`;
-              }
-
+              // Retry original request with new token (already set by refreshToken method)
               return this.request<T>(endpoint, options);
             } catch (refreshError) {
-              this.isRefreshing = false;
-              this.refreshPromise = null;
               // If refresh fails, logout user
               if (typeof window !== 'undefined') {
-                localStorage.removeItem('authToken');
+                this.clearAccessToken();
                 localStorage.removeItem('refreshToken'); // Still remove legacy storage
                 localStorage.removeItem('user');
                 window.location.href = '/auth/login?message=session_expired';
               }
               throw new Error('Session expired. Please log in again.');
+            } finally {
+              // Always clean up the refresh state
+              this.isRefreshing = false;
+              this.refreshPromise = null;
             }
           }
         }
@@ -165,10 +219,10 @@ class AuthApiClient {
       body: JSON.stringify(credentials),
     });
 
-    // Store only access token in localStorage (refresh token will be in HttpOnly cookie)
+    // Store access token using our secure method (memory + localStorage)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('authToken', response.accessToken);
-      // Don't store refresh token in localStorage for security - it's in HttpOnly cookie
+      this.setAccessToken(response.accessToken);
+      // Store user info (not sensitive)
       localStorage.setItem('user', JSON.stringify(response.user));
     }
 
@@ -181,18 +235,17 @@ class AuthApiClient {
       body: JSON.stringify(userData),
     });
 
-    // Store only access token in localStorage (refresh token will be in HttpOnly cookie)
+    // Store access token using our secure method (memory + localStorage)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('authToken', response.accessToken);
-      // Don't store refresh token in localStorage for security - it's in HttpOnly cookie
+      this.setAccessToken(response.accessToken);
+      // Store user info (not sensitive)
       localStorage.setItem('user', JSON.stringify(response.user));
     }
 
     return response;
   }
   async getCurrentUser(): Promise<UserInfo> {
-    const token =
-      typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    const token = this.getAccessToken();
 
     if (!token) {
       throw new Error('No authentication token found');
@@ -200,32 +253,21 @@ class AuthApiClient {
 
     return this.request<UserInfo>('/auth/validate', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     });
   }
 
   async logout(): Promise<void> {
-    const token =
-      typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-
-    if (token) {
-      try {
-        await this.request('/auth/logout', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      } catch (error) {
-        console.error('Logout error:', error);
-      }
+    try {
+      await this.request('/auth/logout', {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
     }
 
     // Clear stored tokens (refresh token cookie will be cleared by server)
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('authToken');
+      this.clearAccessToken();
       localStorage.removeItem('refreshToken'); // Still remove in case of legacy storage
       localStorage.removeItem('user');
     }
@@ -238,9 +280,9 @@ class AuthApiClient {
       body: JSON.stringify({}), // Empty body since cookie contains refresh token
     });
 
-    // Update stored access token and user info
+    // Update stored access token using our secure method
     if (typeof window !== 'undefined') {
-      localStorage.setItem('authToken', response.accessToken);
+      this.setAccessToken(response.accessToken);
       localStorage.setItem('user', JSON.stringify(response.user));
     }
 
@@ -255,13 +297,11 @@ class AuthApiClient {
   }
 
   getStoredToken(): string | null {
-    if (typeof window === 'undefined') return null;
-
-    return localStorage.getItem('authToken');
+    return this.getAccessToken();
   }
 
   isAuthenticated(): boolean {
-    return !!this.getStoredToken();
+    return !!this.getAccessToken();
   }
 }
 
